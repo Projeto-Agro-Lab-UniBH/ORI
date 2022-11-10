@@ -1,14 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
-import Button from "../../components/Button/Button";
-import Label from "../../components/Label/Label";
-import Subtitle from "../../components/Subtitle/Subtitle";
-import Title from "../../components/Title/Title";
-
-import styles from "./styles.module.css";
 
 import { FormProvider, useForm } from "react-hook-form";
 import { useAuthContext } from "../../contexts";
+
+import { Button } from "../../components";
+import { Label, Subtitle, Title } from "../../components/Form";
 
 type ILoginForm = {
   email: string;
@@ -25,10 +22,10 @@ export default function Login() {
   }
 
   return (
-    <div className={styles.container}>
-      <div className={styles.titleContainer}>
+    <div className="w-[416px] absolute top-40 left-1/2 -translate-x-1/2 max-[448px]:w-[368px] max-[400px]:w-[360px]">
+      <div className="ml-auto mr-auto text-center">
         <Image
-          className={styles.iconOrifox}
+          className="mb-6"
           src="/orifox.svg"
           width="64px"
           height="64px"
@@ -39,35 +36,34 @@ export default function Login() {
       </div>
       <FormProvider {...formMethods}>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <div className={styles.row}>
+          <div className="flex flex-col mb-4">
             <Label htmlFor="email" text="E-mail" />
             <input
               {...register("email")}
               type="email"
               name="email"
-              className={styles.input}
+              className="w-full h-10 rounded border border-solid border-gray-200 py-3 px-3 font-normal text-sm text-brand-standard-black bg-white focus:outline-none"
               placeholder="Digite o email da sua conta"
             />
           </div>
-          <div className={styles.row}>
+          <div className="flex flex-col mb-4">
             <Label htmlFor="password" text="Senha" />
             <input
               {...register("password")}
               type="password"
               name="password"
-              className={styles.input}
+              className="w-full h-10 rounded border border-solid border-gray-200 py-3 px-3 font-normal text-sm text-brand-standard-black bg-white focus:outline-none"
               placeholder="Digite a sua senha"
             />
-
-            <span className={styles.forgotPassword}>
+            {/* <span className="mt-2 text-sm font-normal text-gray-500">
               Esqueceu seu acesso?{" "}
               <Link href="/reset-password">
-                <a className={styles.resetPasswordLink}>Recupere-o</a>
+                <a className="no-underline text-sky-600">Recupere-o</a>
               </Link>
-            </span>
+            </span> */}
           </div>
         </form>
-        <div className={styles.btnContainer}>
+        <div className="w-full mt-12 flex justify-center">
           <Button type="submit" onClick={handleSubmit(onSubmit)}>
             Entrar
           </Button>

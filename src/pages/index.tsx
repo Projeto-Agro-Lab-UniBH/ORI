@@ -1,5 +1,4 @@
 import { GetServerSideProps } from "next";
-import { parseCookies } from "nookies";
 import { useContext } from "react";
 
 export default function Home() {
