@@ -1,6 +1,7 @@
 import * as Avatar from "@radix-ui/react-avatar";
 import * as Dialog from "@radix-ui/react-dialog";
 import { CopyIcon, PlusIcon, ImageIcon } from "@radix-ui/react-icons";
+
 import { Badges } from "./Badges";
 
 type AnimalPatientCardProps = {
@@ -8,8 +9,8 @@ type AnimalPatientCardProps = {
   name: string;
   specie: string;
   photo: string;
-  physical_shape: string;
   animal_type: string;
+  physical_shape: string;
   genre: string;
   weight: string;
   situation: string;
@@ -24,7 +25,7 @@ export function AnimalPatientCard(props: AnimalPatientCardProps) {
         id="animal-patient-card-scroll"
         className="w-full flex items-center border-none rounded-lg overflow-x-scroll"
       >
-        <div className="w-full h-20 flex items-center p-2 gap-4">
+        <div className="w-full h-20 flex items-center p-2 gap-10">
           <div className="w-[224px] flex items-center flex-col">
             <span className="w-full mb-2 text-lg font-semibold text-brand-standard-black">
               ID:
@@ -40,35 +41,33 @@ export function AnimalPatientCard(props: AnimalPatientCardProps) {
               </button>
             </div>
           </div>
-          <div className="w-full h-full max-w-[256px] flex items-center">
-            <Dialog.Trigger asChild>
-              <a className="w-full flex items-center hover:cursor-pointer gap-4">
-                <div className="w-16 h-16 flex items-center">
-                  <Avatar.Root className="w-16 h-16 border-2 border-brand-standard-black bg-brand-standard-black rounded-full flex items-center justify-center overflow-hidden">
-                    {props.photo != "" ? (
-                      <Avatar.Image
-                        className="w-full h-full object-cover"
-                        src={props.photo}
-                      />
-                    ) : (
-                      <ImageIcon color="#ffff" width={24} height={24} />
-                    )}
-                    <Avatar.Fallback />
-                  </Avatar.Root>
+          <div className="w-full h-full mx-6 flex items-center">
+            <Dialog.Trigger className="w-full flex items-center hover:cursor-pointer gap-4">
+              <div className="w-16 h-16 flex items-center">
+                <Avatar.Root className="w-16 h-16 border-2 border-brand-standard-black bg-brand-standard-black rounded-full flex items-center justify-center overflow-hidden">
+                  {props.photo != "" ? (
+                    <Avatar.Image
+                      className="w-full h-full object-cover"
+                      src={props.photo}
+                    />
+                  ) : (
+                    <ImageIcon color="#ffff" width={24} height={24} />
+                  )}
+                  <Avatar.Fallback />
+                </Avatar.Root>
+              </div>
+              <div className="w-full flex items-center max-w-[164px]">
+                <div className="w-full max-w-[164px] flex items-center flex-col">
+                  <p className="w-full flex whitespace-nowrap text-xl font-semibold text-brand-standard-black overflow-hidden text-ellipsis">
+                    {props.name != "" ? props.name : "Sem nome"}
+                  </p>
+                  <p className="w-full flex whitespace-nowrap text-lg font-light text-brand-standard-black overflow-hidden text-ellipsis">
+                    {props.specie != ""
+                      ? props.specie
+                      : "Raça não identificada"}
+                  </p>
                 </div>
-                <div className="w-full flex items-center max-w-[164px]">
-                  <div className="w-full max-w-[164px] flex items-center flex-col gap-1">
-                    <p className="w-full whitespace-nowrap text-lg font-semibold text-brand-standard-black overflow-hidden text-ellipsis">
-                      {props.name != "" ? props.name : "Sem nome"}
-                    </p>
-                    <p className="w-full whitespace-nowrap text-base font-light text-brand-standard-black overflow-hidden text-ellipsis">
-                      {props.specie != ""
-                        ? props.specie
-                        : "Raça não identificada"}
-                    </p>
-                  </div>
-                </div>
-              </a>
+              </div>
             </Dialog.Trigger>
           </div>
           <div className="w-full flex items-center flex-col">
