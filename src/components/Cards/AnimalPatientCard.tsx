@@ -2,7 +2,7 @@ import * as Avatar from "@radix-ui/react-avatar";
 import * as Dialog from "@radix-ui/react-dialog";
 import { CopyIcon, PlusIcon, ImageIcon } from "@radix-ui/react-icons";
 
-import { Badges } from "./Badges";
+import { Badges } from "../Badges/Badges";
 
 type AnimalPatientCardProps = {
   id: string;
@@ -25,7 +25,7 @@ export function AnimalPatientCard(props: AnimalPatientCardProps) {
         id="animal-patient-card-scroll"
         className="w-full flex items-center border-none rounded-lg overflow-x-scroll"
       >
-        <div className="w-full h-20 flex items-center p-2 gap-10">
+        <div className="h-20 flex items-center p-2 gap-10">
           <div className="w-[224px] flex items-center flex-col">
             <span className="w-full mb-2 text-lg font-semibold text-brand-standard-black">
               ID:
@@ -44,7 +44,7 @@ export function AnimalPatientCard(props: AnimalPatientCardProps) {
           <div className="w-full h-full mx-6 flex items-center">
             <Dialog.Trigger className="w-full flex items-center hover:cursor-pointer gap-4">
               <div className="w-16 h-16 flex items-center">
-                <Avatar.Root className="w-16 h-16 border-2 border-brand-standard-black bg-brand-standard-black rounded-full flex items-center justify-center overflow-hidden">
+                <Avatar.Root className="w-16 h-16 rounded-full flex items-center justify-center overflow-hidden">
                   {props.photo != "" ? (
                     <Avatar.Image
                       className="w-full h-full object-cover"

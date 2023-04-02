@@ -4,7 +4,7 @@ type Props = {
   children: React.ReactNode;
 };
 
-export function Button({ type = "button", onClick, children }: Props) {
+export function SignInButton({ type = "button", onClick, children }: Props) {
   return (
     <button
       type={type}
