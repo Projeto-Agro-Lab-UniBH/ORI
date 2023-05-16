@@ -62,7 +62,7 @@ export function PatientCard(props: PatientCardProps) {
                   </span>
                 </div>
                 <CopyToClipboard text={copyArea}>
-                  <button className="w-6 h-6 flex items-center justify-center border-none rounded bg-none hover:bg-gray-100">
+                  <button className="w-6 h-6 flex items-center justify-center border-none rounded bg-none hover:bg-slate-50">
                     <CopyIcon color="#212529" />
                   </button>
                 </CopyToClipboard>
