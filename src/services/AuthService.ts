@@ -1,10 +1,18 @@
-import { ILoginResponse } from "../interfaces";
-import { Api } from "../providers";
+import { User } from "../interfaces/User";
+import { api } from "../providers/Api";
 
-function login(email: string, password: string) {
-  return Api.post<ILoginResponse>('/api/v1/login', { email, password })
+type SignInRequest = {
+  email: string; 
+  password: string;
 }
 
-export const AuthService = {
-  login
+type SignInResponse = {
+  user: User;
+  token: string;
 }
+
+function signIn({ email, password }: SignInRequest) {
+  return api.post<SignInResponse>('/auth/signin', { email, password })
+}
+
+export const AuthService = { signIn }

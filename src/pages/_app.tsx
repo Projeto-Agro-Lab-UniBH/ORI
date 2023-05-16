@@ -1,18 +1,17 @@
+import type { AppProps } from "next/app";
+import { AuthProvider } from "../contexts/AuthContext";
 import "../styles/globals.css";
 import "tailwindcss/tailwind.css";
-import Head from "next/head";
-import type { AppProps } from "next/app";
-import { AppContexts } from "../contexts";
+import { QueryClientProvider } from "react-query";
+import { queryClient } from "../providers/QueryClient";
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <AppContexts>
-      <Head>
-        <title>OriFox</title>
-        <link rel="icon" href="/favicon.svg" />
-      </Head>
-      <Component {...pageProps} />
-    </AppContexts>
+    <AuthProvider>
+      <QueryClientProvider client={queryClient}>
+        <Component {...pageProps} />
+      </QueryClientProvider>
+    </AuthProvider>
   );
 }
 

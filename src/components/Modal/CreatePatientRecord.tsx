@@ -3,7 +3,6 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { Cross1Icon } from "@radix-ui/react-icons";
 
 import Select from "react-select";
-import { Diagnosis } from "../Item/Diagnosis";
 
 import { Label } from "../Label/Label";
 

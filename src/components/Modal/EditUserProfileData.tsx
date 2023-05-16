@@ -69,7 +69,7 @@ export function EditUserProfileData() {
                   <div className="w-full h-[96px] flex items-center gap-4">
                     <div className="w-[72px] h-full flex items-center flex-col gap-2">
                       <div className="w-full flex items-center justify-center">
-                        <span className="text-sm font-normal text-brand-standard-black">
+                        <span className="text-sm font-semibold text-brand-standard-black">
                           Foto
                         </span>
                       </div>

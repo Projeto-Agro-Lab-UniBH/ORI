@@ -4,7 +4,9 @@ export default class CustomDocument extends Document {
   render() {
     return (
       <Html>
+        <title>OriFox</title>
         <Head>
+          <link rel="icon" href="/favicon.svg" />
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link
             rel="preconnect"

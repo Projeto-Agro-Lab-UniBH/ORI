@@ -1,5 +1,10 @@
 import axios from "axios";
+import { parseCookies } from "nookies";
 
-const baseURL = process.env.REACT_APP_BASE_URL || "http://localhost:5000";
+const { 'nextauth.token': token } = parseCookies()
 
-export const Api = axios.create({ baseURL })
+export const api = axios.create({ baseURL: "http://localhost:5000" })
+
+if (token) {
+  api.defaults.headers['Autorization'] = `Bearer ${token}`
+}

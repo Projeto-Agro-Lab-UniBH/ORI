@@ -4,6 +4,7 @@ import { CopyIcon } from "@radix-ui/react-icons";
 import { useEffect, useState } from "react";
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { Badges } from "../Badges/Badges";
+import { EditPatientModalProps } from "../Modal/EditPatientModal";
 
 type PatientCardProps = {
   id: string;
@@ -17,6 +18,7 @@ type PatientCardProps = {
   situation: string;
   diagnosis: Array<string>;
   exams: Array<string>;
+  onSelectedPatient: ((e: EditPatientModalProps) => void);
 };
 
 export function PatientCard(props: PatientCardProps) {
@@ -69,7 +71,7 @@ export function PatientCard(props: PatientCardProps) {
               </div>
             </div>
             <div className="w-[224px] h-full flex items-center">
-              <Dialog.Trigger className="w-full flex items-center hover:cursor-pointer gap-4">
+              <Dialog.Trigger onClick={() => props.onSelectedPatient(props as any)} className="w-full flex items-center hover:cursor-pointer gap-4">
                 <div className="w-16 h-16 flex items-center">
                   {
                     props.photo != "" ? (
