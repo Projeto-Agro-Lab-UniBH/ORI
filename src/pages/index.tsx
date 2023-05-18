@@ -23,10 +23,20 @@ interface PatientResponse {
 	gender: string;
 	type: string;
 	weight: string;
+  situation: string;
 	physical_shape: string;
 	entry_date: string;
 	departure_date: string;
 }
+
+const animalTypeOptions = [
+  { value: 'Aves', label: 'Aves' },
+  { value: 'Bovino', label: 'Bovino' },
+  { value: 'Canino', label: 'Canino' },
+  { value: 'Equino', label: 'Equino' },
+  { value: 'Felino', label: 'Felino' },
+  { value: 'Silvestre', label: 'Silvestre' },
+]
 
 export default function Home() {
 	const { user } = useContext(AuthContext);
@@ -44,10 +54,6 @@ export default function Home() {
 		setSearchInput(event.target.value);
 	};
 
-	// const handleSelectAnimalType = (selectAnimalType: ISelectAnimalType) => {
-	//   const data3 = patients?.filter(patients => patients.type.includes(selectAnimalType.value))
-	// }
-
 	useEffect(() => {
 		setData(patients);
 	}, [patients]);
@@ -62,37 +68,31 @@ export default function Home() {
 
 	return (
 		<>
-			<div className="h-14 flex items-center mt-2 pl-4 pr-4 justify-between">
-				<div className="w-full flex items-center gap-2">
-					{user?.profile_photo != '' ? (
-						<div className="w-14 h-14 flex items-center justify-center">
-							<Avatar.Root className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden">
-								<Avatar.Image className="w-full h-full object-cover" src={user?.profile_photo} />
-							</Avatar.Root>
-						</div>
-					) : (
-						<div className="w-14 h-14 flex items-center justify-center">
-							<Avatar.Root className="w-10 h-10 border border-black rounded-full flex items-center justify-center overflow-hidden">
-								<div className="w-[14px] h-[14px]">
-									<PersonIcon className="w-full h-full object-cover" />
-								</div>
-							</Avatar.Root>
-						</div>
-					)}
-					<div className="w-[352px] h-14 flex justify-center items-center flex-col">
-						{user?.username != null ? (
-							<div className="w-full flex text-[18px] font-semibold">{user?.username}</div>
-						) : (
-							<div className="w-full flex text-[18px] font-semibold">Lorem Ipsum</div>
-						)}
-						{user?.email != null ? (
-							<div className="w-full flex text-[14px] font-light">{user?.email}</div>
-						) : (
-							<div className="w-full flex text-[14px] font-light">loremipsum@email.com</div>
-						)}
-					</div>
-				</div>
-				<div className="w-14 h-14 flex justify-end items-center">
+			<div className="h-14 flex items-center mt-6 pl-4 pr-4 justify-between">
+        <Dialog.Root>
+          <div className="w-[408px] flex items-center gap-2">
+            <Dialog.Trigger className="w-14 h-14 flex items-center justify-center">
+              <Avatar.Root className={!user?.profile_photo ? "w-10 h-10 border border-black rounded-full flex items-center justify-center overflow-hidden" : "w-10 h-10 rounded-full flex items-center justify-center overflow-hidden"}>
+                {!user?.profile_photo ? (
+                  <div className="w-[14px] h-[14px]">
+                    <PersonIcon className="w-full h-full object-cover" />
+                  </div>
+                  ) : (
+                  <Avatar.Image className="w-full h-full object-cover" src={user?.profile_photo} /> 
+                )}
+              </Avatar.Root>
+            </Dialog.Trigger>
+            <div className="w-[352px] h-14 flex justify-center items-center flex-col">
+              <div className="w-full flex text-[18px] font-semibold">
+                {!user?.username ? "Lorem Ipsum" : user?.username}
+              </div>
+              <div className="w-full flex text-[14px] font-light">
+                {!user?.email ? "loremipsum@email.com" : user?.email}
+              </div>
+            </div>
+          </div>    
+				</Dialog.Root>
+        <div className="w-14 h-14 flex justify-end items-center">
 					<button className="w-8 h-8 rounded flex justify-center items-center hover:bg-slate-50">
 						<ExitIcon width={16} height={16} />
 					</button>
@@ -130,14 +130,7 @@ export default function Home() {
 							isClearable
 							isSearchable={false}
 							placeholder="Selecionar tipo de animal"
-							options={[
-								{ value: 'Aves', label: 'Aves' },
-								{ value: 'Bovino', label: 'Bovino' },
-								{ value: 'Canino', label: 'Canino' },
-								{ value: 'Equino', label: 'Equino' },
-								{ value: 'Felino', label: 'Felino' },
-								{ value: 'Silvestre', label: 'Silvestre' },
-							]}
+							options={animalTypeOptions}
 							onChange={(value) => setSelectAnimalType(value)}
 						/>
 						<div className="relative w-full">
@@ -156,36 +149,38 @@ export default function Home() {
 						<button className="w-[156px] h-10 bg-brand-standard-black rounded text-white font-normal hover:border hover:bg-white hover:text-brand-standard-black">
 							Procurar
 						</button>
-						<button className="w-[56px] h-10 border rounded flex justify-center items-center">
-							<PlusIcon color="#212529" width={20} height={20} />
-						</button>
+            <Dialog.Root>
+              <Dialog.Trigger className="w-[56px] h-10 border rounded flex justify-center items-center hover:boder hover:border-[#b3b3b3]">
+                <PlusIcon color="#212529" width={20} height={20} />
+              </Dialog.Trigger>
+            </Dialog.Root>
 					</div>
 				</div>
 				<div className="w-[1280px] h-full mb-12 flex flex-col gap-6">
-					{isLoading && <p>Carregando</p>}
-					<Dialog.Root>
-						{data?.map((data) => (
-							<PatientCard
-								key={data.id}
-								id={data.id}
-								name={data.name}
-								specie={data.specie}
-								photo={data.profile_photo}
-								animal_type={data.type}
-								physical_shape={data.physical_shape}
-								genre={data.gender}
-								weight={data.weight}
-								situation="Observação"
-								diagnosis={['Gripe Canina']}
-								exams={['Hemograma']}
-								onSelectedPatient={setSelectedPatient}
-							/>
-						))}
-						<EditPatientModal patient={selectedPatient} />
-					</Dialog.Root>
+          <Dialog.Root>
+            {isLoading && <p>Carregando</p>}
+            {data?.map((data) => (
+              <PatientCard
+                key={data.id}
+                id={data.id}
+                name={data.name}
+                specie={data.specie}
+                photo={data.profile_photo}
+                animal_type={data.type}
+                physical_shape={data.physical_shape}
+                genre={data.gender}
+                weight={data.weight}
+                situation={data.situation}
+                diagnosis={['Gripe Canina']}
+                exams={['Hemograma']}
+                onSelectedPatient={setSelectedPatient}
+              />
+            ))}
+            <EditPatientModal patient={selectedPatient} />
+          </Dialog.Root>    
 				</div>
 			</div>
-		</>
+    </>  
 	);
 }
 
