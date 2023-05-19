@@ -1,32 +1,19 @@
 import * as Avatar from '@radix-ui/react-avatar';
 import * as Dialog from '@radix-ui/react-dialog';
 import { ExitIcon, MagnifyingGlassIcon, PersonIcon, PlusIcon } from '@radix-ui/react-icons';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 import Select from 'react-select';
 import { useQuery } from 'react-query';
 import { PatientService } from '../services/PatientService';
 import { AuthContext } from '../contexts/AuthContext';
 import { PatientCard } from '../components/Cards/PatientCard';
 import { EditPatientModal, EditPatientModalProps } from '../components/Modal/EditPatientModal';
+import { EditProfileModal } from '../components/Modal/EditProfileModal';
+import { RegisterPatientModal } from '../components/Modal/RegisterPatientModal';
 
-interface ISelectAnimalType {
+type SelectAnimalType = {
 	label: string;
 	value: string;
-}
-
-interface PatientResponse {
-	id: string;
-	profile_photo: string;
-	name: string;
-	owner: string;
-	specie: string;
-	gender: string;
-	type: string;
-	weight: string;
-  situation: string;
-	physical_shape: string;
-	entry_date: string;
-	departure_date: string;
 }
 
 const animalTypeOptions = [
@@ -40,12 +27,11 @@ const animalTypeOptions = [
 
 export default function Home() {
 	const { user } = useContext(AuthContext);
-	const [selectAnimalType, setSelectAnimalType] = useState<ISelectAnimalType | null>();
+	const [selectAnimalType, setSelectAnimalType] = useState<SelectAnimalType | null>();
 	const [searchInput, setSearchInput] = useState<string>('');
-	const [data, setData] = useState<PatientResponse[] | undefined>([]);
 	const [selectedPatient, setSelectedPatient] = useState<EditPatientModalProps>({} as EditPatientModalProps);
 
-	const { data: patients, isLoading } = useQuery('animal', async () => {
+	const { data, isLoading } = useQuery('list', async () => {
 		const response = await PatientService.listAllPatients();
 		return response.data;
 	});
@@ -54,51 +40,42 @@ export default function Home() {
 		setSearchInput(event.target.value);
 	};
 
-	useEffect(() => {
-		setData(patients);
-	}, [patients]);
-
-	useEffect(() => {
-		if (selectAnimalType?.value != null) {
-			setData(patients?.filter((patients) => patients.type.includes(selectAnimalType.value)));
-		} else {
-			setData(patients);
-		}
-	}, [selectAnimalType, patients]);
-
 	return (
 		<>
-			<div className="h-14 flex items-center mt-6 pl-4 pr-4 justify-between">
-        <Dialog.Root>
-          <div className="w-[408px] flex items-center gap-2">
-            <Dialog.Trigger className="w-14 h-14 flex items-center justify-center">
-              <Avatar.Root className={!user?.profile_photo ? "w-10 h-10 border border-black rounded-full flex items-center justify-center overflow-hidden" : "w-10 h-10 rounded-full flex items-center justify-center overflow-hidden"}>
-                {!user?.profile_photo ? (
-                  <div className="w-[14px] h-[14px]">
-                    <PersonIcon className="w-full h-full object-cover" />
-                  </div>
-                  ) : (
-                  <Avatar.Image className="w-full h-full object-cover" src={user?.profile_photo} /> 
-                )}
-              </Avatar.Root>
-            </Dialog.Trigger>
-            <div className="w-[352px] h-14 flex justify-center items-center flex-col">
-              <div className="w-full flex text-[18px] font-semibold">
-                {!user?.username ? "Lorem Ipsum" : user?.username}
-              </div>
-              <div className="w-full flex text-[14px] font-light">
-                {!user?.email ? "loremipsum@email.com" : user?.email}
-              </div>
-            </div>
-          </div>    
-				</Dialog.Root>
-        <div className="w-14 h-14 flex justify-end items-center">
-					<button className="w-8 h-8 rounded flex justify-center items-center hover:bg-slate-50">
-						<ExitIcon width={16} height={16} />
-					</button>
+			<div className="w-full h-14 my-6 flex justify-center">
+				<div className="w-[1280px] flex justify-between">					
+					<Dialog.Root>
+						<div className="w-[408px] flex items-center gap-2">
+							<Dialog.Trigger className="w-14 h-14 flex items-center justify-center">
+								<Avatar.Root className={!user?.profile_photo ? "w-10 h-10 border border-gray-200 rounded-full flex items-center justify-center overflow-hidden" : "w-10 h-10 rounded-full flex items-center justify-center overflow-hidden"}>
+									{!user?.profile_photo ? (
+										<div className="w-[14px] h-[14px]">
+											<PersonIcon color="#e5e7eb" className="w-full h-full object-cover" />
+										</div>
+										) : (
+										<Avatar.Image className="w-full h-full object-cover" src={user?.profile_photo} /> 
+									)}
+								</Avatar.Root>
+							</Dialog.Trigger>
+							<div className="w-[352px] h-14 flex justify-center items-center flex-col">
+								<div className="w-full flex text-[18px] font-semibold">
+									{!user?.username ? "Lorem Ipsum" : user?.username}
+								</div>
+								<div className="w-full flex text-[14px] font-light">
+									{!user?.email ? "loremipsum@email.com" : user?.email}
+								</div>
+							</div>
+						</div>
+						<EditProfileModal />    
+					</Dialog.Root>
+					<div className="w-14 h-14 flex justify-end items-center">
+						<button className="w-8 h-8 rounded flex justify-center items-center hover:bg-slate-50">
+							<ExitIcon width={16} height={16} />
+						</button>
+					</div>
 				</div>
 			</div>
-			<div className="w-full h-full flex justify-center px-14 pt-5 flex-col items-center mb-6">
+			<div className="w-full h-full flex justify-center px-14 pt-6 flex-col items-center mb-6">
 				<div className="w-[1280px] h-24 flex items-center flex-col mb-8 gap-4 border-b border-gray-200">
 					<div className="w-full h-24 flex items-center gap-4">
 						<Select
@@ -153,6 +130,7 @@ export default function Home() {
               <Dialog.Trigger className="w-[56px] h-10 border rounded flex justify-center items-center hover:boder hover:border-[#b3b3b3]">
                 <PlusIcon color="#212529" width={20} height={20} />
               </Dialog.Trigger>
+							<RegisterPatientModal />
             </Dialog.Root>
 					</div>
 				</div>
@@ -165,10 +143,10 @@ export default function Home() {
                 id={data.id}
                 name={data.name}
                 specie={data.specie}
-                photo={data.profile_photo}
-                animal_type={data.type}
+                profile_photo={data.profile_photo}
+              	type={data.type}
                 physical_shape={data.physical_shape}
-                genre={data.gender}
+                gender={data.gender}
                 weight={data.weight}
                 situation={data.situation}
                 diagnosis={['Gripe Canina']}
