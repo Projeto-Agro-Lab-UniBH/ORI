@@ -2,7 +2,8 @@ import * as Avatar from '@radix-ui/react-avatar';
 import * as Dialog from '@radix-ui/react-dialog';
 import * as Tabs from '@radix-ui/react-tabs';
 import Select from 'react-select';
-import { useEffect, useState } from 'react';
+import CreatableSelect from 'react-select/creatable';
+import { KeyboardEventHandler, useEffect, useState } from 'react';
 import { useForm, useController } from 'react-hook-form';
 import { Cross1Icon, Pencil2Icon } from '@radix-ui/react-icons';
 import { Label } from '../Label/Label';
@@ -26,6 +27,16 @@ export type EditPatientModalProps = {
 	entry_date?: string;
 	departure_date?: string;
 };
+
+interface Option {
+  readonly label: string;
+  readonly value: string;
+}
+
+const createOption = (label: string) => ({
+  label,
+  value: label,
+});
 
 const genderOptions = [
 	{ value: 'Macho', label: 'Macho' },
@@ -56,6 +67,22 @@ export function EditPatientModal(props: IEditPatientModalProps) {
 	const { value: selectPhysicalShapeValue, onChange: selectPhysicalShapeOnChange, ...restSelectPhysicalShape } = selectPhysicalShape;
 	const { value: selectGenderValue, onChange: selectGenderOnChange, ...restSelectGender } = selectGender;
 	const { value: selectSituationValue, onChange: selectSituationOnChange, ...restSelectSituation } = selectSituation;
+
+	const [diagnosisInput, setDiagnosisInputValue] = useState('');
+  const [value, setValue] = useState<readonly Option[]>([]);
+
+  const handleKeyDown: KeyboardEventHandler = (event) => {
+    if (!diagnosisInput) return;
+    switch (event.key) {
+      case 'Enter':
+      case 'Tab':
+        setValue((prev) => [...prev, createOption(diagnosisInput)]);
+        setDiagnosisInputValue('');
+        event.preventDefault();
+    }
+  };
+
+	console.log(value)
 
 	const [ìsLoadingProfile, setIsLoadingProfile] = useState<boolean>(false);
 
@@ -361,8 +388,8 @@ export function EditPatientModal(props: IEditPatientModalProps) {
 																placeholder="Selecione o sexo do paciente"
 																isSearchable={false}
 																options={genderOptions}
-																value={selectGenderValue ? genderOptions.find((x) => x.value === selectGenderValue) : selectGenderValue}
 																onChange={(option) => selectGenderOnChange(option ? option.value : option)}
+																value={selectGenderValue ? genderOptions.find((x) => x.value === selectGenderValue) : selectGenderValue}
 																{...restSelectGender}
 															/>
 														</div>
@@ -373,9 +400,42 @@ export function EditPatientModal(props: IEditPatientModalProps) {
 												<div className="w-full flex flex-col gap-5">
 													<div className="w-full flex flex-col gap-3">
 														<Label htmlFor="" text="Diagnóstico" />
-														<input
-															type="text"
-															className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white"
+														<CreatableSelect
+															styles={{
+																control: (baseStyles, state) => ({
+																	...baseStyles,
+																	width: '100%',
+																	height: 40,
+																	borderColor: state.isFocused ? '#e2e8f0' : '#e2e8f0',
+																	whiteSpace: 'nowrap',
+																	textOverflow: 'ellipsis',
+																	fontFamily: 'Inter',
+																	fontWeight: 400,
+																	fontSize: '0.875rem',
+																	lineHeight: '1.25rem',
+																}),
+															}}
+															theme={(theme) => ({
+																...theme,
+																borderRadius: 4,
+																colors: {
+																	...theme.colors,
+																	primary75: '#cbd5e1',
+																	primary50: '##e2e8f0',
+																	primary25: '#f8fafc',
+																	primary: '#212529',
+																},
+															})}
+															components={{ DropdownIndicator: null }}
+															inputValue={diagnosisInput}
+															isClearable
+															isMulti
+															menuIsOpen={false}
+															onInputChange={(newValue) => setDiagnosisInputValue(newValue)}
+															onChange={(newValue) => setValue(newValue)}
+															onKeyDown={handleKeyDown}
+															placeholder="Digite o nome da doença diagnosticada e depois aperte a tecla 'Enter'"
+															value={value}
 														/>
 													</div>
 												</div>
@@ -565,7 +625,6 @@ export function EditPatientModal(props: IEditPatientModalProps) {
 					</div>
 				</Dialog.Content>
 			</Dialog.Portal>
-			)
 		</Tabs.Root>
 	);
 }
