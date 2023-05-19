@@ -1,11 +1,35 @@
+import { type } from 'os';
 import { Patient } from '../interfaces/Patient';
 import { api } from '../providers/Api';
 
-type listAllPatientsResponse = Pick<Patient, 'id' | 'profile_photo' | 'name' | 'specie' | 'gender' | 'type' | 'weight' | 'situation' | 'physical_shape'>;
-type getPatientProfileResponse = Patient;
+type patientProfileResponse = Patient;
+type listAllPatientsResponse = Pick<Patient, 'id' | 'profile_photo' | 'name' | 'specie' | 'gender' | 'type' | 'weight' | 'situation' | 'diagnosis' | 'physical_shape'>;
+type editPatientDataRequest = Partial<
+	Pick<Patient, 'profile_photo' | 'name' | 'owner' | 'specie' | 'gender' | 'type' | 'weight' | 'situation' | 'diagnosis' | 'physical_shape' | 'entry_date' | 'departure_date'>
+>;
+
+function editPatientData(
+	id: any,
+	{ profile_photo, name, owner, specie, gender, type, weight, situation, diagnosis, physical_shape, entry_date, departure_date }: editPatientDataRequest
+) {
+	return api.patch<patientProfileResponse>(`/animal/${id}`, {
+		profile_photo,
+		name,
+		owner,
+		specie,
+		gender,
+		type,
+		weight,
+		situation,
+		diagnosis,
+		physical_shape,
+		entry_date,
+		departure_date,
+	});
+}
 
 function getPatientProfile(id: string) {
-	return api.get<getPatientProfileResponse>(`/animal/${id}`);
+	return api.get<patientProfileResponse>(`/animal/${id}`);
 }
 
 function filterByAnimalType(type: string) {
@@ -16,4 +40,9 @@ function listAllPatients() {
 	return api.get<listAllPatientsResponse[] | null>('/animal/');
 }
 
-export const PatientService = { patientProfile: getPatientProfile, listAllPatients, filterByAnimalType };
+export const PatientService = {
+	patientProfile: getPatientProfile,
+	listAllPatients,
+	filterByAnimalType,
+	editPatientData,
+};

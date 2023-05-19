@@ -81,7 +81,10 @@ export function EditPatientModal(props: IEditPatientModalProps) {
 		}
 	};
 
-	const onSubmitProfile = (data: any) => {};
+	const onSubmitProfile = (data: any) => {
+		setIsLoadingProfile(true);
+		PatientService.editPatientData(patient.id, data).finally(() => setIsLoadingProfile(false));
+	};
 
 	useEffect(() => {
 		if (patient.id) {
@@ -146,7 +149,7 @@ export function EditPatientModal(props: IEditPatientModalProps) {
 								<Load divProps={{ className: 'w-full h-[488px] flex items-center justify-center relative bg-gray-500-50' }} />
 							) : (
 								<div id="modal-scroll" className="w-full h-[488px] px-6 py-6 overflow-y-scroll">
-									<form className="w-full flex flex-col gap-10" onSubmit={handleSubmit((data) => console.log(data))}>
+									<form className="w-full flex flex-col gap-10" onSubmit={handleSubmit(onSubmitProfile)}>
 										<div className="w-full flex flex-col gap-6">
 											<div className="w-full flex flex-col gap-2">
 												<div className="w-full flex items-center gap-4">
