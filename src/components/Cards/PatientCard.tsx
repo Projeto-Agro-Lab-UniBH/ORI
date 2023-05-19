@@ -5,17 +5,18 @@ import { useEffect, useState } from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { EditPatientModalProps } from '../Modal/EditPatientModal';
 import { Badges } from '../Badges/Badges';
+import { useRouter } from 'next/router';
 
 type PatientCardProps = {
 	id: string;
-  profile_photo?: string;
-  name: string;
-  specie: string;
-  gender: string;
-  type: string;
-  weight: string;
-  situation: string;
-  physical_shape: string;
+	profile_photo?: string;
+	name: string;
+	specie: string;
+	gender: string;
+	type: string;
+	weight: string;
+	situation: string;
+	physical_shape: string;
 	diagnosis: Array<string>;
 	exams: Array<string>;
 	onSelectedPatient: (e: EditPatientModalProps) => void;
@@ -24,18 +25,34 @@ type PatientCardProps = {
 export function PatientCard(props: PatientCardProps) {
 	const [photo, setPhoto] = useState('');
 	const [copyArea, setCopyArea] = useState('');
+	const router = useRouter();
 
 	useEffect(() => {
 		setCopyArea(props.id);
 	}, [props.id]);
 
+	const addQueryParam = (patientId: string) => {
+		const queryParams = { patientId };
+		router.push({
+			pathname: router.pathname,
+			query: queryParams,
+		});
+	};
+
 	useEffect(() => {
-		if (props.type === 'Aves') { setPhoto('/blue-jay.png'); } 
-		else if (props.type === 'Bovino') { setPhoto('/cow.png'); } 
-		else if (props.type === 'Canino') { setPhoto('/dog.png'); } 
-		else if (props.type === 'Equino') { setPhoto('/horse.png'); } 
-		else if (props.type === 'Felino') { setPhoto('/cat.png'); } 
-		else if (props.type === 'Silvestre') { setPhoto('/fox.png'); }
+		if (props.type === 'Aves') {
+			setPhoto('/blue-jay.png');
+		} else if (props.type === 'Bovino') {
+			setPhoto('/cow.png');
+		} else if (props.type === 'Canino') {
+			setPhoto('/dog.png');
+		} else if (props.type === 'Equino') {
+			setPhoto('/horse.png');
+		} else if (props.type === 'Felino') {
+			setPhoto('/cat.png');
+		} else if (props.type === 'Silvestre') {
+			setPhoto('/fox.png');
+		}
 	}, [props.type]);
 
 	return (
@@ -57,17 +74,29 @@ export function PatientCard(props: PatientCardProps) {
 							</div>
 						</div>
 						<div className="w-[224px] h-full flex items-center">
-							<Dialog.Trigger onClick={() => props.onSelectedPatient(props as any)} className="w-full flex items-center hover:cursor-pointer gap-4">
-								<div className="w-16 h-16 flex items-center">	
-									<Avatar.Root className={!props.profile_photo ? "w-16 h-16 border border-gray-200 rounded-full flex items-center justify-center overflow-hidden" : "w-16 h-16 rounded-full flex items-center justify-center overflow-hidden"}>
+							<Dialog.Trigger
+								onClick={() => {
+									props.onSelectedPatient(props as any);
+									addQueryParam(props.id);
+								}}
+								className="w-full flex items-center hover:cursor-pointer gap-4"
+							>
+								<div className="w-16 h-16 flex items-center">
+									<Avatar.Root
+										className={
+											!props.profile_photo
+												? 'w-16 h-16 border border-gray-200 rounded-full flex items-center justify-center overflow-hidden'
+												: 'w-16 h-16 rounded-full flex items-center justify-center overflow-hidden'
+										}
+									>
 										{!props.profile_photo ? (
 											<div className="w-11 h-11">
 												<Avatar.Image className="w-full h-full object-cover" src={photo} alt="Icon" />
 											</div>
-										) : (	
+										) : (
 											<Avatar.Image className="w-full h-full object-cover" src={props.profile_photo} />
 										)}
-									</Avatar.Root>							
+									</Avatar.Root>
 								</div>
 								<div className="w-full flex items-center max-w-[164px]">
 									<div className="w-full max-w-[164px] flex items-center flex-col">
@@ -86,7 +115,7 @@ export function PatientCard(props: PatientCardProps) {
 						<div className="w-[340px] flex items-center flex-col">
 							<span className="w-[340px] whitespace-nowrap text-lg font-semibold text-brand-standard-black mb-2">Ficha do animal:</span>
 							<div className="w-full flex items-center flex-row gap-2">
-								<Badges data={!props.type ? "Sem dados" : props.type} />
+								<Badges data={!props.type ? 'Sem dados' : props.type} />
 								{!props.gender ? null : <Badges data={props.gender} />}
 								{!props.physical_shape ? null : <Badges data={props.physical_shape} />}
 								{!props.weight ? null : <Badges data={props.weight} />}
@@ -95,7 +124,7 @@ export function PatientCard(props: PatientCardProps) {
 						<div className="w-[124px] flex items-center flex-col">
 							<span className="w-[124px] whitespace-nowrap text-lg font-semibold text-brand-standard-black mb-2">Situação:</span>
 							<div className="w-full flex items-center flex-row gap-2">
-								<Badges data={!props.situation ? "Sem dados" : props.situation} />
+								<Badges data={!props.situation ? 'Sem dados' : props.situation} />
 							</div>
 						</div>
 						<div className="w-full flex items-center flex-col">
@@ -104,7 +133,7 @@ export function PatientCard(props: PatientCardProps) {
 								{props.diagnosis.map((data) =>
 									!data ? (
 										<span className="whitespace-nowrap text-sm font-normal text-brand-standard-black">Sem dados</span>
-										) : (
+									) : (
 										<Badges key={props.id} data={data} />
 									)
 								)}
@@ -116,7 +145,7 @@ export function PatientCard(props: PatientCardProps) {
 								{props.exams.map((data) =>
 									!data ? (
 										<span className="whitespace-nowrap text-sm font-normal text-brand-standard-black">Sem dados</span>
-										) : (
+									) : (
 										<Badges key={props.id} data={data} />
 									)
 								)}
