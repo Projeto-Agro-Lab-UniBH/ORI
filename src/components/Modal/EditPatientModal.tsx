@@ -565,7 +565,6 @@ export function EditPatientModal(props: IEditPatientModalProps) {
 					</div>
 				</Dialog.Content>
 			</Dialog.Portal>
-			)
 		</Tabs.Root>
 	);
 }
