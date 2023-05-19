@@ -1,8 +1,10 @@
-import { User } from "../interfaces/User";
 import { api } from "../providers/Api";
 
 type UserDataStoredinTokenResponse = {
-  user: User
+  id: string;
+  profile_photo: string;
+  username: string;
+  email: string;
 }
 
 function getUserDataStoredinToken() {

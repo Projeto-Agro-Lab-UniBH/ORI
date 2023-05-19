@@ -11,7 +11,6 @@ type CreateAccountResponse = {
   profile_photo: string;
   username: string;
   email: string;
-  password: string;
 }
 
 function createUser({ username, email, password }: CreateAccountRequest) {

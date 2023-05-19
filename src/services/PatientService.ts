@@ -1,29 +1,19 @@
+import { Patient } from "../interfaces/Patient";
 import { api } from "../providers/Api"
 
-type PatientResponse = {
-  id: string;
-  profile_photo: string;
-  name: string;
-  owner: string;
-  specie: string;
-  gender: string;
-  type: string;
-  weight: string;
-  physical_shape: string;
-  entry_date: string;
-  departure_date: string;
-}
+type listAllPatientsResponse = Pick<Patient, "id" | "profile_photo" | "name" | "specie" | "gender" | "type" | "weight" | "situation" | "physical_shape">
+type getPatientProfileResponse = Patient
 
-function patientProfile(id: string) {
-  return api.get<PatientResponse>(`/animal/${id}`)
+function getPatientProfile(id: string) {
+  return api.get<getPatientProfileResponse>(`/animal/${id}`)
 }
 
 function filterByAnimalType(type: string) {
-  return api.get<PatientResponse[]>(`/animal/filter/${type}`)
+  return api.get<listAllPatientsResponse[]>(`/animal/filter/${type}`)
 }
 
 function listAllPatients() {
-  return api.get<PatientResponse[]>('/animal/')
+  return api.get<listAllPatientsResponse[] | null>('/animal/')
 }
 
-export const PatientService = { patientProfile, filterByAnimalType, listAllPatients }
+export const PatientService = { patientProfile: getPatientProfile, listAllPatients, filterByAnimalType }

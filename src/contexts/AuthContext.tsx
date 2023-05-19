@@ -1,20 +1,26 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import Router from "next/router";
-import { User } from "../interfaces/User";
 import { AuthService } from "../services/AuthService";
 import { setCookie, parseCookies } from "nookies"
 import { ProfileService } from "../services/ProfileService";
 import { api } from "../providers/Api";
 
+type SignInData = {
+  email: string, 
+  password: string
+}
+
+type User = {
+  id: string;
+  profile_photo: string;
+  username: string;
+  email: string;
+}
+
 type AuthContext = {
   isAuthenticated: boolean
   user: User | null;
   signIn: (data: SignInData) => Promise<void>;
-}
-
-type SignInData = {
-  email: string, 
-  password: string
 }
 
 export const AuthContext = createContext({} as AuthContext);
@@ -32,7 +38,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     if (token) {
       ProfileService.getUserDataStoredinToken().then(response => {
-        setUser(response.data.user)
+        setUser(response.data)
       })
     }
   }, [])
