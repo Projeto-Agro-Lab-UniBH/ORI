@@ -11,6 +11,7 @@ import { CreateExamModal } from './CreateExamModal';
 import { PatientService } from '../../services/PatientService';
 import { Load } from '../Load/Load';
 import { useRouter } from 'next/router';
+import { Option } from '../../interfaces/utils';
 
 interface IEditPatientModalProps {
 	patient: EditPatientModalProps;
@@ -51,10 +52,6 @@ const situationOptions = [
 	{ value: 'Risco', label: 'Risco' },
 	{ value: 'Alto risco', label: 'Alto risco' },
 ];
-interface Option {
-	readonly label: string;
-	readonly value: string;
-}
 
 export function EditPatientModal(props: IEditPatientModalProps) {
 	const { patient } = props;
@@ -83,7 +80,7 @@ export function EditPatientModal(props: IEditPatientModalProps) {
 
 	const onSubmitProfile = (data: any) => {
 		setIsLoadingProfile(true);
-		PatientService.editPatientData(patient.id, data).finally(() => setIsLoadingProfile(false));
+		PatientService.editPatientData(patient.id, { ...data }).finally(() => setIsLoadingProfile(false));
 	};
 
 	useEffect(() => {
@@ -91,7 +88,9 @@ export function EditPatientModal(props: IEditPatientModalProps) {
 			setIsLoadingProfile(true);
 			PatientService.patientProfile(patient.id)
 				.then((res) => {
-					setValueDiagnosis((res?.data as any).diagnosis?.map((diagnosis: any) => createOption(diagnosis)));
+					if ((res?.data as any)?.diagnosis?.length > 0) {
+						setValueDiagnosis((res?.data as any)?.diagnosis);
+					}
 					reset(res?.data);
 				})
 				.finally(() => setIsLoadingProfile(false));

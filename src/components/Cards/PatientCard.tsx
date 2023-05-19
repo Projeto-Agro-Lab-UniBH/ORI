@@ -6,6 +6,7 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { EditPatientModalProps } from '../Modal/EditPatientModal';
 import { Badges } from '../Badges/Badges';
 import { useRouter } from 'next/router';
+import { Option } from '../../interfaces/utils';
 
 type PatientCardProps = {
 	id: string;
@@ -17,7 +18,7 @@ type PatientCardProps = {
 	weight: string;
 	situation: string;
 	physical_shape: string;
-	diagnosis: Array<string>;
+	diagnosis: Array<Option>;
 	exams: Array<string>;
 	onSelectedPatient: (e: EditPatientModalProps) => void;
 };
@@ -134,7 +135,7 @@ export function PatientCard(props: PatientCardProps) {
 									!data ? (
 										<span className="whitespace-nowrap text-sm font-normal text-brand-standard-black">Sem dados</span>
 									) : (
-										<Badges key={props.id} data={data} />
+										<Badges key={props.id} data={data.value} />
 									)
 								)}
 							</div>

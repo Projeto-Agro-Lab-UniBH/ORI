@@ -5,18 +5,22 @@ import { api } from '../providers/Api';
 type patientProfileResponse = Patient;
 type listAllPatientsResponse = Pick<Patient, 'id' | 'profile_photo' | 'name' | 'specie' | 'gender' | 'type' | 'weight' | 'situation' | 'diagnosis' | 'physical_shape'>;
 type editPatientDataRequest = Partial<
-	Pick<Patient, 'profile_photo' | 'name' | 'owner' | 'specie' | 'gender' | 'type' | 'weight' | 'situation' | 'diagnosis' | 'physical_shape' | 'entry_date' | 'departure_date'>
+	Pick<
+		Patient,
+		'profile_photo' | 'name' | 'owner' | 'specie' | 'race' | 'gender' | 'type' | 'weight' | 'situation' | 'diagnosis' | 'physical_shape' | 'entry_date' | 'departure_date'
+	>
 >;
 
 function editPatientData(
 	id: any,
-	{ profile_photo, name, owner, specie, gender, type, weight, situation, diagnosis, physical_shape, entry_date, departure_date }: editPatientDataRequest
+	{ profile_photo, name, owner, specie, gender, type, weight, situation, diagnosis, physical_shape, entry_date, departure_date, race }: editPatientDataRequest
 ) {
 	return api.patch<patientProfileResponse>(`/animal/${id}`, {
 		profile_photo,
 		name,
 		owner,
 		specie,
+		race,
 		gender,
 		type,
 		weight,
