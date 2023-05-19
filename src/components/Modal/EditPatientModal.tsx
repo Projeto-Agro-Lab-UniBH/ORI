@@ -28,14 +28,9 @@ export type EditPatientModalProps = {
 	departure_date?: string;
 };
 
-interface Option {
-  readonly label: string;
-  readonly value: string;
-}
-
 const createOption = (label: string) => ({
-  label,
-  value: label,
+	label,
+	value: label,
 });
 
 const genderOptions = [
@@ -56,10 +51,14 @@ const situationOptions = [
 	{ value: 'Risco', label: 'Risco' },
 	{ value: 'Alto risco', label: 'Alto risco' },
 ];
+interface Option {
+	readonly label: string;
+	readonly value: string;
+}
 
 export function EditPatientModal(props: IEditPatientModalProps) {
 	const { patient } = props;
-	const { reset, register, control, handleSubmit } = useForm();
+	const { reset, register, control, handleSubmit, watch, setValue } = useForm();
 	const { replace } = useRouter();
 	const { field: selectPhysicalShape } = useController({ name: 'physical_shape', control });
 	const { field: selectGender } = useController({ name: 'gender', control });
@@ -67,35 +66,38 @@ export function EditPatientModal(props: IEditPatientModalProps) {
 	const { value: selectPhysicalShapeValue, onChange: selectPhysicalShapeOnChange, ...restSelectPhysicalShape } = selectPhysicalShape;
 	const { value: selectGenderValue, onChange: selectGenderOnChange, ...restSelectGender } = selectGender;
 	const { value: selectSituationValue, onChange: selectSituationOnChange, ...restSelectSituation } = selectSituation;
-
-	const [diagnosisInput, setDiagnosisInputValue] = useState('');
-  const [value, setValue] = useState<readonly Option[]>([]);
-
-  const handleKeyDown: KeyboardEventHandler = (event) => {
-    if (!diagnosisInput) return;
-    switch (event.key) {
-      case 'Enter':
-      case 'Tab':
-        setValue((prev) => [...prev, createOption(diagnosisInput)]);
-        setDiagnosisInputValue('');
-        event.preventDefault();
-    }
-  };
-
-	console.log(value)
-
 	const [ìsLoadingProfile, setIsLoadingProfile] = useState<boolean>(false);
+	const [diagnosisInputValue, setDiagnosisInputValue] = useState('');
+	const [valueDiagnosis, setValueDiagnosis] = useState<readonly Option[]>([]);
+
+	const handleKeyDown: KeyboardEventHandler = (event) => {
+		if (!diagnosisInputValue) return;
+		switch (event.key) {
+			case 'Enter':
+			case 'Tab':
+				setValueDiagnosis((prev) => [...prev, createOption(diagnosisInputValue)]);
+				setDiagnosisInputValue('');
+				event.preventDefault();
+		}
+	};
+
+	const onSubmitProfile = (data: any) => {};
 
 	useEffect(() => {
 		if (patient.id) {
 			setIsLoadingProfile(true);
 			PatientService.patientProfile(patient.id)
 				.then((res) => {
+					setValueDiagnosis((res?.data as any).diagnosis?.map((diagnosis: any) => createOption(diagnosis)));
 					reset(res?.data);
 				})
 				.finally(() => setIsLoadingProfile(false));
 		}
 	}, [patient?.id]);
+
+	useEffect(() => {
+		setValue('diagnosis', valueDiagnosis);
+	}, [valueDiagnosis?.length]);
 
 	return (
 		<Tabs.Root defaultValue="profile">
@@ -144,7 +146,7 @@ export function EditPatientModal(props: IEditPatientModalProps) {
 								<Load divProps={{ className: 'w-full h-[488px] flex items-center justify-center relative bg-gray-500-50' }} />
 							) : (
 								<div id="modal-scroll" className="w-full h-[488px] px-6 py-6 overflow-y-scroll">
-									<form className="w-full flex flex-col gap-10">
+									<form className="w-full flex flex-col gap-10" onSubmit={handleSubmit((data) => console.log(data))}>
 										<div className="w-full flex flex-col gap-6">
 											<div className="w-full flex flex-col gap-2">
 												<div className="w-full flex items-center gap-4">
@@ -427,15 +429,15 @@ export function EditPatientModal(props: IEditPatientModalProps) {
 																},
 															})}
 															components={{ DropdownIndicator: null }}
-															inputValue={diagnosisInput}
+															inputValue={diagnosisInputValue}
 															isClearable
 															isMulti
 															menuIsOpen={false}
+															onChange={(newValue) => setValueDiagnosis(newValue)}
 															onInputChange={(newValue) => setDiagnosisInputValue(newValue)}
-															onChange={(newValue) => setValue(newValue)}
 															onKeyDown={handleKeyDown}
 															placeholder="Digite o nome da doença diagnosticada e depois aperte a tecla 'Enter'"
-															value={value}
+															value={valueDiagnosis}
 														/>
 													</div>
 												</div>
