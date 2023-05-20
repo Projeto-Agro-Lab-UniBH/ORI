@@ -2,8 +2,16 @@ import * as Avatar from "@radix-ui/react-avatar";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Cross1Icon } from "@radix-ui/react-icons";
 import Select from "react-select";
+import CreatableSelect from "react-select/creatable";
 import { Label } from "../Label/Label";
+import { Option } from "../../interfaces/Option";
 import { useController, useForm } from "react-hook-form";
+import { useState, KeyboardEventHandler } from "react";
+
+const createOption = (label: string) => ({
+	label,
+	value: label,
+});
 
 const genderOptions = [
   { value: 'Macho', label: 'Macho' },
@@ -32,7 +40,20 @@ export function RegisterPatientModal() {
   const { value: selectPhysicalShapeValue, onChange: selectPhysicalShapeOnChange, ...restSelectPhysicalShape } = selectPhysicalShape
   const { value: selectGenderValue, onChange: selectGenderOnChange, ...restSelectGender } = selectGender
   const { value: selectSituationValue, onChange: selectSituationOnChange, ...restSelectSituation } = selectSituation
+  const [diagnosisInputValue, setDiagnosisInputValue] = useState('');
+	const [valueDiagnosis, setValueDiagnosis] = useState<readonly Option[]>([]);
 
+	const handleKeyDown: KeyboardEventHandler = (event) => {
+		if (!diagnosisInputValue) return;
+		switch (event.key) {
+			case 'Enter':
+			case 'Tab':
+				setValueDiagnosis((prev) => [...prev, createOption(diagnosisInputValue)]);
+				setDiagnosisInputValue('');
+				event.preventDefault();
+		}
+	};
+  
   return (
     <Dialog.Portal>
       <Dialog.Overlay className="bg-black/60 inset-0 fixed" />
@@ -300,10 +321,43 @@ export function RegisterPatientModal() {
               <div className="w-full">
                 <div className="w-full flex flex-col gap-5">
                   <div className="w-full flex flex-col gap-3">
-                    <Label htmlFor="" text="Diagnóstico" />
-                    <input
-                      type="text"
-                      className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white"
+                    <Label htmlFor="diagnosis" text="Diagnóstico" />
+                    <CreatableSelect
+                      styles={{
+                        control: (baseStyles, state) => ({
+                          ...baseStyles,
+                          width: '100%',
+                          minHeight: 40,
+                          borderColor: state.isFocused ? '#e2e8f0' : '#e2e8f0',
+                          whiteSpace: 'nowrap',
+                          textOverflow: 'ellipsis',
+                          fontFamily: 'Inter',
+                          fontWeight: 400,
+                          fontSize: '0.875rem',
+                          lineHeight: '1.25rem',
+                        }),
+                      }}
+                      theme={(theme) => ({
+                        ...theme,
+                        borderRadius: 4,
+                        colors: {
+                          ...theme.colors,
+                          primary75: '#cbd5e1',
+                          primary50: '##e2e8f0',
+                          primary25: '#f8fafc',
+                          primary: '#212529',
+                        },
+                      })}
+                      components={{ DropdownIndicator: null }}
+                      inputValue={diagnosisInputValue}
+                      isClearable
+                      isMulti
+                      menuIsOpen={false}
+                      onChange={(newValue) => setValueDiagnosis(newValue)}
+                      onInputChange={(newValue) => setDiagnosisInputValue(newValue)}
+                      onKeyDown={handleKeyDown}
+                      placeholder="Digite o nome da doença diagnosticada e depois aperte a tecla 'Enter'"
+                      value={valueDiagnosis}
                     />
                   </div>
                 </div>

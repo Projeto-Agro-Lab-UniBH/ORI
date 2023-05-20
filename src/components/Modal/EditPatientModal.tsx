@@ -11,7 +11,7 @@ import { CreateExamModal } from './CreateExamModal';
 import { PatientService } from '../../services/PatientService';
 import { Load } from '../Load/Load';
 import { useRouter } from 'next/router';
-import { Option } from '../../interfaces/utils';
+import { Option } from '../../interfaces/Option';
 
 interface IEditPatientModalProps {
 	patient: EditPatientModalProps;
@@ -152,7 +152,7 @@ export function EditPatientModal(props: IEditPatientModalProps) {
 										<div className="w-full flex flex-col gap-6">
 											<div className="w-full flex flex-col gap-2">
 												<div className="w-full flex items-center gap-4">
-													<div className="w-[72px] h-full flex items-center flex-col gap-2">
+													<div className="w-[72px] flex items-center flex-col gap-2">
 														<div className="w-full flex items-center justify-center">
 															<span className="text-sm font-semibold text-brand-standard-black">Foto</span>
 														</div>
@@ -403,13 +403,13 @@ export function EditPatientModal(props: IEditPatientModalProps) {
 											<div className="w-full">
 												<div className="w-full flex flex-col gap-5">
 													<div className="w-full flex flex-col gap-3">
-														<Label htmlFor="" text="Diagnóstico" />
+														<Label htmlFor="diagnosis" text="Diagnóstico" />
 														<CreatableSelect
 															styles={{
 																control: (baseStyles, state) => ({
 																	...baseStyles,
 																	width: '100%',
-																	height: 40,
+																	minHeight: 40,
 																	borderColor: state.isFocused ? '#e2e8f0' : '#e2e8f0',
 																	whiteSpace: 'nowrap',
 																	textOverflow: 'ellipsis',
