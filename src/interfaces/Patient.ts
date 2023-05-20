@@ -1,4 +1,4 @@
-import { Option } from './utils';
+import { Option } from './Option';
 
 export interface Patient {
 	id: string;
