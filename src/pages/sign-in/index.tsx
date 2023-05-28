@@ -1,5 +1,4 @@
 import Image from "next/image";
-import Link from "next/link";
 import { useAuthContext } from "../../contexts/AuthContext";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
