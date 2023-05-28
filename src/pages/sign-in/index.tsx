@@ -22,7 +22,7 @@ export default function SignIn() {
     resolver: zodResolver(signFormSchema)
   });
 
-  async function send({ email, password }: signInFormData) {
+  const send = async ({ email, password }: signInFormData) => {
     await signIn({ 
       email, 
       password 
@@ -40,12 +40,6 @@ export default function SignIn() {
               height={64}
               alt="Orifox-Icon"
             />
-          </div>
-          <div className="w-full flex items-center justify-center gap-1">
-            <p className="text-brand-standard-black text-2xl font-extralight">Não tem conta?</p>
-            <Link href="/sign-up" className="text-2xl text-sky-600 no-underline font-extralight">
-              Crie
-            </Link>
           </div>
         </div>
         <form onSubmit={handleSubmit(send)}>
