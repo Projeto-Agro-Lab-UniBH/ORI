@@ -61,7 +61,7 @@ const RegisterPatientModal = () => {
     useForm<registerPatientFormData>({
       resolver: zodResolver(registerPatientFormSchema),
     });
-  const [open, setOpen] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [diagnosisInputValue, setDiagnosisInputValue] = useState<string>("");
   const [valueDiagnosis, setValueDiagnosis] = useState<readonly Option[]>([]);
@@ -129,7 +129,7 @@ const RegisterPatientModal = () => {
       onSuccess: () => {
         queryClient.invalidateQueries("pacient-list");
         if (isLoading != true) {
-          setOpen(false);
+          setIsOpen(false);
           reset();
         }
       },
@@ -141,12 +141,12 @@ const RegisterPatientModal = () => {
   }, [setValue, valueDiagnosis, valueDiagnosis?.length]);
 
   useEffect(() => {
-    if (open != true) {
+    if (isOpen != true) {
       setPreviewImage(null);
       setValueDiagnosis([])
       reset()
     }
-  }, [open, setPreviewImage, setValueDiagnosis, reset]);
+  }, [isOpen, setPreviewImage, setValueDiagnosis, reset]);
 
   const send = (data: registerPatientFormData) => {
     const request = {
@@ -156,7 +156,7 @@ const RegisterPatientModal = () => {
   };
 
   return (
-    <Dialog.Root onOpenChange={setOpen} open={open}>
+    <Dialog.Root onOpenChange={setIsOpen} open={isOpen}>
       <Dialog.Trigger className="w-10 h-10 border rounded flex justify-center items-center hover:boder hover:border-[#b3b3b3]">
         <PlusIcon color="#212529" width={20} height={20} />
       </Dialog.Trigger>
