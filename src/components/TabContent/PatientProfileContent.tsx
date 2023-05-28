@@ -2,34 +2,20 @@ import * as Avatar from "@radix-ui/react-avatar";
 import Select from "react-select";
 import CreatableSelect from "react-select/creatable";
 import { useForm, useController } from "react-hook-form";
-import { Option } from "../../interfaces/Option";
-import { KeyboardEventHandler, useEffect, useState } from "react";
 import { Label } from "../Label/Label";
+import { Option } from "../../interfaces/Option";
+import { ChangeEvent, KeyboardEventHandler, useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { api } from "../../providers/Api";
 import { Load } from "../Load/Load";
 import { Patient } from "../../@types/Patient";
+import { CameraIcon } from "@radix-ui/react-icons";
 
 type EditPatientProps = {
   patientId: string;
-};
-
-type PatientData = {
-  profile_photo?: string;
-  name: string;
-  owner: string;
-  specie: string;
-  race: string;
-  gender: string;
-  type: string;
-  weight: string;
-  situation: string;
-  diagnosis: Option[];
-  physical_shape: string;
-  entry_date: string;
-  departure_date: string;
+  isOpen: boolean;
 };
 
 type GetPatientProfileResponse = {
@@ -39,9 +25,8 @@ type GetPatientProfileResponse = {
   specie: string;
   race: string;
   gender: string;
-  type: string;
   weight: string;
-  situation: string;
+  prognosis: string;
   diagnosis: Option[];
   physical_shape: string;
   entry_date: string;
@@ -53,17 +38,15 @@ type GetEditedPatientResponse = {
 };
 
 const editPatientProfileFormSchema = z.object({
-  profile_photo: z.any(),
   name: z.string().nonempty(),
   owner: z.string(),
   specie: z.string(),
   race: z.string(),
-  gender: z.string(),
-  type: z.string(),
+  gender: z.any(),
   weight: z.string(),
-  situation: z.string(),
+  prognosis: z.any(),
   diagnosis: z.any(),
-  physical_shape: z.string(),
+  physical_shape: z.any(),
   entry_date: z.string(),
   departure_date: z.string(),
 });
@@ -83,13 +66,16 @@ const genderOptions = [
 const physicalShapeOptions = [
   { value: "Grande porte", label: "Grande porte" },
   { value: "Médio porte", label: "Médio porte" },
-  { value: "Leve porte", label: "Leve porte" },
+  { value: "Pequeno porte", label: "Pequeno porte" },
 ];
 
-const situationOptions = [
+const prognosisOptions = [
   { value: "Alta", label: "Alta" },
-  { value: "Pronto pra alta", label: "Pronto pra alta" },
-  { value: "Em observação", label: "Em observação" },
+  { value: "Aguardando alta médica", label: "Aguardando alta médica" },
+  { value: "Obscuro", label: "Obscuro" },
+  { value: "Desfávoravel", label: "Desfávoravel" },
+  { value: "Reservado", label: "Reservado" },
+  { value: "Favorável", label: "Favorável" },
   { value: "Risco", label: "Risco" },
   { value: "Alto risco", label: "Alto risco" },
 ];
@@ -107,17 +93,19 @@ const PatientProfileContent = (props: EditPatientProps) => {
   });
 
   const [diagnosisInputValue, setDiagnosisInputValue] = useState("");
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [fetchImage, setFetchImage] = useState<string | null>(null);
+  const [photo, setPhoto] = useState<string | null>(null);
   const [valueDiagnosis, setValueDiagnosis] = useState<readonly Option[]>([]);
+  const { field: selectGender } = useController({ name: "gender", control });
 
   const { field: selectPhysicalShape } = useController({
     name: "physical_shape",
     control,
   });
 
-  const { field: selectGender } = useController({ name: "gender", control });
-
-  const { field: selectSituation } = useController({
-    name: "situation",
+  const { field: selectPrognosis } = useController({
+    name: "prognosis",
     control,
   });
 
@@ -134,31 +122,62 @@ const PatientProfileContent = (props: EditPatientProps) => {
   } = selectGender;
 
   const {
-    value: selectSituationValue,
-    onChange: selectSituationOnChange,
-    ...restSelectSituation
-  } = selectSituation;
+    value: selectPrognosisValue,
+    onChange: selectPrognosisOnChange,
+    ...restSelectPrognosis
+  } = selectPrognosis;
 
-  const [data, setData] = useState<PatientData>({} as PatientData);
+  const [callRequest, setCallRequest] = useState<boolean>(false);
   const queryClient = useQueryClient();
-  const { isLoading: isLoadingPatientData } = useQuery(
-    "get-patient-by-id",
-    async () => {
-      return await api
-        .get<GetPatientProfileResponse>(`/animal/${props.patientId}`)
+  const { isLoading: isLoadingPatientData } = useQuery({
+    queryKey: ["get-patient-by-id"],
+    queryFn: async () => {
+      await api
+        .get<GetPatientProfileResponse>(`/patient/${props.patientId}`)
         .then((res) => {
-          if ((res.data as any).diagnosis.length > 0) {
-            setValueDiagnosis((res.data as any).diagnosis);
+          if ((res.data as GetPatientProfileResponse).diagnosis.length > 0) {
+            setValueDiagnosis((res.data as GetPatientProfileResponse).diagnosis);
           }
           reset(res.data);
-          setData(res.data);
+          setFetchImage(res.data.profile_photo);
         });
+    },
+    enabled: callRequest,
+  });
+
+  useEffect(() => {
+    if (props.isOpen != true) {
+      setCallRequest(false);
+      setPhoto(null)
+      reset();
+    } else {
+      setCallRequest(true);
     }
-  );
+  }, [props.isOpen, setPhoto, setCallRequest, reset]);
+
+  useEffect(() => {
+    if (fetchImage) {
+      setPhoto(fetchImage)
+    } 
+    if (previewImage) {
+      setPhoto(previewImage)
+    } 
+  }, [photo, setPhoto, fetchImage, previewImage])
 
   useEffect(() => {
     setValue("diagnosis", valueDiagnosis);
-  }, [valueDiagnosis?.length]);
+  }, [setValue, valueDiagnosis, valueDiagnosis?.length]);
+
+  const handleImage = (event: ChangeEvent<HTMLInputElement>) => {
+    if (event?.target?.files?.[0]) {
+      const file = event.target.files[0];
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleKeyDown: KeyboardEventHandler = (event) => {
     if (!diagnosisInputValue) return;
@@ -174,15 +193,18 @@ const PatientProfileContent = (props: EditPatientProps) => {
     }
   };
 
-  const { isLoading: savingChanges, mutate } = useMutation(
-    (data: editPatientProfileFormData) =>
-      api.patch<GetEditedPatientResponse>(`/animal/${props.patientId}`, data),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries("pacient-list");
-      },
-    }
-  );
+  const { isLoading: savingChanges, mutate } = useMutation({
+    mutationKey: ["update-patient"],
+    mutationFn: async (data: editPatientProfileFormData) => {
+      await api.patch<GetEditedPatientResponse>(`/patient/${props.patientId}`, {
+        ...data,
+        profile_photo: photo,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries("pacient-list");
+    },
+  });
 
   const send = (data: editPatientProfileFormData) => {
     const request = {
@@ -227,15 +249,24 @@ const PatientProfileContent = (props: EditPatientProps) => {
                   <div className="w-full flex items-center justify-center">
                     <Avatar.Root
                       className={
-                        !data.profile_photo
+                        !photo
                           ? "w-16 h-16 border border-gray-200 rounded-full flex items-center justify-center overflow-hidden"
                           : "w-16 h-16 rounded-full flex items-center justify-center overflow-hidden"
                       }
                     >
-                      <Avatar.Image
-                        className="w-full h-full object-cover"
-                        src={!data.profile_photo ? "" : data.profile_photo}
-                      />
+                      {!photo ? (
+                        <div className="w-4 h-4">
+                          <CameraIcon
+                            className="w-full h-full object-cover"
+                            color="#e5e7eb"
+                          />
+                        </div>
+                      ) : (
+                        <Avatar.Image
+                          className="w-full h-full object-cover"
+                          src={photo}
+                        />
+                      )}
                     </Avatar.Root>
                   </div>
                 </div>
@@ -249,9 +280,10 @@ const PatientProfileContent = (props: EditPatientProps) => {
                     </label>
                     <input
                       type="file"
+                      accept=".jpg, .jpeg, .png"
                       id="patient-photo-file"
-                      name="patientPhotoFile"
                       className="hidden"
+                      onChange={handleImage}
                     />
                     <div className="w-full">
                       <div className="w-[516px] flex flex-col">
@@ -304,7 +336,7 @@ const PatientProfileContent = (props: EditPatientProps) => {
               <div className="w-full">
                 <div className="w-full flex flex-col gap-6">
                   <div className="w-full flex flex-col gap-3">
-                    <Label htmlFor="situation" text="Situação" />
+                    <Label htmlFor="prognosis" text="Prognóstico" />
                     <Select
                       styles={{
                         control: (baseStyles, state) => ({
@@ -333,20 +365,18 @@ const PatientProfileContent = (props: EditPatientProps) => {
                       })}
                       placeholder="Selecione a situação do paciente"
                       isSearchable={false}
-                      options={situationOptions}
+                      options={prognosisOptions}
                       value={
-                        selectSituationValue
-                          ? situationOptions.find(
-                              (x) => x.value === selectSituationValue
+                        selectPrognosisValue
+                          ? prognosisOptions.find(
+                              (x) => x.value === selectPrognosisValue
                             )
-                          : selectSituationValue
+                          : selectPrognosisValue
                       }
                       onChange={(option) =>
-                        selectSituationOnChange(
-                          option ? option.valueOf : option
-                        )
+                        selectPrognosisOnChange(option ? option.value : option)
                       }
-                      {...restSelectSituation}
+                      {...restSelectPrognosis}
                     />
                   </div>
                 </div>
@@ -441,7 +471,7 @@ const PatientProfileContent = (props: EditPatientProps) => {
                       }
                       onChange={(option) =>
                         selectPhysicalShapeOnChange(
-                          option ? option.valueOf : option
+                          option ? option.value : option
                         )
                       }
                       {...restSelectPhysicalShape}
@@ -495,7 +525,7 @@ const PatientProfileContent = (props: EditPatientProps) => {
                       isSearchable={false}
                       options={genderOptions}
                       onChange={(option) =>
-                        selectGenderOnChange(option ? option.valueOf : option)
+                        selectGenderOnChange(option ? option.value : option)
                       }
                       value={
                         selectGenderValue
@@ -513,7 +543,10 @@ const PatientProfileContent = (props: EditPatientProps) => {
             <div className="w-full">
               <div className="w-full flex flex-col gap-5">
                 <div className="w-full flex flex-col gap-3">
-                  <Label htmlFor="diagnosis" text="Diagnóstico" />
+                  <Label
+                    htmlFor="diagnosis"
+                    text="Diagnóstico/Suspeita Clínica"
+                  />
                   <CreatableSelect
                     styles={{
                       control: (baseStyles, state) => ({
@@ -550,7 +583,7 @@ const PatientProfileContent = (props: EditPatientProps) => {
                       setDiagnosisInputValue(newValue)
                     }
                     onKeyDown={handleKeyDown}
-                    placeholder="Digite o nome da doença diagnosticada e depois aperte a tecla 'Enter'"
+                    placeholder="Digite o nome da doença diagnosticada/suspeita clínica e depois aperte a tecla 'Enter'"
                     value={valueDiagnosis}
                   />
                 </div>
