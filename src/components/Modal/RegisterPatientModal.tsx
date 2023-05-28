@@ -121,20 +121,22 @@ const RegisterPatientModal = () => {
   };
 
   const queryClient = useQueryClient();
-  const { isLoading, mutate } = useMutation(
-    (data: registerPatientFormData) => api.post("/patient", {
-      ...data, 
-      profile_photo: previewImage}),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries("pacient-list");
-        if (isLoading != true) {
-          setIsOpen(false);
-          reset();
-        }
-      },
-    }
-  );
+  const { isLoading, mutate } = useMutation({
+    mutationKey: ['create-patient'],
+    mutationFn: async (data: registerPatientFormData) => {
+        await api.post("/patient", {
+          ...data, 
+          profile_photo: previewImage
+        })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries("pacient-list");
+      if (isLoading != true) {
+        setIsOpen(false);
+        reset();
+      }
+    },
+  });
 
   useEffect(() => {
     setValue("diagnosis", valueDiagnosis);
