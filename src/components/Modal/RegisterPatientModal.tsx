@@ -138,7 +138,7 @@ const RegisterPatientModal = () => {
 
   useEffect(() => {
     setValue("diagnosis", valueDiagnosis);
-  }, [valueDiagnosis?.length]);
+  }, [setValue, valueDiagnosis, valueDiagnosis?.length]);
 
   useEffect(() => {
     if (open != true) {
@@ -146,7 +146,7 @@ const RegisterPatientModal = () => {
       setValueDiagnosis([])
       reset()
     }
-  }, [open]);
+  }, [open, setPreviewImage, setValueDiagnosis, reset]);
 
   const send = (data: registerPatientFormData) => {
     const request = {
