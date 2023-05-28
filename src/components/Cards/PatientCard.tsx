@@ -1,70 +1,40 @@
 import * as Avatar from '@radix-ui/react-avatar';
-import * as Dialog from '@radix-ui/react-dialog';
-import { CopyIcon } from '@radix-ui/react-icons';
+import { CopyIcon, CameraIcon } from '@radix-ui/react-icons';
 import { useEffect, useState } from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { EditPatientModalProps } from '../Modal/EditPatientModal';
+import EditPatientModal from '../Modal/EditPatientModal';
 import { Badges } from '../Badges/Badges';
-import { useRouter } from 'next/router';
-import { Option } from '../../interfaces/utils';
+import { Option } from '../../interfaces/Option';
 
 type PatientCardProps = {
 	id: string;
-	profile_photo?: string;
-	name: string;
-	specie: string;
-	gender: string;
-	type: string;
-	weight: string;
-	situation: string;
-	physical_shape: string;
-	diagnosis: Array<Option>;
+  profile_photo?: string;
+  name: string;
+  specie: string;
+  gender: string;
+  weight: string;
+  prognosis: string;
+  diagnosis: Option[];
+  physical_shape: string;
 	exams: Array<string>;
-	onSelectedPatient: (e: EditPatientModalProps) => void;
 };
 
-export function PatientCard(props: PatientCardProps) {
-	const [photo, setPhoto] = useState('');
+const PatientCard = (props: PatientCardProps) => {
 	const [copyArea, setCopyArea] = useState('');
-	const router = useRouter();
 
 	useEffect(() => {
 		setCopyArea(props.id);
 	}, [props.id]);
-
-	const addQueryParam = (patientId: string) => {
-		const queryParams = { patientId };
-		router.push({
-			pathname: router.pathname,
-			query: queryParams,
-		});
-	};
-
-	useEffect(() => {
-		if (props.type === 'Aves') {
-			setPhoto('/blue-jay.png');
-		} else if (props.type === 'Bovino') {
-			setPhoto('/cow.png');
-		} else if (props.type === 'Canino') {
-			setPhoto('/dog.png');
-		} else if (props.type === 'Equino') {
-			setPhoto('/horse.png');
-		} else if (props.type === 'Felino') {
-			setPhoto('/cat.png');
-		} else if (props.type === 'Silvestre') {
-			setPhoto('/fox.png');
-		}
-	}, [props.type]);
 
 	return (
 		<div className="w-full h-[104px] px-4 pt-2 pb-2 flex items-center bg-white border border-gray-200 rounded-lg">
 			<div id="animal-patient-card-scroll" className="w-full flex items-center border-none rounded-lg overflow-x-scroll">
 				<div className="h-20 flex items-center p-2 gap-10">
 					<div className="flex gap-4">
-						<div className="w-[152px] flex items-center flex-col">
+						<div className="w-[88px] flex items-center flex-col">
 							<span className="w-full mb-2 text-lg font-semibold text-brand-standard-black">ID:</span>
 							<div className="w-full h-full flex items-center gap-2">
-								<div className="w-[124px] h-6 bg-brand-standard-black border-none rounded flex items-center px-2">
+								<div className="w-[64px] h-6 bg-brand-standard-black border-none rounded flex items-center px-2">
 									<span className="whitespace-nowrap text-sm font-normal text-white overflow-hidden overflow-ellipsis">{copyArea}</span>
 								</div>
 								<CopyToClipboard text={copyArea}>
@@ -75,13 +45,7 @@ export function PatientCard(props: PatientCardProps) {
 							</div>
 						</div>
 						<div className="w-[224px] h-full flex items-center">
-							<Dialog.Trigger
-								onClick={() => {
-									props.onSelectedPatient(props as any);
-									addQueryParam(props.id);
-								}}
-								className="w-full flex items-center hover:cursor-pointer gap-4"
-							>
+							<EditPatientModal patientId={props.id}>
 								<div className="w-16 h-16 flex items-center">
 									<Avatar.Root
 										className={
@@ -91,8 +55,8 @@ export function PatientCard(props: PatientCardProps) {
 										}
 									>
 										{!props.profile_photo ? (
-											<div className="w-11 h-11">
-												<Avatar.Image className="w-full h-full object-cover" src={photo} alt="Icon" />
+											<div className="w-4 h-4">
+												<CameraIcon className="w-full h-full object-cover" color="#e5e7eb" />
 											</div>
 										) : (
 											<Avatar.Image className="w-full h-full object-cover" src={props.profile_photo} />
@@ -109,35 +73,28 @@ export function PatientCard(props: PatientCardProps) {
 										</p>
 									</div>
 								</div>
-							</Dialog.Trigger>
+							</EditPatientModal>
 						</div>
 					</div>
 					<div className="flex gap-10">
-						<div className="w-[340px] flex items-center flex-col">
-							<span className="w-[340px] whitespace-nowrap text-lg font-semibold text-brand-standard-black mb-2">Ficha do animal:</span>
+						<div className="w-[256px] flex items-center flex-col">
+							<span className="w-[256px] whitespace-nowrap text-lg font-semibold text-brand-standard-black mb-2">Dados do paciente:</span>
 							<div className="w-full flex items-center flex-row gap-2">
-								<Badges data={!props.type ? 'Sem dados' : props.type} />
 								{!props.gender ? null : <Badges data={props.gender} />}
 								{!props.physical_shape ? null : <Badges data={props.physical_shape} />}
 								{!props.weight ? null : <Badges data={props.weight} />}
 							</div>
 						</div>
 						<div className="w-[124px] flex items-center flex-col">
-							<span className="w-[124px] whitespace-nowrap text-lg font-semibold text-brand-standard-black mb-2">Situação:</span>
+							<span className="w-[124px] whitespace-nowrap text-lg font-semibold text-brand-standard-black mb-2">Prognóstico:</span>
 							<div className="w-full flex items-center flex-row gap-2">
-								<Badges data={!props.situation ? 'Sem dados' : props.situation} />
+								<Badges data={!props.prognosis ? 'Sem dados' : props.prognosis} />
 							</div>
 						</div>
 						<div className="w-full flex items-center flex-col">
-							<span className="whitespace-nowrap w-full text-lg font-semibold text-brand-standard-black mb-2">Diagnóstico:</span>
+							<span className="whitespace-nowrap w-full text-lg font-semibold text-brand-standard-black mb-2">Diagnóstico / Suspeita Clínica:</span>
 							<div className="w-full flex items-center flex-row gap-2">
-								{props.diagnosis.map((data) =>
-									!data ? (
-										<span className="whitespace-nowrap text-sm font-normal text-brand-standard-black">Sem dados</span>
-									) : (
-										<Badges key={props.id} data={data.value} />
-									)
-								)}
+								{props.diagnosis.map((data) => <Badges key={data.label} data={data.value} /> )}
 							</div>
 						</div>
 						<div className="w-full flex items-center flex-col">
@@ -158,3 +115,5 @@ export function PatientCard(props: PatientCardProps) {
 		</div>
 	);
 }
+
+export default PatientCard
