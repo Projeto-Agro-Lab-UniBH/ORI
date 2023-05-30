@@ -10,6 +10,7 @@ type PatientCardProps = {
 	id: string;
   profile_photo?: string;
   name: string;
+	race: string;
   specie: string;
   gender: string;
   weight: string;
@@ -69,7 +70,7 @@ const PatientCard = (props: PatientCardProps) => {
 											{!props.name ? 'Sem nome' : props.name}
 										</p>
 										<p className="w-full flex whitespace-nowrap text-lg font-light text-brand-standard-black overflow-hidden text-ellipsis">
-											{!props.specie ? 'Não registrado' : props.specie}
+											{!props.race ? 'Não registrado' : props.race}
 										</p>
 									</div>
 								</div>

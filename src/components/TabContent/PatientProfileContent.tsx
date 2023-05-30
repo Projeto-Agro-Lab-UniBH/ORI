@@ -10,13 +10,28 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { api } from "../../providers/Api";
 import { Load } from "../Load/Load";
-import { Patient } from "../../@types/Patient";
 import { CameraIcon } from "@radix-ui/react-icons";
 
 type EditPatientProps = {
   patientId: string;
   isOpen: boolean;
 };
+
+type Patient = {
+  id: string;
+  profile_photo: string;
+  name: string;
+  owner: string;
+  specie: string;
+  race: string;
+  gender: string;
+  weight: string;
+  prognosis: string;
+  diagnosis: Option[];
+  physical_shape: string;
+  entry_date: string;
+  departure_date: string;
+}
 
 type GetPatientProfileResponse = {
   profile_photo: string;
@@ -40,7 +55,7 @@ type GetEditedPatientResponse = {
 const editPatientProfileFormSchema = z.object({
   name: z.string().nonempty(),
   owner: z.string(),
-  specie: z.string(),
+  specie: z.any(),
   race: z.string(),
   gender: z.any(),
   weight: z.string(),
@@ -80,6 +95,14 @@ const prognosisOptions = [
   { value: "Alto risco", label: "Alto risco" },
 ];
 
+const specieOptions = [
+  { value: "Bovino", label: "Bovino" },
+  { value: "Canino", label: "Canino" },
+  { value: "Equino", label: "Equino" },
+  { value: "Felino", label: "Felino" },
+  { value: "Outros", label: "Outros" },
+]
+
 const PatientProfileContent = (props: EditPatientProps) => {
   const {
     reset,
@@ -97,15 +120,9 @@ const PatientProfileContent = (props: EditPatientProps) => {
   const [fetchImage, setFetchImage] = useState<string | null>(null);
   const [photo, setPhoto] = useState<string | null>(null);
   const [valueDiagnosis, setValueDiagnosis] = useState<readonly Option[]>([]);
-  const { field: selectGender } = useController({ name: "gender", control });
 
   const { field: selectPhysicalShape } = useController({
     name: "physical_shape",
-    control,
-  });
-
-  const { field: selectPrognosis } = useController({
-    name: "prognosis",
     control,
   });
 
@@ -115,17 +132,38 @@ const PatientProfileContent = (props: EditPatientProps) => {
     ...restSelectPhysicalShape
   } = selectPhysicalShape;
 
+  const { field: selectGender } = useController({ 
+    name: "gender", 
+    control 
+  });
+
   const {
     value: selectGenderValue,
     onChange: selectGenderOnChange,
     ...restSelectGender
   } = selectGender;
 
+  const { field: selectPrognosis } = useController({
+    name: "prognosis",
+    control,
+  });
+
   const {
     value: selectPrognosisValue,
     onChange: selectPrognosisOnChange,
     ...restSelectPrognosis
   } = selectPrognosis;
+
+  const { field: selectSpecie } = useController({
+    name: "specie",
+    control,
+  });
+
+  const {
+    value: selectSpecieValue,
+    onChange: selectSpecieOnChange,
+    ...restSelectSpecie
+  } = selectSpecie;
 
   const [callRequest, setCallRequest] = useState<boolean>(false);
   const queryClient = useQueryClient();
@@ -396,11 +434,51 @@ const PatientProfileContent = (props: EditPatientProps) => {
               <div className="w-full">
                 <div className="w-full flex flex-col gap-3">
                   <Label htmlFor="specie" text="Espécie" />
-                  <input
-                    type="text"
-                    className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                    {...register("specie")}
-                  />
+                  <Select
+                            styles={{
+                              control: (baseStyles, state) => ({
+                                ...baseStyles,
+                                width: "100%",
+                                height: 40,
+                                borderColor: state.isFocused
+                                  ? "#e2e8f0"
+                                  : "#e2e8f0",
+                                whiteSpace: "nowrap",
+                                textOverflow: "ellipsis",
+                                fontFamily: "Inter",
+                                fontWeight: 400,
+                                fontSize: "0.875rem",
+                                lineHeight: "1.25rem",
+                              }),
+                            }}
+                            theme={(theme) => ({
+                              ...theme,
+                              borderRadius: 4,
+                              colors: {
+                                ...theme.colors,
+                                primary75: "#cbd5e1",
+                                primary50: "##e2e8f0",
+                                primary25: "#f8fafc",
+                                primary: "#212529",
+                              },
+                            })}
+                            placeholder="Selecione a espécie do paciente"
+                            isSearchable={false}
+                            options={specieOptions}
+                            value={
+                              selectSpecieValue
+                                ? specieOptions.find(
+                                    (x) => x.value === selectSpecieValue
+                                  )
+                                : selectSpecieValue
+                            }
+                            onChange={(option) =>
+                              selectSpecieOnChange(
+                                option ? option.value : option
+                              )
+                            }
+                            {...restSelectSpecie}
+                          />
                 </div>
               </div>
             </div>

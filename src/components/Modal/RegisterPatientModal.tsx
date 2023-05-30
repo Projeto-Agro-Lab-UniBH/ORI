@@ -16,7 +16,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 const registerPatientFormSchema = z.object({
   name: z.string().nonempty(),
   owner: z.string(),
-  specie: z.string(),
+  specie: z.any(),
   race: z.string(),
   gender: z.any(),
   weight: z.string(),
@@ -56,6 +56,14 @@ const prognosisOptions = [
   { value: "Alto risco", label: "Alto risco" },
 ];
 
+const specieOptions = [
+  { value: "Bovino", label: "Bovino" },
+  { value: "Canino", label: "Canino" },
+  { value: "Equino", label: "Equino" },
+  { value: "Felino", label: "Felino" },
+  { value: "Outros", label: "Outros" },
+]
+
 const RegisterPatientModal = () => {
   const { reset, register, setValue, control, handleSubmit } =
     useForm<registerPatientFormData>({
@@ -76,6 +84,17 @@ const RegisterPatientModal = () => {
     name: "prognosis",
     control,
   });
+
+  const { field: selectSpecie } = useController({
+    name: "specie",
+    control,
+  });
+
+  const {
+    value: selectSpecieValue,
+    onChange: selectSpecieOnChange,
+    ...restSelectSpecie
+  } = selectSpecie;
 
   const {
     value: selectPhysicalShapeValue,
@@ -344,12 +363,52 @@ const RegisterPatientModal = () => {
                     </div>
                     <div className="w-full">
                       <div className="w-full flex flex-col gap-3">
-                        <Label htmlFor="specie" text="Nome da espécie" />
-                        <input
-                          type="text"
-                          className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                          {...register("specie")}
-                        />
+                        <Label htmlFor="specie" text="Espécie" />
+                        <Select
+                            styles={{
+                              control: (baseStyles, state) => ({
+                                ...baseStyles,
+                                width: "100%",
+                                height: 40,
+                                borderColor: state.isFocused
+                                  ? "#e2e8f0"
+                                  : "#e2e8f0",
+                                whiteSpace: "nowrap",
+                                textOverflow: "ellipsis",
+                                fontFamily: "Inter",
+                                fontWeight: 400,
+                                fontSize: "0.875rem",
+                                lineHeight: "1.25rem",
+                              }),
+                            }}
+                            theme={(theme) => ({
+                              ...theme,
+                              borderRadius: 4,
+                              colors: {
+                                ...theme.colors,
+                                primary75: "#cbd5e1",
+                                primary50: "##e2e8f0",
+                                primary25: "#f8fafc",
+                                primary: "#212529",
+                              },
+                            })}
+                            placeholder="Selecione a espécie do paciente"
+                            isSearchable={false}
+                            options={specieOptions}
+                            value={
+                              selectSpecieValue
+                                ? specieOptions.find(
+                                    (x) => x.value === selectSpecieValue
+                                  )
+                                : selectSpecieValue
+                            }
+                            onChange={(option) =>
+                              selectSpecieOnChange(
+                                option ? option.value : option
+                              )
+                            }
+                            {...restSelectSpecie}
+                          />
                       </div>
                     </div>
                   </div>
