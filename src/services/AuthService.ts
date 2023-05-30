@@ -1,5 +1,11 @@
-import { User } from "../interfaces/User";
 import { api } from "../providers/Api";
+
+type User = {
+  id: string;
+  profile_photo: string;
+  username: string;
+  email: string;
+}
 
 type SignInRequest = {
   email: string; 
