@@ -2,7 +2,7 @@ import Image from "next/image";
 import { useAuthContext } from "../../contexts/AuthContext";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod"
+import { zodResolver } from "@hookform/resolvers/zod";
 
 const signFormSchema = z.object({
   email: z.string().nonempty('O e-mail é obrigatório').email('Formato de e-mail inválido'),
@@ -93,3 +93,20 @@ export default function SignIn() {
     </div>
   );
 }
+
+// export const getServerSideProps: GetServerSideProps = async (ctx) => {
+//   // if (!session) {
+//   //   return {
+//   //     redirect: {
+//   //       destination: "/",
+//   //       permanent: false,
+//   //     },
+//   //   };
+//   // }
+
+//   return {
+//     props: {
+      
+//     },
+//   };
+// };

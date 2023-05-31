@@ -31,7 +31,7 @@ type Patient = {
   physical_shape: string;
   entry_date: string;
   departure_date: string;
-}
+};
 
 type GetPatientProfileResponse = {
   profile_photo: string;
@@ -55,7 +55,7 @@ type GetEditedPatientResponse = {
 const editPatientProfileFormSchema = z.object({
   name: z.string().nonempty(),
   owner: z.string(),
-  specie: z.any(),
+  specie: z.string(),
   race: z.string(),
   gender: z.any(),
   weight: z.string(),
@@ -95,14 +95,6 @@ const prognosisOptions = [
   { value: "Alto risco", label: "Alto risco" },
 ];
 
-const specieOptions = [
-  { value: "Bovino", label: "Bovino" },
-  { value: "Canino", label: "Canino" },
-  { value: "Equino", label: "Equino" },
-  { value: "Felino", label: "Felino" },
-  { value: "Outros", label: "Outros" },
-]
-
 const PatientProfileContent = (props: EditPatientProps) => {
   const {
     reset,
@@ -132,9 +124,9 @@ const PatientProfileContent = (props: EditPatientProps) => {
     ...restSelectPhysicalShape
   } = selectPhysicalShape;
 
-  const { field: selectGender } = useController({ 
-    name: "gender", 
-    control 
+  const { field: selectGender } = useController({
+    name: "gender",
+    control,
   });
 
   const {
@@ -154,17 +146,6 @@ const PatientProfileContent = (props: EditPatientProps) => {
     ...restSelectPrognosis
   } = selectPrognosis;
 
-  const { field: selectSpecie } = useController({
-    name: "specie",
-    control,
-  });
-
-  const {
-    value: selectSpecieValue,
-    onChange: selectSpecieOnChange,
-    ...restSelectSpecie
-  } = selectSpecie;
-
   const [callRequest, setCallRequest] = useState<boolean>(false);
   const queryClient = useQueryClient();
   const { isLoading: isLoadingPatientData } = useQuery({
@@ -174,7 +155,9 @@ const PatientProfileContent = (props: EditPatientProps) => {
         .get<GetPatientProfileResponse>(`/patient/${props.patientId}`)
         .then((res) => {
           if ((res.data as GetPatientProfileResponse).diagnosis.length > 0) {
-            setValueDiagnosis((res.data as GetPatientProfileResponse).diagnosis);
+            setValueDiagnosis(
+              (res.data as GetPatientProfileResponse).diagnosis
+            );
           }
           reset(res.data);
           setFetchImage(res.data.profile_photo);
@@ -186,7 +169,7 @@ const PatientProfileContent = (props: EditPatientProps) => {
   useEffect(() => {
     if (props.isOpen != true) {
       setCallRequest(false);
-      setPhoto(null)
+      setPhoto(null);
       reset();
     } else {
       setCallRequest(true);
@@ -195,12 +178,12 @@ const PatientProfileContent = (props: EditPatientProps) => {
 
   useEffect(() => {
     if (fetchImage) {
-      setPhoto(fetchImage)
-    } 
+      setPhoto(fetchImage);
+    }
     if (previewImage) {
-      setPhoto(previewImage)
-    } 
-  }, [photo, setPhoto, fetchImage, previewImage])
+      setPhoto(previewImage);
+    }
+  }, [photo, setPhoto, fetchImage, previewImage]);
 
   useEffect(() => {
     setValue("diagnosis", valueDiagnosis);
@@ -434,58 +417,18 @@ const PatientProfileContent = (props: EditPatientProps) => {
               <div className="w-full">
                 <div className="w-full flex flex-col gap-3">
                   <Label htmlFor="specie" text="Espécie" />
-                  <Select
-                            styles={{
-                              control: (baseStyles, state) => ({
-                                ...baseStyles,
-                                width: "100%",
-                                height: 40,
-                                borderColor: state.isFocused
-                                  ? "#e2e8f0"
-                                  : "#e2e8f0",
-                                whiteSpace: "nowrap",
-                                textOverflow: "ellipsis",
-                                fontFamily: "Inter",
-                                fontWeight: 400,
-                                fontSize: "0.875rem",
-                                lineHeight: "1.25rem",
-                              }),
-                            }}
-                            theme={(theme) => ({
-                              ...theme,
-                              borderRadius: 4,
-                              colors: {
-                                ...theme.colors,
-                                primary75: "#cbd5e1",
-                                primary50: "##e2e8f0",
-                                primary25: "#f8fafc",
-                                primary: "#212529",
-                              },
-                            })}
-                            placeholder="Selecione a espécie do paciente"
-                            isSearchable={false}
-                            options={specieOptions}
-                            value={
-                              selectSpecieValue
-                                ? specieOptions.find(
-                                    (x) => x.value === selectSpecieValue
-                                  )
-                                : selectSpecieValue
-                            }
-                            onChange={(option) =>
-                              selectSpecieOnChange(
-                                option ? option.value : option
-                              )
-                            }
-                            {...restSelectSpecie}
-                          />
+                  <input
+                    type="text"
+                    className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                    {...register("specie")}
+                  />
                 </div>
               </div>
             </div>
             <div className="w-full flex flex-row gap-4">
               <div className="w-[368px]">
                 <div className="w-[368px] flex flex-col gap-3">
-                  <Label htmlFor="owner" text="Nome do dono(a)" />
+                  <Label htmlFor="owner" text="Nome do tutor(a)" />
                   <input
                     type="text"
                     className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
@@ -669,7 +612,7 @@ const PatientProfileContent = (props: EditPatientProps) => {
             </div>
           </div>
           <div className="w-full flex justify-end">
-            <button className="border border-gray-200 px-3 py-[6px] rounded text-base text-brand-standard-black font-medium bg-white hover:bg-gray-50">
+            <button type="submit" className="border border-gray-200 px-3 py-[6px] rounded text-base text-brand-standard-black font-medium bg-white hover:bg-gray-50">
               Salvar alterações
             </button>
           </div>

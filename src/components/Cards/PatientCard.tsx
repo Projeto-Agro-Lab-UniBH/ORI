@@ -70,7 +70,7 @@ const PatientCard = (props: PatientCardProps) => {
 											{!props.name ? 'Sem nome' : props.name}
 										</p>
 										<p className="w-full flex whitespace-nowrap text-lg font-light text-brand-standard-black overflow-hidden text-ellipsis">
-											{!props.race ? 'Não registrado' : props.race}
+											{!props.specie ? 'Não registrado' : props.specie}
 										</p>
 									</div>
 								</div>
