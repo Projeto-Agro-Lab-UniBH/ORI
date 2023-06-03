@@ -3,6 +3,7 @@ import { useAuthContext } from "../../contexts/AuthContext";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
 
 const signFormSchema = z.object({
   email: z.string().nonempty('O e-mail é obrigatório').email('Formato de e-mail inválido'),
@@ -30,7 +31,7 @@ export default function SignIn() {
 
   return (
     <div className="w-[416px] absolute top-40 left-1/2 -translate-x-1/2 max-[448px]:w-[368px] max-[400px]:w-[360px]">
-      <div className="w-full flex flex-col gap-6">
+      <div className="w-full flex flex-col gap-4">
         <div className="ml-auto mr-auto text-center flex flex-col gap-4">
           <div className="w-full flex justify-center">
             <Image
@@ -82,10 +83,10 @@ export default function SignIn() {
               Entrar
             </button>
           </div>
-          {/* <span className="w-full h-8 flex justify-center mt-3 text-sm font-normal text-gray-500">
-            Esqueceu seu acesso?{" "}
-            <Link href="/reset-password">
-              <a className="no-underline text-sky-600">Recupere-o</a>
+          {/* <span className="w-full h-8 mt-6 flex gap-[6px] justify-center text-sm font-normal text-gray-500">
+            Esqueceu seu acesso?
+            <Link href="/reset-password" className="no-underline text-sky-600">
+              Recupere-o
             </Link>
           </span> */}
         </form>
@@ -93,20 +94,3 @@ export default function SignIn() {
     </div>
   );
 }
-
-// export const getServerSideProps: GetServerSideProps = async (ctx) => {
-//   // if (!session) {
-//   //   return {
-//   //     redirect: {
-//   //       destination: "/",
-//   //       permanent: false,
-//   //     },
-//   //   };
-//   // }
-
-//   return {
-//     props: {
-      
-//     },
-//   };
-// };

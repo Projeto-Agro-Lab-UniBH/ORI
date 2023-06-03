@@ -7,6 +7,8 @@ import { Option } from "../interfaces/Option";
 import { api } from "../providers/Api";
 import { Load } from "../components/Load/Load";
 import { useAuthContext } from "../contexts/AuthContext";
+import { GetServerSideProps } from "next";
+import { parseCookies } from "nookies";
 
 type ListAllPatientsResponse = {
   id: string;
@@ -52,7 +54,7 @@ export default function Home() {
               onChange={handleSearchInput}
             />
             <button className="w-[162px] h-10 bg-brand-standard-black rounded text-white font-normal hover:border hover:bg-white hover:text-brand-standard-black">
-              Procurar
+              Buscar
             </button>
             <RegisterPatientModal />
           </div>
@@ -91,21 +93,19 @@ export default function Home() {
   );
 }
 
-// export const getServerSideProps: GetServerSideProps = async (ctx) => {
-//   const apiClient = getAPIClient(ctx);
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const { ["nextauth.token"]: token } = parseCookies(ctx);
 
-//   const { ["nextauth.token"]: token } = parseCookies(ctx);
+  if (!token) {
+    return {
+      redirect: {
+        destination: "/sign-in",
+        permanent: false,
+      },
+    };
+  }
 
-//   if (!token) {
-//     return {
-//       redirect: {
-//         destination: "/sign-in",
-//         permanent: false,
-//       },
-//     };
-//   }
-
-//   return {
-//     props: {},
-//   };
-// };
+  return {
+    props: {},
+  };
+};
