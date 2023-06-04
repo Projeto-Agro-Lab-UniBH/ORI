@@ -1,10 +1,10 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import * as Tabs from "@radix-ui/react-tabs";
 import { Cross1Icon } from "@radix-ui/react-icons";
-import PatientProfileContent from "../TabContent/PatientProfileContent";
-import PatientReportsContent from "../TabContent/PatientReportsContent";
-import PatientExamsContent from "../TabContent/PatientExamsContent";
-import PatientAttachments from "../TabContent/PatientAttachments";
+import PatientProfileTabContent from "../TabContent/PatientProfileTabContent";
+import PatientReportsTabContent from "../TabContent/PatientReportsTabContent";
+import PatientExamsTabContent from "../TabContent/PatientExamsTabContent";
+import PatientAttachmentsTabContent from "../TabContent/PatientAttachmentsTabContent";
 import { useEffect, useState } from "react";
 
 type EditPatientModalProps = {
@@ -64,16 +64,16 @@ const EditPatientModal = (props: EditPatientModalProps) => {
                 </Tabs.Trigger>
               </Tabs.List>
               <Tabs.Content value="profile" >
-								<PatientProfileContent patientId={props.patientId} isOpen={open} />
+								<PatientProfileTabContent patientId={props.patientId} isOpen={open} />
               </Tabs.Content>
               <Tabs.Content value="reports">
-                <PatientReportsContent patientId={props.patientId} isOpen={open} />
+                <PatientReportsTabContent patientId={props.patientId} isOpen={open} />
               </Tabs.Content>
               <Tabs.Content value="exams">
-                <PatientExamsContent patientId={props.patientId} isOpen={open} />
+                <PatientExamsTabContent patientId={props.patientId} isOpen={open} />
               </Tabs.Content>
               <Tabs.Content value="attachments">
-                <PatientAttachments patiendId={props.patientId} isOpen={open} />
+                <PatientAttachmentsTabContent patiendId={props.patientId} isOpen={open} />
               </Tabs.Content>
             </div>
           </Dialog.Content>
