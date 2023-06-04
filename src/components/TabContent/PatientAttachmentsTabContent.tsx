@@ -2,12 +2,12 @@ import { useState } from 'react';
 import AddAttachmentModal from '../Modal/AddAttachmentModal';
 import { FileTextIcon } from '@radix-ui/react-icons';
 
-type PatientAttachmentsProps = {
+type PatientAttachmentsTabContentProps = {
 	patiendId: string;
 	isOpen: boolean;
 };
 
-const PatientAttachments = (props: PatientAttachmentsProps) => {
+const PatientAttachmentsTabContent = (props: PatientAttachmentsTabContentProps) => {
 	const [files, setFiles] = useState<FileList>({} as FileList);
 
 	return (
@@ -29,4 +29,4 @@ const PatientAttachments = (props: PatientAttachmentsProps) => {
 	);
 };
 
-export default PatientAttachments;
+export default PatientAttachmentsTabContent;
