@@ -1,14 +1,12 @@
 import { useState } from "react";
 import { useQuery } from "react-query";
-import PatientCard from "../components/Cards/PatientCard";
-import RegisterPatientModal from "../components/Modal/RegisterPatientModal";
 import Header from "../components/Header/Header";
 import { Option } from "../interfaces/Option";
 import { api } from "../providers/Api";
-import { Load } from "../components/Load/Load";
 import { useAuthContext } from "../contexts/AuthContext";
 import { GetServerSideProps } from "next";
 import { parseCookies } from "nookies";
+import Feed from "../components/Feed/Feed";
 
 type ListAllPatientsResponse = {
   id: string;
@@ -42,53 +40,7 @@ export default function Home() {
   return (
     <div className="w-full h-full flex flex-col justify-center px-14 mt-4 mb-20 gap-6">
       <Header currentUser={user} />
-      <div className="w-full h-full flex flex-col gap-8 items-center">
-        <div className="w-[1280px] h-24 flex items-center flex-col border-b border-gray-200">
-          <div className="w-full h-24 flex items-center gap-3">
-            <input
-              type="text"
-              id="search"
-              className="w-[1054px] h-10 p-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:border-[#b3b3b3]"
-              placeholder=""
-              value={searchInput}
-              onChange={handleSearchInput}
-            />
-            <button className="w-[162px] h-10 bg-brand-standard-black rounded text-white font-normal hover:border hover:bg-white hover:text-brand-standard-black">
-              Buscar
-            </button>
-            <RegisterPatientModal />
-          </div>
-        </div>
-        <div className="w-[1280px] h-full flex flex-col gap-6">
-          {isLoading ? (
-            <Load
-              divProps={{
-                className:
-                  "w-full h-[488px] flex items-center justify-center relative bg-gray-500-50",
-              }}
-            />
-          ) : (
-            data?.map((data) => {
-              return (
-                <PatientCard
-                  key={data.id}
-                  id={data.id}
-                  name={data.name}
-                  race={data.race}
-                  specie={data.specie}
-                  profile_photo={data.profile_photo}
-                  prognosis={data.prognosis}
-                  physical_shape={data.physical_shape}
-                  gender={data.gender}
-                  weight={data.weight}
-                  diagnosis={data.diagnosis}
-                  exams={["Hemograma"]}
-                />
-              );
-            })
-          )}
-        </div>
-      </div>
+      <Feed />
     </div>
   );
 }
