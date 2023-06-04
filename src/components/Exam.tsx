@@ -1,6 +1,6 @@
-import EditExamModal from "../Modal/EditExamModal";
+import EditExamModal from "./Modal/EditExamModal";
 
-const ExamCard = () => {
+const Exam = () => {
   return (
     <div className="w-full flex flex-col items-center gap-6 pb-6 border-b border-gray-200">
       <div className="w-full flex flex-col items-center gap-3">
@@ -38,4 +38,4 @@ const ExamCard = () => {
   );
 };
 
-export default ExamCard;
+export default Exam;
