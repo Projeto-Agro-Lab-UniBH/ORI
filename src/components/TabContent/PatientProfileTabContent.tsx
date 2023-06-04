@@ -12,7 +12,7 @@ import { api } from "../../providers/Api";
 import { Load } from "../Load/Load";
 import { CameraIcon } from "@radix-ui/react-icons";
 
-type EditPatientProps = {
+type PatientProfileTabContentProps = {
   patientId: string;
   isOpen: boolean;
 };
@@ -95,7 +95,7 @@ const prognosisOptions = [
   { value: "Alto risco", label: "Alto risco" },
 ];
 
-const PatientProfileContent = (props: EditPatientProps) => {
+const PatientProfileTabContent = (props: PatientProfileTabContentProps) => {
   const {
     reset,
     register,
@@ -365,6 +365,7 @@ const PatientProfileContent = (props: EditPatientProps) => {
                           width: "100%",
                           height: 40,
                           borderColor: state.isFocused ? "#e2e8f0" : "#e2e8f0",
+                          borderRadius: 4,
                           whiteSpace: "nowrap",
                           textOverflow: "ellipsis",
                           fontFamily: "Inter",
@@ -375,7 +376,6 @@ const PatientProfileContent = (props: EditPatientProps) => {
                       }}
                       theme={(theme) => ({
                         ...theme,
-                        borderRadius: 4,
                         colors: {
                           ...theme.colors,
                           primary75: "#cbd5e1",
@@ -384,7 +384,7 @@ const PatientProfileContent = (props: EditPatientProps) => {
                           primary: "#212529",
                         },
                       })}
-                      placeholder="Selecione a situação do paciente"
+                      placeholder="Selecione o prognóstico"
                       isSearchable={false}
                       options={prognosisOptions}
                       value={
@@ -461,6 +461,7 @@ const PatientProfileContent = (props: EditPatientProps) => {
                           width: "100%",
                           height: 40,
                           borderColor: state.isFocused ? "#e2e8f0" : "#e2e8f0",
+                          borderRadius: 4,
                           whiteSpace: "nowrap",
                           textOverflow: "ellipsis",
                           fontFamily: "Inter",
@@ -471,7 +472,6 @@ const PatientProfileContent = (props: EditPatientProps) => {
                       }}
                       theme={(theme) => ({
                         ...theme,
-                        borderRadius: 4,
                         colors: {
                           ...theme.colors,
                           primary75: "#cbd5e1",
@@ -523,6 +523,7 @@ const PatientProfileContent = (props: EditPatientProps) => {
                           width: "100%",
                           height: 40,
                           borderColor: state.isFocused ? "#e2e8f0" : "#e2e8f0",
+                          borderRadius: 4,
                           whiteSpace: "nowrap",
                           textOverflow: "ellipsis",
                           fontFamily: "Inter",
@@ -533,7 +534,6 @@ const PatientProfileContent = (props: EditPatientProps) => {
                       }}
                       theme={(theme) => ({
                         ...theme,
-                        borderRadius: 4,
                         colors: {
                           ...theme.colors,
                           primary75: "#cbd5e1",
@@ -575,6 +575,7 @@ const PatientProfileContent = (props: EditPatientProps) => {
                         width: "100%",
                         minHeight: 40,
                         borderColor: state.isFocused ? "#e2e8f0" : "#e2e8f0",
+                        borderRadius: 4,
                         whiteSpace: "nowrap",
                         textOverflow: "ellipsis",
                         fontFamily: "Inter",
@@ -585,7 +586,6 @@ const PatientProfileContent = (props: EditPatientProps) => {
                     }}
                     theme={(theme) => ({
                       ...theme,
-                      borderRadius: 4,
                       colors: {
                         ...theme.colors,
                         primary75: "#cbd5e1",
@@ -622,4 +622,4 @@ const PatientProfileContent = (props: EditPatientProps) => {
   );
 };
 
-export default PatientProfileContent;
+export default PatientProfileTabContent;
