@@ -2,7 +2,7 @@ import React from "react";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 
-const Component = () => {
+const DataPatientCardsSkeleton = () => {
   return (
     <div className="w-full h-[104px] px-4 pt-2 pb-2 flex items-center bg-white border border-gray-200 rounded-lg">
       <div className="w-full">
@@ -74,26 +74,6 @@ const Component = () => {
         </div>
       </div>
     </div>
-  );
-};
-
-const DataPatientCardsSkeleton = () => {
-  return (
-    <>
-      <Component />
-      <Component />
-      <Component />
-      <Component />
-      <Component />
-      <Component />
-      <Component />
-      <Component />
-      <Component />
-      <Component />
-      <Component />
-      <Component />
-      <Component />
-    </>
   )
 }
 
