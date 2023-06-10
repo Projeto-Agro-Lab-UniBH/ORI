@@ -17,7 +17,7 @@ type SignInResponse = {
   token: string;
 }
 
-function signIn({ email, password }: SignInRequest) {
+const signIn = ({ email, password }: SignInRequest) => {
   return api.post<SignInResponse>('/auth/signin', { email, password })
 }
 
