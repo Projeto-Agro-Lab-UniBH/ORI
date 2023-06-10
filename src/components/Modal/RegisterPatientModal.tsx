@@ -7,7 +7,7 @@ import { Label } from "../Label/Label";
 import { Option } from "../../interfaces/Option";
 import { useController, useForm } from "react-hook-form";
 import { useState, KeyboardEventHandler, useEffect, ChangeEvent } from "react";
-import { useMutation, useQueryClient } from "react-query";
+import { useMutation, useQueryClient } from "react-query"
 import { api } from "../../providers/Api";
 import { Load } from "../Load/Load";
 import { z } from "zod";
@@ -130,7 +130,7 @@ const RegisterPatientModal = () => {
         })
     },
     onSuccess: () => {
-      queryClient.invalidateQueries("pacient-list");
+      queryClient.invalidateQueries({ queryKey: ["pacient-list"] });
       if (isLoading != true) {
         setIsOpen(false);
         reset();

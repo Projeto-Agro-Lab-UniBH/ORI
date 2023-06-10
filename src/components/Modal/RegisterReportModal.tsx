@@ -5,7 +5,7 @@ import { useController, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ChangeEvent, useEffect, useState } from "react";
-import { useMutation, useQueryClient } from "react-query";
+import { useMutation, useQueryClient } from "react-query"
 import { api } from "../../providers/Api";
 import Select from "react-select";
 
@@ -77,7 +77,7 @@ const RegisterReportModal = (props: RegisterReportModalProps) => {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries("list-all-reports");
+      queryClient.invalidateQueries({ queryKey: ["list-all-reports"] });
       reset();
       setOpen(false);
     },
