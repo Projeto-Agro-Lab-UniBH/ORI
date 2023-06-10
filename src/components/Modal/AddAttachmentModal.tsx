@@ -33,8 +33,8 @@ const AddAttachmentModal = (props: AddAttachmentModalProps) => {
 				Adicionar um anexo
 			</Dialog.Trigger>
 			<Dialog.Portal>
-				<Dialog.Overlay className="bg-black/60 inset-0 fixed" />
-				<Dialog.Content className="w-[608px] rounded-lg border border-gray-200 fixed pt-4 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white overflow-hidden">
+				<Dialog.Overlay className="bg-black/60 inset-0 fixed z-20" />
+				<Dialog.Content className="w-[608px] rounded-lg border border-gray-200 bg-white fixed overflow-hidden pt-4 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
 					<div className="w-full px-6 pb-4 border-b-[1px] border-gray-200 flex items-center flex-row justify-between">
 						<Dialog.Title className="font-semibold text-2xl">Anexar documento</Dialog.Title>
 						<Dialog.Close className="w-[32px] h-[32px] flex justify-center items-center">
