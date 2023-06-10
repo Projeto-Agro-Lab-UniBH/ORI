@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import Router from "next/router";
 import { AuthService } from "../services/AuthService";
-import { setCookie, parseCookies } from "nookies"
+import { parseCookies, setCookie } from "nookies"
 import { api } from "../providers/Api";
 import jwt_decode from "jwt-decode"
 
