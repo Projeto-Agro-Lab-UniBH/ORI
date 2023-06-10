@@ -5,7 +5,7 @@ import { useForm, useController } from "react-hook-form";
 import { Label } from "../Label/Label";
 import { Option } from "../../interfaces/Option";
 import { ChangeEvent, KeyboardEventHandler, useEffect, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query"
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { api } from "../../providers/Api";
@@ -109,7 +109,7 @@ const PatientProfileTabContent = (props: PatientProfileTabContentProps) => {
 
   const [diagnosisInputValue, setDiagnosisInputValue] = useState("");
   const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const [fetchImage, setFetchImage] = useState<string | null>(null);
+  const [fetchedImage, setFetchedImage] = useState<string | null>(null);
   const [photo, setPhoto] = useState<string | null>(null);
   const [valueDiagnosis, setValueDiagnosis] = useState<readonly Option[]>([]);
 
@@ -160,7 +160,7 @@ const PatientProfileTabContent = (props: PatientProfileTabContentProps) => {
             );
           }
           reset(res.data);
-          setFetchImage(res.data.profile_photo);
+          setFetchedImage(res.data.profile_photo);
         });
     },
     enabled: callRequest,
@@ -177,13 +177,13 @@ const PatientProfileTabContent = (props: PatientProfileTabContentProps) => {
   }, [props.isOpen, setPhoto, setCallRequest, reset]);
 
   useEffect(() => {
-    if (fetchImage) {
-      setPhoto(fetchImage);
+    if (fetchedImage) {
+      setPhoto(fetchedImage);
     }
     if (previewImage) {
       setPhoto(previewImage);
     }
-  }, [photo, setPhoto, fetchImage, previewImage]);
+  }, [photo, setPhoto, fetchedImage, previewImage]);
 
   useEffect(() => {
     setValue("diagnosis", valueDiagnosis);
@@ -223,7 +223,7 @@ const PatientProfileTabContent = (props: PatientProfileTabContentProps) => {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries("pacient-list");
+      queryClient.invalidateQueries({ queryKey: ["pacient-list"] });
     },
   });
 
