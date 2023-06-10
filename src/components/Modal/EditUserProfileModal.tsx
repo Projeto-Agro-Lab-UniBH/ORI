@@ -5,7 +5,7 @@ import { PersonIcon } from "@radix-ui/react-icons";
 import { Label } from "../Label/Label";
 import { useForm } from "react-hook-form";
 import React, { ChangeEvent, useEffect, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query"
 import { api } from "../../providers/Api";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -34,7 +34,7 @@ const EditUserProfileModal = (props: IEditUserProfileModal) => {
     resolver: zodResolver(editUserProfileFormSchema),
   });
   const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const [fetchImage, setFetchImage] = useState<string | null>(null);
+  const [fetchedImage, setFetchedImage] = useState<string | null>(null);
   const [photo, setPhoto] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [callRequest, setCallRequest] = useState<boolean>(false);
@@ -44,7 +44,7 @@ const EditUserProfileModal = (props: IEditUserProfileModal) => {
     queryFn: async () => {
       await api.get<Response>(`/user/${props.id}`).then((res) => {
         reset(res.data);
-        setFetchImage(res.data.profile_photo);
+        setFetchedImage(res.data.profile_photo);
       });
     },
     enabled: callRequest,
@@ -74,13 +74,13 @@ const EditUserProfileModal = (props: IEditUserProfileModal) => {
   }, [isOpen, setCallRequest, reset]);
 
   useEffect(() => {
-    if (fetchImage) {
-      setPhoto(fetchImage);
+    if (fetchedImage) {
+      setPhoto(fetchedImage);
     }
     if (previewImage) {
       setPhoto(previewImage);
     }
-  }, [photo, setPhoto, fetchImage, previewImage]);
+  }, [photo, setPhoto, fetchedImage, previewImage]);
 
   const handleImage = (event: ChangeEvent<HTMLInputElement>) => {
     if (event?.target?.files?.[0]) {
@@ -222,9 +222,9 @@ const EditUserProfileModal = (props: IEditUserProfileModal) => {
                     </div>
                   </div>
                   <div className="w-full flex flex-row gap-4">
-                  <div className="w-full">
+                    <div className="w-[327.2px]">
                       <div className="w-full flex flex-col gap-3">
-                        <Label htmlFor="" text="Senha" />
+                        <Label htmlFor="password" text="Senha" />
                         <input
                           type="password"
                           className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
