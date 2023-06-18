@@ -1,13 +1,13 @@
 const max_items = 5;
 const max_left = (max_items - 1) / 2;
 
-const Pagination = ({ limit, total, offset, setOffset }: any) => {
-  const current = offset ? offset / limit + 1 : 1;
+const Pagination = ({ limit, total, currentPage, setCurrentPage }: any) => {
+  const current = currentPage;
   const pages = Math.ceil(total / limit);
   const first = Math.max(current - max_left, 1);
 
   const onPageChange = (page: number) => {
-    setOffset((page - 1) * limit);
+    setCurrentPage(page);
   };
 
   return (
