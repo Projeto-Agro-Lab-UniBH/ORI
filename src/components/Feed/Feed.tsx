@@ -29,12 +29,12 @@ const Feed = () => {
     string | null
   >();
   const [selectGender, setSelectGender] = useState<string | null>();
-  const [offset, setOffset] = useState<number>(0);
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["pacient-list", offset],
+    queryKey: ["pacient-list", currentPage],
     queryFn: async () => {
-      const response = await api.get<Page<Response>>(`/patient/pages?offset=${offset}`);
+      const response = await api.get<Page<Response>>(`/patient/pages?page=${currentPage}`);
       return response.data;
     },
     enabled: true,
@@ -78,8 +78,8 @@ const Feed = () => {
             <Pagination 
               limit={data.info.size} 
               total={data.info.length} 
-              offset={offset} 
-              setOffset={setOffset} 
+              currentPage={currentPage} 
+              setCurrentPage={setCurrentPage} 
             />
           )}
         </div>
