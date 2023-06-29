@@ -21,23 +21,18 @@ type Response = {
   physical_shape: string;
 };
 
-// Tarefa consertar a transição do pagination
 const Feed = () => {
-  const [searchInput, setSearchInput] = useState<string>("");
-  const [selectPrognosis, setSelectPrognosis] = useState<string | null>();
-  const [selectPhysicalShape, setSelectPhysicalShape] = useState<
-    string | null
-  >();
-  const [selectGender, setSelectGender] = useState<string | null>();
   const [currentPage, setCurrentPage] = useState<number>(1);
-
+  
   const { data, isLoading } = useQuery({
     queryKey: ["pacient-list", currentPage],
     queryFn: async () => {
-      const response = await api.get<Page<Response>>(`/patient/pages?page=${currentPage}`);
+      const response = await api.get<Page<Response>>(
+        `/patient/pages?page=${currentPage}`
+      );
       return response.data;
     },
-    enabled: true,
+    enabled: true
   });
 
   return (
@@ -75,11 +70,11 @@ const Feed = () => {
         </div>
         <div className="w-full h-8">
           {data?.info && (
-            <Pagination 
-              limit={data.info.size} 
-              total={data.info.length} 
-              currentPage={currentPage} 
-              setCurrentPage={setCurrentPage} 
+            <Pagination
+              limit={data.info.size}
+              total={data.info.length}
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
             />
           )}
         </div>

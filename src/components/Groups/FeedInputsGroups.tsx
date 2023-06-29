@@ -7,33 +7,11 @@ type SelectTypes = {
   value: string;
 };
 
-const prognosisOptions = [
-  { value: "Alta", label: "Alta" },
-  { value: "Aguardando alta médica", label: "Aguardando alta médica" },
-  { value: "Obscuro", label: "Obscuro" },
-  { value: "Desfávoravel", label: "Desfávoravel" },
-  { value: "Reservado", label: "Reservado" },
-  { value: "Favorável", label: "Favorável" },
-  { value: "Risco", label: "Risco" },
-  { value: "Alto risco", label: "Alto risco" },
-];
-
-const physicalShapeOptions = [
-  { value: "Grande porte", label: "Grande porte" },
-  { value: "Médio porte", label: "Médio porte" },
-  { value: "Pequeno porte", label: "Pequeno porte" },
-];
-
-const genderOptions = [
-  { value: "Macho", label: "Macho" },
-  { value: "Fêmea", label: "Fêmea" },
-];
-
 const FeedInputsGroups = () => {
   const [searchInput, setSearchInput] = useState<string>("");
-  const [selectPrognosis, setSelectPrognosis] = useState<SelectTypes | null>();
-  const [selectPhysicalShape, setSelectPhysicalShape] = useState<SelectTypes | null>();
-  const [selectGender, setSelectGender] = useState<SelectTypes | null>();
+  const [selectPrognosis, setSelectPrognosis] = useState<SelectTypes | string>();
+  const [selectPhysicalShape, setSelectPhysicalShape] = useState<SelectTypes | string>();
+  const [selectGender, setSelectGender] = useState<SelectTypes | string>();
 
   const handleSearchInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchInput(event.target.value);
@@ -73,8 +51,20 @@ const FeedInputsGroups = () => {
             isClearable
             isSearchable={false}
             placeholder="Filtrar prognóstico"
-            options={prognosisOptions}
-            onChange={(value) => setSelectPrognosis(value)}
+            options={[
+              { value: "Alta", label: "Alta" },
+              {
+                value: "Aguardando alta médica",
+                label: "Aguardando alta médica",
+              },
+              { value: "Obscuro", label: "Obscuro" },
+              { value: "Desfávoravel", label: "Desfávoravel" },
+              { value: "Reservado", label: "Reservado" },
+              { value: "Favorável", label: "Favorável" },
+              { value: "Risco", label: "Risco" },
+              { value: "Alto risco", label: "Alto risco" },
+            ]}
+            onChange={(value) => setSelectPrognosis(value?.label)}
           />
         </div>
         <div className="w-[200px] h-24 flex items-center">
@@ -108,8 +98,12 @@ const FeedInputsGroups = () => {
             isClearable
             isSearchable={false}
             placeholder="Filtrar porte físico"
-            options={physicalShapeOptions}
-            onChange={(value) => setSelectPhysicalShape(value)}
+            options={[
+              { value: "Grande porte", label: "Grande porte" },
+              { value: "Médio porte", label: "Médio porte" },
+              { value: "Pequeno porte", label: "Pequeno porte" },
+            ]}
+            onChange={(value) => setSelectPhysicalShape(value?.label)}
           />
         </div>
         <div className="w-[178px] h-24 flex items-center">
@@ -143,8 +137,11 @@ const FeedInputsGroups = () => {
             isClearable
             isSearchable={false}
             placeholder="Filtrar por gênero"
-            options={genderOptions}
-            onChange={(value) => setSelectGender(value)}
+            options={[
+              { value: "Macho", label: "Macho" },
+              { value: "Fêmea", label: "Fêmea" },
+            ]}
+            onChange={(value) => setSelectGender(value?.label)}
           />
         </div>
         <div className="w-full h-24 flex items-center">

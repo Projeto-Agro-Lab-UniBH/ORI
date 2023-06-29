@@ -5,7 +5,7 @@ import { useForm, useController } from "react-hook-form";
 import { Label } from "../Label/Label";
 import { Option } from "../../interfaces/Option";
 import { ChangeEvent, KeyboardEventHandler, useEffect, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "react-query"
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { api } from "../../providers/Api";
@@ -612,7 +612,10 @@ const PatientProfileTabContent = (props: PatientProfileTabContentProps) => {
             </div>
           </div>
           <div className="w-full flex justify-end">
-            <button type="submit" className="border border-gray-200 px-3 py-[6px] rounded text-base text-brand-standard-black font-medium bg-white hover:bg-gray-50">
+            <button
+              type="submit"
+              className="border border-gray-200 px-3 py-[6px] rounded text-base text-brand-standard-black font-medium bg-white hover:bg-gray-50"
+            >
               Salvar alterações
             </button>
           </div>
