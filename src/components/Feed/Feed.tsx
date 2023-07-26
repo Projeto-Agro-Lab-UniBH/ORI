@@ -21,14 +21,14 @@ type Response = {
   physical_shape: string;
 };
 
-const Feed = () => {
+const Feed = ({ params }: any) => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   
   const { data, isLoading } = useQuery({
     queryKey: ["pacient-list", currentPage],
     queryFn: async () => {
       const response = await api.get<Page<Response>>(
-        `/patient/pages?page=${currentPage}`
+        `/patient?page=${params.page}`
       );
       return response.data;
     },

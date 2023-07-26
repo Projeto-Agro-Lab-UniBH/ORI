@@ -155,7 +155,7 @@ const FeedInputsGroups = () => {
           />
         </div>
         <div className="w-24">
-          <button className="w-24 h-10 bg-brand-standard-black rounded text-white font-normal hover:border hover:bg-white hover:text-brand-standard-black">
+          <button className="w-24 h-10 bg-brand-standard-black rounded text-white font-normal hover:border hover:bg-white hover:border-[#b3b3b3] hover:text-brand-standard-black">
             Buscar
           </button>
         </div>
