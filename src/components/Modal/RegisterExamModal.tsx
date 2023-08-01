@@ -1,6 +1,5 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { Cross1Icon } from "@radix-ui/react-icons";
-import { Label } from "../Label/Label";
 
 const RegisterExamModal = () => {
   return (
@@ -24,7 +23,7 @@ const RegisterExamModal = () => {
               <div className="w-full flex flex-col gap-6">
                 <div className="w-[224px]">
                   <div className="w-[224px] flex flex-col gap-3">
-                    <Label text="Tipo de exame" />
+                    <label htmlFor="" className="w-full text-sm font-normal text-brand-standard-black">Tipo de exame</label>
                     <input
                       type="text"
                       className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
@@ -34,7 +33,7 @@ const RegisterExamModal = () => {
                 <div className="w-full flex flex-row gap-3">
                   <div className="w-[224px]">
                     <div className="w-[224px] flex flex-col gap-3">
-                      <Label text="Data de realização" />
+                      <label htmlFor="" className="w-full text-sm font-normal text-brand-standard-black">Data de realização</label>
                       <input
                         type="text"
                         className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
@@ -43,7 +42,7 @@ const RegisterExamModal = () => {
                   </div>
                   <div className="w-[322.4px]">
                     <div className="w-[322.4px] flex flex-col gap-3">
-                      <Label text="Nome do responsável" />
+                      <label htmlFor="" className="w-full text-sm font-normal text-brand-standard-black">Nome do responsável</label>
                       <input
                         type="text"
                         className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
@@ -52,7 +51,7 @@ const RegisterExamModal = () => {
                   </div>
                 </div>
                 <div className="w-full flex flex-col gap-3">
-                  <Label htmlFor="annotations" text="Anotações" />
+                  <label htmlFor="annotations" className="w-full text-sm font-normal text-brand-standard-black">Anotações</label>
                   <div>
                     <textarea
                       cols={30}
