@@ -58,7 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     api.defaults.headers['Authorization'] = `Bearer ${data.token}`
 
-    Router.push(`/${data.user.id}`)
+    Router.push(`/${data.user.id}?page=1`)
   }
   
   function logOut() {
