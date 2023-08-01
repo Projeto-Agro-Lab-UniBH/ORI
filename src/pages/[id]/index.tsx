@@ -10,7 +10,7 @@ import UserProfileSkeleton from "../../components/Skeletons/UserProfileSkeleton"
 import RegisterPatientModal from "../../components/Modal/RegisterPatientModal";
 import DataPatientCard from "../../components/Cards/DataPatientCard";
 import Pagination from "../../components/Pagination/Pagination";
-import { Loading } from "../../components/Load/Loading";
+import { LoadingDataPatienCardsSkeletons } from "../../components/Load/LoadingDataPatienCardsSkeletons";
 import UserProfile from "../../components/UserProfile";
 import { useSearchParams } from "next/navigation";
 import useSearch from "../../hooks/useSearch";
@@ -280,7 +280,7 @@ export default function AppPage() {
           <div className={"w-[1280px] h-full flex flex-col gap-6"}>
             {isLoading ? (
               <>
-                <Loading />
+                <LoadingDataPatienCardsSkeletons />
               </>
             ) : (
               data?.results.map((data) => (
