@@ -2,7 +2,6 @@ import * as Avatar from "@radix-ui/react-avatar";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Cross1Icon } from "@radix-ui/react-icons";
 import { PersonIcon } from "@radix-ui/react-icons";
-import { Label } from "../Label/Label";
 import { useForm } from "react-hook-form";
 import React, { ChangeEvent, useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query"
@@ -202,7 +201,7 @@ const EditUserProfileModal = (props: IEditUserProfileModal) => {
                   <div className="w-full flex flex-row gap-4">
                     <div className="w-full">
                       <div className="w-full flex flex-col gap-3">
-                        <Label htmlFor="username" text="Nome completo" />
+                        <label htmlFor="username" className="w-full text-sm font-normal text-brand-standard-black">Nome completo</label>
                         <input
                           type="text"
                           className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
@@ -212,7 +211,7 @@ const EditUserProfileModal = (props: IEditUserProfileModal) => {
                     </div>
                     <div className="w-full">
                       <div className="w-full flex flex-col gap-3">
-                        <Label htmlFor="email" text="E-mail" />
+                        <label htmlFor="email" className="w-full text-sm font-normal text-brand-standard-black">E-mail</label>
                         <input
                           type="text"
                           className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
@@ -224,7 +223,7 @@ const EditUserProfileModal = (props: IEditUserProfileModal) => {
                   <div className="w-full flex flex-row gap-4">
                     <div className="w-[327.2px]">
                       <div className="w-full flex flex-col gap-3">
-                        <Label htmlFor="password" text="Senha" />
+                        <label htmlFor="password" className="w-full text-sm font-normal text-brand-standard-black">Senha</label>
                         <input
                           type="password"
                           className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
