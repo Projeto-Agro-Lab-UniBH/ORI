@@ -1,32 +1,35 @@
 import Link from "next/link"
 import { useRouter } from "next/router";
+import { useSearchParams } from 'next/navigation'
+import { useEffect } from "react";
 
 const max_items = 5;
 const max_left = (max_items - 1) / 2;
 
 const Pagination = ({ limit, total, currentPage, setCurrentPage }: any) => {
-  const router = useRouter();
-
-  const current = currentPage;
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const pages = Math.ceil(total / limit);
-  const first = Math.max(current - max_left, 1);
+  const first = Math.max(currentPage - max_left, 1);
 
-  if(Number(router.query.page) >= 1) {
-    setCurrentPage(Number(router.query.page))
-  }
+  useEffect(() => {
+    if (Number(searchParams.get('page')) >= 1) {
+      setCurrentPage(Number(searchParams.get('page')))
+    }
+  }, [searchParams, setCurrentPage])
 
   return (
     <div className="w-full flex justify-center">
       <nav aria-label="Page navigation example">
         <ul className="list-style-none flex gap-1">
           <li>
-            <Link 
+            <Link
               href={{
                 pathname: router.pathname,
-                query: { ...router.query, page: current - 1 }
+                query: { ...router.query, page: currentPage - 1 }
               }}
               className={
-                current === 1
+                currentPage === 1
                   ? "relative block rounded bg-transparent px-3 py-1.5 text-sm text-gray-400 transition-all duration-300 pointer-events-none"
                   : "relative block rounded bg-transparent px-3 py-1.5 text-sm text-brand-standard-black transition-all duration-300 hover:bg-neutral-100"
               }
@@ -38,13 +41,13 @@ const Pagination = ({ limit, total, currentPage, setCurrentPage }: any) => {
             .map((_, index) => index + first)
             .map((page) => (
               <li key={page}>
-                <Link 
+                <Link
                   href={{
                     pathname: router.pathname,
                     query: { ...router.query, page }
                   }}
                   className={
-                    page === current
+                    page === currentPage
                       ? "relative block rounded bg-neutral-100 px-3 py-1.5 text-sm text-[#0f172a] transition-all duration-300"
                       : "relative block rounded bg-transparent px-3 py-1.5 text-sm text-brand-standard-black transition-all duration-300 hover:bg-neutral-100"
                   }
@@ -57,10 +60,10 @@ const Pagination = ({ limit, total, currentPage, setCurrentPage }: any) => {
             <Link
               href={{
                 pathname: router.pathname,
-                query: { ...router.query, page: current + 1 }
+                query: { ...router.query, page: currentPage + 1 }
               }}
               className={
-                current === pages
+                currentPage === pages
                   ? "relative block rounded bg-transparent px-3 py-1.5 text-sm text-gray-400 transition-all duration-300 pointer-events-none"
                   : "relative block rounded bg-transparent px-3 py-1.5 text-sm text-brand-standard-black transition-all duration-300 hover:bg-neutral-100"
               }
