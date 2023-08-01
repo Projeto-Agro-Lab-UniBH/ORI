@@ -1,4 +1,3 @@
-import { z } from "zod";
 import Select from "react-select";
 import { Load } from "../Load/Load";
 import * as Tabs from "@radix-ui/react-tabs";
@@ -9,8 +8,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useController } from "react-hook-form";
 import { CameraIcon, Cross1Icon, FileTextIcon } from "@radix-ui/react-icons";
 import { ChangeEvent, KeyboardEventHandler, useEffect, useState } from "react";
-import useEditPatientData from "../../hooks/useEditPatientData";
-import useGetPatientData from "../../hooks/useGetPatientData";
+import { editPatientProfileFormData, editPatientProfileFormSchema } from "../../schemas/editPatientProfileFormSchema";
+import useEditPatientProfile from "../../hooks/useEditPatientProfile";
+import useGetPatientProfile from "../../hooks/useGetPatientProfile";
 import StakedReportList from "../Lists/StakedReportList";
 import RegisterReportModal from "./RegisterReportModal";
 import CreatableSelect from "react-select/creatable";
@@ -18,26 +18,10 @@ import AddAttachmentModal from "./AddAttachmentModal";
 import StakedExamList from "../Lists/StakedExamList";
 import RegisterExamModal from "./RegisterExamModal";
 
-type EditPatientModalProps = {
+type EditPatientProfileModalProps = {
   patientId: string;
 	children: React.ReactNode;
 }
-
-const editPatientProfileFormSchema = z.object({
-  name: z.string().nonempty(),
-  owner: z.string(),
-  specie: z.string(),
-  race: z.string(),
-  gender: z.any(),
-  weight: z.string(),
-  prognosis: z.any(),
-  diagnosis: z.any(),
-  physical_shape: z.any(),
-  entry_date: z.string(),
-  departure_date: z.string(),
-});
-
-export type editPatientProfileFormData = z.infer<typeof editPatientProfileFormSchema>;
 
 const createOption = (label: string) => ({
   label,
@@ -66,19 +50,13 @@ const prognosisOptions = [
   { value: "Alto risco", label: "Alto risco" },
 ];
 
-const EditPatientModal = (props: EditPatientModalProps) => {
+const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
   const [open, setOpen] = useState<boolean>(false);
   const [callRequest, setCallRequest] = useState<boolean>(false);
-  const {
-    reset,
-    register,
-    control,
-    formState: { errors },
-    handleSubmit,
-    setValue,
-  } = useForm<editPatientProfileFormData>({
-    resolver: zodResolver(editPatientProfileFormSchema),
-  });
+  const { reset, register, control, formState: { errors }, handleSubmit, setValue} = 
+    useForm<editPatientProfileFormData>({
+      resolver: zodResolver(editPatientProfileFormSchema),
+    });
 
   const [files, setFiles] = useState<FileList>({} as FileList);
 
@@ -89,13 +67,13 @@ const EditPatientModal = (props: EditPatientModalProps) => {
   const [valueDiagnosis, setValueDiagnosis] = useState<readonly Option[]>([]);
 
   const { field: selectPhysicalShape } = useController({ name: "physical_shape", control });
-  const { value: selectPhysicalShapeValue, onChange: selectPhysicalShapeOnChange, ...restSelectPhysicalShape } = selectPhysicalShape;
   const { field: selectGender } = useController({ name: "gender", control });
-  const { value: selectGenderValue, onChange: selectGenderOnChange,...restSelectGender } = selectGender;
   const { field: selectPrognosis } = useController({ name: "prognosis", control });
+  const { value: selectPhysicalShapeValue, onChange: selectPhysicalShapeOnChange, ...restSelectPhysicalShape } = selectPhysicalShape;
+  const { value: selectGenderValue, onChange: selectGenderOnChange,...restSelectGender } = selectGender;
   const { value: selectPrognosisValue, onChange: selectPrognosisOnChange, ...restSelectPrognosis } = selectPrognosis;
 
-  const { isLoading: isLoadingPatientData } = useGetPatientData({
+  const { isLoading: isLoadingPatientData } = useGetPatientProfile({
     id: props.patientId,
     reset: reset,
     setValueDiagnosis: setValueDiagnosis,
@@ -151,7 +129,7 @@ const EditPatientModal = (props: EditPatientModalProps) => {
     }
   };
 
-  const { isLoading: savingChanges, mutate } = useEditPatientData({
+  const { isLoading: savingChanges, mutate } = useEditPatientProfile({
     id: props.patientId,
     photo: photo
   });
@@ -216,14 +194,7 @@ const EditPatientModal = (props: EditPatientModalProps) => {
                   id="modal-scroll"
                   className="w-full h-[488px] px-6 py-6 overflow-y-scroll"
                 >
-                  {isLoadingPatientData ? (
-                    <Load
-                      divProps={{
-                        className:
-                          "w-full h-[488px] flex items-center justify-center relative bg-gray-500-50",
-                      }}
-                    />
-                  ) : savingChanges ? (
+                  {isLoadingPatientData || savingChanges ? (
                     <Load
                       divProps={{
                         className:
@@ -641,4 +612,4 @@ const EditPatientModal = (props: EditPatientModalProps) => {
   );
 };
 
-export default EditPatientModal;
+export default EditPatientProfileModal;

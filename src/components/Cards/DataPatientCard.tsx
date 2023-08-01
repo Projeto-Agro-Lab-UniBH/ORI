@@ -2,7 +2,7 @@ import * as Avatar from "@radix-ui/react-avatar";
 import { CopyIcon, CameraIcon } from "@radix-ui/react-icons";
 import { useEffect, useState } from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
-import EditPatientModal from "../Modal/EditPatientModal";
+import EditPatientProfileModal from "../Modal/EditPatientProfileModal";
 import { Badges } from "../Badges/Badges";
 import { Option } from "../../interfaces/Option";
 
@@ -53,7 +53,7 @@ const DataPatientCard = (props: DataPatientCardProps) => {
               </div>
             </div>
             <div className="w-[238.6px] h-full flex items-center">
-              <EditPatientModal patientId={props.id}>
+              <EditPatientProfileModal patientId={props.id}>
                 <div className="w-16 h-16 flex items-center">
                   <Avatar.Root
                     className={
@@ -91,7 +91,7 @@ const DataPatientCard = (props: DataPatientCardProps) => {
                     </div>
                   </div>
                 </div>
-              </EditPatientModal>
+              </EditPatientProfileModal>
             </div>
           </div>
           <div className="flex gap-10">
