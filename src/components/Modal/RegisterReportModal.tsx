@@ -1,36 +1,14 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { Cross1Icon } from "@radix-ui/react-icons";
-import { Label } from "../Label/Label";
 import { useController, useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { ChangeEvent, useEffect, useState } from "react";
-import { useMutation, useQueryClient } from "react-query"
-import { api } from "../../providers/Api";
 import Select from "react-select";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { registerReportFormData, registerReportFormSchema } from "../../schemas/registerReportFormSchema";
+import useCreatePatientReport from "../../hooks/useCreatePatientReport";
 
 type RegisterReportModalProps = {
   patientId: string | null;
-};
-
-const registerReportFormSchema = z.object({
-  shift: z.any(),
-  author: z.string().nonempty("Nome completo não pode ser nulo"),
-  report_text: z.string().nonempty("Relatório não pode ser nulo"),
-  // attachments: z.string(),
-});
-
-type registerReportFormData = z.infer<typeof registerReportFormSchema>;
-
-type ReportResponse = {
-  id: string;
-  patientId: string;
-  shift: string;
-  author: string;
-  report_text: string;
-  createdAt: string;
-  updatedAt: string;
-  attachments: string;
 };
 
 const turnOptions = [
@@ -40,47 +18,22 @@ const turnOptions = [
 ];
 
 const RegisterReportModal = (props: RegisterReportModalProps) => {
-  const {
-    reset,
-    register,
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<registerReportFormData>({
-    resolver: zodResolver(registerReportFormSchema),
-  });
-
-  const [attachedFile, setAttachedFile] = useState<string | undefined>()
-
-  const { field: selectShift } = useController({
-    name: "shift",
-    control,
-  });
-
-  const {
-    value: selectShiftValue,
-    onChange: selectShiftOnChange,
-    ...restSelectShift
-  } = selectShift;
-
   const [open, setOpen] = useState<boolean>(false);
+  const { reset, register, control, handleSubmit, formState: { errors } } = 
+    useForm<registerReportFormData>({
+      resolver: zodResolver(registerReportFormSchema),
+    });
 
-  const queryClient = useQueryClient();
+  const [attachedFile, setAttachedFile] = useState<string | undefined>();
 
-  const { mutate } = useMutation({
-    mutationKey: ["create-report"],
-    mutationFn: async (data: registerReportFormData) => {
-      await api.post<ReportResponse>("/reports", {
-        ...data,
-        patientId: props.patientId,
-        attachments: attachedFile
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["list-all-reports"] });
-      reset();
-      setOpen(false);
-    },
+  const { field: selectShift } = useController({ name: "shift", control });
+  const { value: selectShiftValue, onChange: selectShiftOnChange, ...restSelectShift } = selectShift;
+
+  const { mutate } = useCreatePatientReport({ 
+    patientId: props.patientId, 
+    attachedFile: attachedFile, 
+    reset: reset, 
+    setOpen: setOpen 
   });
 
   const send = (data: registerReportFormData) => {
@@ -126,7 +79,7 @@ const RegisterReportModal = (props: RegisterReportModalProps) => {
               <div className="w-full flex flex-col gap-6">
                 <div className="w-full flex flex-row gap-3">
                   <div className="w-[184px] flex flex-col gap-3">
-                    <Label htmlFor="shift" text="Turno" />
+                    <label htmlFor="shift" className="w-full text-sm font-normal text-brand-standard-black">Turno</label>
                     <Select
                       styles={{
                         control: (baseStyles, state) => ({
@@ -170,7 +123,7 @@ const RegisterReportModal = (props: RegisterReportModalProps) => {
                     />
                   </div>
                   <div className="w-full flex flex-col gap-3">
-                    <Label htmlFor="author" text="Veterinário responsável" />
+                    <label htmlFor="author" className="w-full text-sm font-normal text-brand-standard-black">Veterinário responsável</label>
                     <input
                       type="text"
                       className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
@@ -179,7 +132,7 @@ const RegisterReportModal = (props: RegisterReportModalProps) => {
                   </div>
                 </div>
                 <div className="w-full flex flex-col gap-3">
-                  <Label htmlFor="report_text" text="Relatório" />
+                  <label htmlFor="report_text" className="w-full text-sm font-normal text-brand-standard-black">Relatório</label>
                   <div>
                     <textarea
                       cols={30}
