@@ -73,7 +73,7 @@ export default function AppPage() {
     router.reload()
   };
 
-  const { data, isLoading } = useSearch(currentPage, router);
+  const { data, isLoading } = useSearch({ currentPage: currentPage, router: router});
 
   useEffect(() => {
     if (searchParams.get('prognosis') != '' && searchParams.has('prognosis') == true) {
