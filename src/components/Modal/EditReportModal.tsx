@@ -3,36 +3,16 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { Cross1Icon, Pencil2Icon } from "@radix-ui/react-icons";
 import { ChangeEvent, useEffect, useState } from "react";
 import { useController, useForm } from "react-hook-form";
-import { Label } from "../Label/Label";
-import { useMutation, useQuery, useQueryClient } from "react-query"
 import { api } from "../../providers/Api";
 import { Load } from "../Load/Load";
 import Select from "react-select";
-import { z } from "zod";
+import { editReportFormData, editReportFormSchema } from "../../schemas/editReportFormSchema";
+import useEditPatientReport from "../../hooks/useEditPatientReport";
+import useGetPatientReport from "../../hooks/useGetPatientReport";
 
 type EditReportProps = {
   id: string;
   patientId: string;
-};
-
-const editReportFormSchema = z.object({
-  shift: z.any(),
-  author: z.string().nonempty("Nome completo não pode ser nulo"),
-  report_text: z.string().nonempty("Relatório não pode ser nulo"),
-  attachments: z.string(),
-});
-
-type editReportFormData = z.infer<typeof editReportFormSchema>;
-
-type ReportResponse = {
-  id: string;
-  patientId: string;
-  shift: string;
-  author: string;
-  report_text: string;
-  createdAt: string;
-  updatedAt: string;
-  attachments: string;
 };
 
 type ReportData = {
@@ -48,58 +28,30 @@ const turnOptions = [
 ];
 
 const EditReportModal = (props: EditReportProps) => {
-  const {
-    reset,
-    register,
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<editReportFormData>({
-    resolver: zodResolver(editReportFormSchema),
-  });
-  const queryClient = useQueryClient();
   const [open, setOpen] = useState<boolean>(false);
+  const { reset, register, control, handleSubmit, formState: { errors } } = 
+    useForm<editReportFormData>({
+      resolver: zodResolver(editReportFormSchema),
+    });
+
   const [data, setData] = useState<ReportData>({} as ReportData);
   const [callRequest, setCallRequest] = useState<boolean>(false);
 	const [fecthedAttachment, setFecthedAttachment] = useState<string | undefined>();
 	const [attachedFile, setAttachedFile] = useState<string | null | undefined>();
 	const [attachment, setAttachment] = useState<string | null | undefined>();
 
-  const { field: selectShift } = useController({
-    name: "shift",
-    control,
-  });
+  const { field: selectShift } = useController({ name: "shift", control });
+  const { value: selectShiftValue, onChange: selectShiftOnChange, ...restSelectShift } = selectShift;
 
-  const {
-    value: selectShiftValue,
-    onChange: selectShiftOnChange,
-    ...restSelectShift
-  } = selectShift;
-
-  const { isLoading: isLoadingPatientReportData } = useQuery({
-    queryKey: ["get-report-by-id"],
-    queryFn: async () => {
-      await api.get<ReportResponse>(`/reports/${props.id}`).then((res) => {
-        reset(res.data);
-        setData(res.data);
-				setFecthedAttachment(res.data.attachments)
-      });
-    },
-    enabled: callRequest,
+  const { isLoading: isLoadingPatientReportData } = useGetPatientReport({ 
+    id: props.id, 
+    reset: reset,
+    setData: setData,
+    setFecthedAttachment: setFecthedAttachment,
+    callRequest: callRequest  
   });
-
-  const { isLoading: savingChanges, mutate } = useMutation({
-    mutationKey: ["update-patient"],
-    mutationFn: async (data: editReportFormData) => {
-      await api.patch<ReportResponse>(`/reports/${props.id}`, {
-        ...data,
-        patientId: props.patientId,
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["list-all-reports"] });
-    },
-  });
+  
+  const { isLoading: savingChanges, mutate } = useEditPatientReport({ patientId: props.patientId })
 
   useEffect(() => {
     if (open != true) {
@@ -209,7 +161,7 @@ const EditReportModal = (props: EditReportProps) => {
                   <div className="w-full flex flex-col gap-6">
                     <div className="w-full flex flex-row gap-3">
                       <div className="w-[184px] flex flex-col gap-3">
-                        <Label htmlFor="shift" text="Turno" />
+                        <label htmlFor="shift" className="w-full text-sm font-normal text-brand-standard-black">Turno</label>
                         <Select
                           styles={{
                             control: (baseStyles, state) => ({
@@ -255,10 +207,7 @@ const EditReportModal = (props: EditReportProps) => {
                         />
                       </div>
                       <div className="w-full flex flex-col gap-3">
-                        <Label
-                          htmlFor="author"
-                          text="Veterinário responsável"
-                        />
+                        <label htmlFor="author" className="w-full text-sm font-normal text-brand-standard-black">Veterinário responsável</label>
                         <input
                           type="text"
                           className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
@@ -267,7 +216,7 @@ const EditReportModal = (props: EditReportProps) => {
                       </div>
                     </div>
                     <div className="w-full flex flex-col gap-3">
-                      <Label htmlFor="report_text" text="Relatório" />
+                    <label htmlFor="report_text" className="w-full text-sm font-normal text-brand-standard-black">Relatório</label>
                       <div>
                         <textarea
                           cols={30}
