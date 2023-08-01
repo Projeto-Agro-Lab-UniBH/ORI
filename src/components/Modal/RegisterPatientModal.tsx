@@ -2,32 +2,15 @@ import * as Avatar from "@radix-ui/react-avatar";
 import * as Dialog from "@radix-ui/react-dialog";
 import { CameraIcon, Cross1Icon, PlusIcon } from "@radix-ui/react-icons";
 import Select from "react-select";
-import CreatableSelect from "react-select/creatable";
-import { Label } from "../Label/Label";
 import { Option } from "../../interfaces/Option";
+import CreatableSelect from "react-select/creatable";
 import { useController, useForm } from "react-hook-form";
 import { useState, KeyboardEventHandler, useEffect, ChangeEvent } from "react";
 import { useMutation, useQueryClient } from "react-query"
-import { api } from "../../providers/Api";
 import { Load } from "../Load/Load";
-import { z } from "zod";
+import { api } from "../../providers/Api";
 import { zodResolver } from "@hookform/resolvers/zod";
-
-const registerPatientFormSchema = z.object({
-  name: z.string().nonempty(),
-  owner: z.string(),
-  specie: z.string(),
-  race: z.string(),
-  gender: z.any(),
-  weight: z.string(),
-  prognosis: z.any(),
-  diagnosis: z.any(),
-  physical_shape: z.any(),
-  entry_date: z.string(),
-  departure_date: z.string(),
-});
-
-type registerPatientFormData = z.infer<typeof registerPatientFormSchema>;
+import { registerPatientFormData, registerPatientFormSchema } from "../../schemas/registerPatientFormSchema";
 
 const createOption = (label: string) => ({
   label,
@@ -57,43 +40,23 @@ const prognosisOptions = [
 ];
 
 const RegisterPatientModal = () => {
+  const queryClient = useQueryClient();
   const { reset, register, setValue, control, handleSubmit } =
     useForm<registerPatientFormData>({
       resolver: zodResolver(registerPatientFormSchema),
     });
+    
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [diagnosisInputValue, setDiagnosisInputValue] = useState<string>("");
   const [valueDiagnosis, setValueDiagnosis] = useState<readonly Option[]>([]);
+  
   const { field: selectGender } = useController({ name: "gender", control });
-
-  const { field: selectPhysicalShape } = useController({
-    name: "physical_shape",
-    control,
-  });
-
-  const { field: selectPrognosis } = useController({
-    name: "prognosis",
-    control,
-  });
-
-  const {
-    value: selectPhysicalShapeValue,
-    onChange: selectPhysicalShapeOnChange,
-    ...restSelectPhysicalShape
-  } = selectPhysicalShape;
-
-  const {
-    value: selectGenderValue,
-    onChange: selectGenderOnChange,
-    ...restSelectGender
-  } = selectGender;
-
-  const {
-    value: selectPrognosisValue,
-    onChange: selectPrognosisOnChange,
-    ...restSelectPrognosis
-  } = selectPrognosis;
+  const { field: selectPhysicalShape } = useController({ name: "physical_shape", control });
+  const { field: selectPrognosis } = useController({ name: "prognosis", control });
+  const { value: selectPhysicalShapeValue, onChange: selectPhysicalShapeOnChange, ...restSelectPhysicalShape } = selectPhysicalShape;
+  const { value: selectGenderValue, onChange: selectGenderOnChange, ...restSelectGender } = selectGender;
+  const { value: selectPrognosisValue, onChange: selectPrognosisOnChange, ...restSelectPrognosis } = selectPrognosis;
 
   const handleKeyDown: KeyboardEventHandler = (event) => {
     if (!diagnosisInputValue) return;
@@ -120,17 +83,16 @@ const RegisterPatientModal = () => {
     }
   };
 
-  const queryClient = useQueryClient();
   const { isLoading, mutate } = useMutation({
     mutationKey: ['create-patient'],
     mutationFn: async (data: registerPatientFormData) => {
-        await api.post("/patient", {
-          ...data, 
-          profile_photo: previewImage
-        })
+      await api.post("/patient", {
+        ...data, 
+        profile_photo: previewImage
+      })
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["pacient-list"] });
+      queryClient.invalidateQueries({ queryKey: ["search"] });
       if (isLoading != true) {
         setIsOpen(false);
         reset();
@@ -254,7 +216,7 @@ const RegisterPatientModal = () => {
                     <div className="w-44">
                       <div className="w-44 flex flex-col gap-6">
                         <div className="w-full flex flex-col gap-3">
-                          <Label htmlFor="entry_date" text="Data de entrada" />
+                          <label htmlFor="entry_date" className="w-full text-sm font-normal text-brand-standard-black">Data de entrada</label>
                           <input
                             type="text"
                             className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
@@ -266,10 +228,7 @@ const RegisterPatientModal = () => {
                     <div className="w-44">
                       <div className="w-44 flex flex-col gap-6">
                         <div className="w-full flex flex-col gap-3">
-                          <Label
-                            htmlFor="departure_date"
-                            text="Data de saída"
-                          />
+                          <label htmlFor="departure_date" className="w-full text-sm font-normal text-brand-standard-black">Data de saída</label>
                           <input
                             type="text"
                             className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
@@ -281,7 +240,7 @@ const RegisterPatientModal = () => {
                     <div className="w-full">
                       <div className="w-full flex flex-col gap-6">
                         <div className="w-full flex flex-col gap-3">
-                          <Label htmlFor="situation" text="Prognóstico" />
+                          <label htmlFor="prognosis" className="w-full text-sm font-normal text-brand-standard-black">Prognóstico</label>
                           <Select
                             styles={{
                               control: (baseStyles, state) => ({
@@ -334,7 +293,7 @@ const RegisterPatientModal = () => {
                   <div className="w-full flex flex-row gap-4">
                     <div className="w-[368px]">
                       <div className="w-[368px] flex flex-col gap-3">
-                        <Label htmlFor="name" text="Nome do paciente" />
+                        <label htmlFor="name" className="w-full text-sm font-normal text-brand-standard-black">Nome do paciente</label>
                         <input
                           type="text"
                           className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
@@ -344,7 +303,7 @@ const RegisterPatientModal = () => {
                     </div>
                     <div className="w-full">
                       <div className="w-full flex flex-col gap-3">
-                        <Label htmlFor="specie" text="Espécie" />
+                        <label htmlFor="specie" className="w-full text-sm font-normal text-brand-standard-black">Espécie</label>
                         <input
                           type="text"
                           className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
@@ -356,7 +315,7 @@ const RegisterPatientModal = () => {
                   <div className="w-full flex flex-row gap-4">
                     <div className="w-[368px]">
                       <div className="w-[368px] flex flex-col gap-3">
-                        <Label htmlFor="owner" text="Nome do tutor(a)" />
+                        <label htmlFor="owner" className="w-full text-sm font-normal text-brand-standard-black">Nome do tutor(a)</label>
                         <input
                           type="text"
                           className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
@@ -367,7 +326,7 @@ const RegisterPatientModal = () => {
                     <div className="w-full">
                       <div className="w-full flex flex-col gap-6">
                         <div className="w-full flex flex-col gap-3">
-                          <Label htmlFor="race" text="Raça" />
+                          <label htmlFor="race" className="w-full text-sm font-normal text-brand-standard-black">Raça</label>
                           <input
                             type="text"
                             className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
@@ -381,7 +340,7 @@ const RegisterPatientModal = () => {
                     <div className="w-44">
                       <div className="w-44 flex flex-col gap-6">
                         <div className="w-full flex flex-col gap-3">
-                          <Label htmlFor="physical_shape" text="Porte físico" />
+                          <label htmlFor="physical_shape" className="w-full text-sm font-normal text-brand-standard-black">Porte físico</label>
                           <Select
                             styles={{
                               control: (baseStyles, state) => ({
@@ -433,7 +392,7 @@ const RegisterPatientModal = () => {
                     <div className="w-44">
                       <div className="w-44 flex flex-col gap-6">
                         <div className="w-full flex flex-col gap-3">
-                          <Label htmlFor="weight" text="Peso" />
+                          <label htmlFor="weight" className="w-full text-sm font-normal text-brand-standard-black">Peso</label>
                           <input
                             type="text"
                             className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
@@ -445,7 +404,7 @@ const RegisterPatientModal = () => {
                     <div className="w-full">
                       <div className="w-full flex flex-col gap-6">
                         <div className="w-full flex flex-col gap-3">
-                          <Label htmlFor="gender" text="Gênero" />
+                          <label htmlFor="gender" className="w-full text-sm font-normal text-brand-standard-black">Gênero</label>
                           <Select
                             styles={{
                               control: (baseStyles, state) => ({
@@ -498,10 +457,7 @@ const RegisterPatientModal = () => {
                   <div className="w-full">
                     <div className="w-full flex flex-col gap-5">
                       <div className="w-full flex flex-col gap-3">
-                        <Label
-                          htmlFor="diagnosis"
-                          text="Diagnóstico/Suspeita Clínica"
-                        />
+                        <label htmlFor="diagnosis" className="w-full text-sm font-normal text-brand-standard-black">Diagnóstico/Suspeita Clínica</label>
                         <CreatableSelect
                           styles={{
                             control: (baseStyles, state) => ({
