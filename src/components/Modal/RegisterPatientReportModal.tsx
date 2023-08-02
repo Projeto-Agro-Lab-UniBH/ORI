@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { registerReportFormData, registerReportFormSchema } from "../../schemas/registerReportFormSchema";
 import useCreatePatientReport from "../../hooks/useCreatePatientReport";
 
-type RegisterReportModalProps = {
+type RegisterPatientReportProps = {
   patientId: string | null;
 };
 
@@ -17,7 +17,7 @@ const turnOptions = [
   { value: "Noturno", label: "Noturno" },
 ];
 
-const RegisterReportModal = (props: RegisterReportModalProps) => {
+const RegisterPatientReportModal = (props: RegisterPatientReportProps) => {
   const [open, setOpen] = useState<boolean>(false);
   const { reset, register, control, handleSubmit, formState: { errors } } = 
     useForm<registerReportFormData>({
@@ -198,4 +198,4 @@ const RegisterReportModal = (props: RegisterReportModalProps) => {
   );
 };
 
-export default RegisterReportModal;
+export default RegisterPatientReportModal;
