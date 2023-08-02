@@ -1,7 +1,7 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { Cross1Icon } from "@radix-ui/react-icons";
 
-const RegisterExamModal = () => {
+const RegisterPatientExamModal = () => {
   return (
     <Dialog.Root>
       <Dialog.Trigger className="border border-gray-200 px-3 py-[6px] rounded text-base text-brand-standard-black font-medium bg-white hover:bg-gray-50">
@@ -110,4 +110,4 @@ const RegisterExamModal = () => {
   );
 };
 
-export default RegisterExamModal;
+export default RegisterPatientExamModal;
