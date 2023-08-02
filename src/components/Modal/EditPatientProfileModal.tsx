@@ -12,11 +12,11 @@ import { editPatientProfileFormData, editPatientProfileFormSchema } from "../../
 import useEditPatientProfile from "../../hooks/useEditPatientProfile";
 import useGetPatientProfile from "../../hooks/useGetPatientProfile";
 import StakedReportList from "../Lists/StakedReportList";
-import RegisterReportModal from "./RegisterReportModal";
+import RegisterPatientReportModal from "./RegisterPatientReportModal";
 import CreatableSelect from "react-select/creatable";
 import AddAttachmentModal from "./AddAttachmentModal";
 import StakedExamList from "../Lists/StakedExamList";
-import RegisterExamModal from "./RegisterExamModal";
+import RegisterPatientExamModal from "./RegisterPatientExamModal";
 
 type EditPatientProfileModalProps = {
   patientId: string;
@@ -573,7 +573,7 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                   <StakedReportList patientId={props.patientId} />
                 </div>
                 <div className="w-full flex justify-end px-6 py-6">
-                  <RegisterReportModal patientId={props.patientId} />
+                  <RegisterPatientReportModal patientId={props.patientId} />
                 </div>
               </Tabs.Content>
               <Tabs.Content value="exams">
@@ -584,7 +584,7 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                   <StakedExamList />
                 </div>
                 <div className="w-full flex justify-end px-6 py-6">
-                  <RegisterExamModal />
+                  <RegisterPatientExamModal />
                 </div>
               </Tabs.Content>
               <Tabs.Content value="attachments">
