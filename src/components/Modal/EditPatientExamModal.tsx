@@ -1,7 +1,7 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { Cross1Icon, Pencil2Icon } from "@radix-ui/react-icons";
 
-const EditExamModal = () => {
+const EditPatientExamModal = () => {
   return (
     <Dialog.Root>
       <div className="px-1 py-1 border-none rounded hover:bg-gray-50">
@@ -112,4 +112,4 @@ const EditExamModal = () => {
   )
 }
 
-export default EditExamModal
+export default EditPatientExamModal

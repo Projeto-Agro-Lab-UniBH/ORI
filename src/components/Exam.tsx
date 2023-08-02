@@ -1,4 +1,4 @@
-import EditExamModal from "./Modal/EditExamModal";
+import EditPatientExamModal from "./Modal/EditPatientExamModal";
 
 const Exam = () => {
   return (
@@ -10,7 +10,7 @@ const Exam = () => {
               Lorem ipsum
             </span>
           </div>
-          <EditExamModal />
+          <EditPatientExamModal />
         </div>
         <div className="w-full flex-row flex items-center gap-5">
           <div className="flex items-center gap-1">
