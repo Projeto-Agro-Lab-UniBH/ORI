@@ -10,7 +10,7 @@ import { editReportFormData, editReportFormSchema } from "../../schemas/editRepo
 import useEditPatientReport from "../../hooks/useEditPatientReport";
 import useGetPatientReport from "../../hooks/useGetPatientReport";
 
-type EditReportProps = {
+type EditPatientReportModalProps = {
   id: string;
   patientId: string;
 };
@@ -27,7 +27,7 @@ const turnOptions = [
   { value: "Noturno", label: "Noturno" },
 ];
 
-const EditReportModal = (props: EditReportProps) => {
+const EditPatientReportModal = (props: EditPatientReportModalProps) => {
   const [open, setOpen] = useState<boolean>(false);
   const { reset, register, control, handleSubmit, formState: { errors } } = 
     useForm<editReportFormData>({
@@ -284,4 +284,4 @@ const EditReportModal = (props: EditReportProps) => {
   );
 };
 
-export default EditReportModal;
+export default EditPatientReportModal;

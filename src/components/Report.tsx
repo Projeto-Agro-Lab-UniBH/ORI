@@ -1,4 +1,4 @@
-import EditReportModal from "./Modal/EditReportModal";
+import EditPatientReportModal from "./Modal/EditPatientReportModal";
 import { DownloadIcon } from "@radix-ui/react-icons";
 import { useEffect, useState } from "react";
 import { api } from "../providers/Api";
@@ -42,7 +42,7 @@ const Report = (props: ReportProps) => {
               </span>
             </div>
             <div className="flex items-center gap-4">
-              <EditReportModal id={props.id} patientId={props.patientId} />
+              <EditPatientReportModal id={props.id} patientId={props.patientId} />
             </div>
           </div>
           <div className="w-full font-light text-brand-standard-black">
