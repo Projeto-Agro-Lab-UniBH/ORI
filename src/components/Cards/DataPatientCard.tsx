@@ -86,7 +86,7 @@ const DataPatientCard = (props: DataPatientCardProps) => {
                     </div>
                     <div className="w-[158.6px] flex">
                       <p className="whitespace-nowrap overflow-hidden text-ellipsis text-lg font-light text-brand-standard-black">
-                        {!props.specie ? "Não registrado" : props.specie}
+                        {!props.specie ? props.race : props.specie}
                       </p>
                     </div>
                   </div>
