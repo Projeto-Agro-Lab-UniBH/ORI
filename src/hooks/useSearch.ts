@@ -7,6 +7,7 @@ import { NextRouter } from "next/router";
 type PatientCardResponse = {
   id: string;
   profile_photo?: string;
+  imageUrl: string;
   name: string;
   specie: string;
   race: string;
