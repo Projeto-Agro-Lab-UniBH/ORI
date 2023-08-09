@@ -1,14 +1,33 @@
 import * as Dialog from "@radix-ui/react-dialog";
-import { Cross1Icon } from "@radix-ui/react-icons";
+import { Cross1Icon, Cross2Icon, FileIcon } from "@radix-ui/react-icons";
 import { useController, useForm } from "react-hook-form";
 import { ChangeEvent, useEffect, useState } from "react";
-import Select from "react-select";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerReportFormData, registerReportFormSchema } from "../../schemas/registerReportFormSchema";
-import useCreatePatientReport from "../../hooks/useCreatePatientReport";
+import { useMutation, useQueryClient } from "react-query";
+import { api } from "../../providers/Api";
+import { Load } from "../Load/Load";
+import Select from "react-select";
 
 type RegisterPatientReportProps = {
   patientId: string | null;
+};
+
+type UploadFileResponse = {
+  fileUrl: string;
+};
+
+type MutationReportResponse = {
+  id: string;
+  patientId: string;
+  shift: string;
+  author: string;
+  title: string;
+  report_text: string;
+  filename: string;
+  attachments: string; 
+  createdAt: string;
+  updatedAt: string;
 };
 
 const turnOptions = [
@@ -24,17 +43,65 @@ const RegisterPatientReportModal = (props: RegisterPatientReportProps) => {
       resolver: zodResolver(registerReportFormSchema),
     });
 
-  const [attachedFile, setAttachedFile] = useState<string | undefined>();
+  const [attachedFile, setAttachedFile] = useState<any | undefined>();
+  const [previewAttachedFile, setPreviewAttachedFile] = useState<string>("");
 
   const { field: selectShift } = useController({ name: "shift", control });
   const { value: selectShiftValue, onChange: selectShiftOnChange, ...restSelectShift } = selectShift;
+  
+  const queryClient = useQueryClient();  
 
-  const { mutate } = useCreatePatientReport({ 
-    patientId: props.patientId, 
-    attachedFile: attachedFile, 
-    reset: reset, 
-    setOpen: setOpen 
+  const { isLoading, mutate } = useMutation({
+    mutationKey: ["create-report"],
+    mutationFn: async (data: registerReportFormData) => {
+      const formData = new FormData();
+      formData.append('file', attachedFile);
+
+      if (attachedFile != undefined) {
+        const upload = await api.post<UploadFileResponse>('uploads/file/', formData)
+
+        await api.post<MutationReportResponse>("/reports", {
+          ...data,
+          patientId: props.patientId,
+          filename: previewAttachedFile,
+          attachment: upload
+        });
+      } else {
+        await api.post<MutationReportResponse>("/reports", {
+          ...data,
+          patientId: props.patientId,
+          filename: '',
+          attachment: ''
+        });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["list-all-reports"] });
+      reset();
+      setOpen(false);
+    },
   });
+
+  useEffect(() => {
+    if (open != true) {
+      setAttachedFile(undefined);
+      setPreviewAttachedFile("");
+      reset();
+    }
+  }, [open, reset]);
+
+  const handleFile = (event: ChangeEvent<HTMLInputElement>) => {
+    if (event?.target?.files?.[0]) {
+      const file = event.target.files[0];
+      setAttachedFile(file);
+      setPreviewAttachedFile(file.name)
+    }
+  }
+
+  const removeAttachment = () => {
+    setAttachedFile(undefined);
+    setPreviewAttachedFile("");
+  }
 
   const send = (data: registerReportFormData) => {
     const request = {
@@ -42,18 +109,6 @@ const RegisterPatientReportModal = (props: RegisterPatientReportProps) => {
     };
     mutate(request);
   };
-
-  useEffect(() => {
-    if (open != true) {
-      reset();
-    }
-  }, [open, reset]);
-
-  const handleFile = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event?.target?.files?.[0].name
-    console.log(file)
-    setAttachedFile(file)
-  }
 
   return (
     <Dialog.Root onOpenChange={setOpen} open={open}>
@@ -71,10 +126,25 @@ const RegisterPatientReportModal = (props: RegisterPatientReportProps) => {
               <Cross1Icon width={24} height={24} />
             </Dialog.Close>
           </div>
-          <div className="w-full px-6 py-6">
+          {isLoading && 
+            <div className="w-full h-full absolute z-20">
+              <div className="w-full h-full bg-[#f9fafb8b]">
+                <Load
+                  divProps={{
+                    className:
+                      "w-full h-[488px] relative flex items-center justify-center bg-gray-500-50",
+                  }}
+                />
+              </div>
+            </div>
+          }
+          <div
+            id="modal-scroll" 
+            className="w-full h-[402px] px-6 py-6 overflow-y-scroll"
+          >
             <form
               onSubmit={handleSubmit(send)}
-              className="w-full flex flex-col h-360 gap-3"
+              className="w-full flex flex-col h-360 gap-6"
             >
               <div className="w-full flex flex-col gap-6">
                 <div className="w-full flex flex-row gap-3">
@@ -123,7 +193,7 @@ const RegisterPatientReportModal = (props: RegisterPatientReportProps) => {
                     />
                   </div>
                   <div className="w-full flex flex-col gap-3">
-                    <label htmlFor="author" className="w-full text-sm font-normal text-brand-standard-black">Veterinário responsável</label>
+                    <label htmlFor="author" className="w-full text-sm font-normal text-brand-standard-black">Nome do responsável</label>
                     <input
                       type="text"
                       className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
@@ -132,7 +202,15 @@ const RegisterPatientReportModal = (props: RegisterPatientReportProps) => {
                   </div>
                 </div>
                 <div className="w-full flex flex-col gap-3">
-                  <label htmlFor="report_text" className="w-full text-sm font-normal text-brand-standard-black">Relatório</label>
+                  <label htmlFor="author" className="w-full text-sm font-normal text-brand-standard-black">Título</label>
+                  <input
+                    type="text"
+                    className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                    {...register("title")}  
+                  />
+                </div>
+                <div className="w-full flex flex-col gap-3">
+                  <label htmlFor="report_text" className="w-full text-sm font-normal text-brand-standard-black">Descrição / Relatório</label>
                   <div>
                     <textarea
                       cols={30}
@@ -140,57 +218,60 @@ const RegisterPatientReportModal = (props: RegisterPatientReportProps) => {
                       className="w-full px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                       {...register("report_text")}
                     ></textarea>
-                    {errors.report_text && (
-                      <span className="w-full mt-1 flex items-center font-normal text-sm text-red-500">
-                        {errors.report_text.message}
-                      </span>
-                    )}
                   </div>
                 </div>
+                {attachedFile &&  
+                  <div className="w-full flex gap-3 items-center">
+                    <div className="w-[558.4px] px-2 py-2 flex justify-between items-center border rounded">
+                      <div className="w-[488px] gap-2 flex items-center">
+                        <FileIcon width={20} height={20} />
+                        <p className="w-[500px] max-w-[500px] whitespace-nowrap overflow-hidden text-ellipsis text-sm font-medium text-brand-standard-black">
+                          {previewAttachedFile}
+                        </p>
+                      </div>
+                      <button onClick={removeAttachment}>
+                        <Cross2Icon />
+                      </button>
+                    </div>
+                  </div>
+                }
               </div>
-              <div className="w-full flex flex-col gap-3">
-                <div className="w-[558.4px] flex items-center">
-                  <p className="w-[558.4px] max-w-[500px] whitespace-nowrap overflow-hidden text-ellipsis text-sm font-normal text-brand-standard-black">
-                    {attachedFile}
-                  </p>
-                </div>
-                <div className="w-full flex justify-between">
-                  <div className="w-full flex">
-                    <label
-                      htmlFor="patient-photo-file"
-                      className="border border-gray-200 flex items-center px-3 py-[6px] gap-1 rounded text-base text-brand-standard-black font-medium bg-white hover:border-[#b3b3b3] cursor-pointer"
+              <div className="w-full flex justify-between">
+                <div className="w-full flex">
+                  <label
+                    htmlFor="patient-photo-file"
+                    className="border border-gray-200 flex items-center px-3 py-[6px] gap-1 rounded text-base text-brand-standard-black font-medium bg-white hover:border-[#b3b3b3] cursor-pointer"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="#212529"
+                      className="w-5 h-5"
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="#212529"
-                        className="w-5 h-5"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"
-                        />
-                      </svg>
-                      Adicionar um anexo
-                    </label>
-                    <input
-                      type="file"
-                      accept=".doc, .docx, .pdf"
-                      id="patient-photo-file"
-                      className="hidden"
-                      onChange={handleFile}
-                    />
-                  </div>
-                  <div className="w-full flex justify-end">
-                    <button type="submit" className="border border-gray-200 px-3 py-[6px] rounded text-base text-brand-standard-black font-medium bg-white hover:bg-gray-50">
-                      Salvar
-                    </button>
-                  </div>
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"
+                      />
+                    </svg>
+                    Adicionar um anexo
+                  </label>
+                  <input
+                    type="file"
+                    accept=".doc, .docx, .pdf"
+                    id="patient-photo-file"
+                    className="hidden"
+                    onChange={handleFile}
+                  />
+                </div>
+                <div className="w-full flex justify-end">
+                  <button type="submit" className="border border-gray-200 px-3 py-[6px] rounded text-base text-brand-standard-black font-medium bg-white hover:bg-gray-50">
+                    Salvar
+                  </button>
                 </div>
               </div>
-            </form>
+            </form> 
           </div>
         </Dialog.Content>
       </Dialog.Portal>
