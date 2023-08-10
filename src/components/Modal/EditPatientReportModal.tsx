@@ -1,30 +1,47 @@
-import { zodResolver } from "@hookform/resolvers/zod";
 import * as Dialog from "@radix-ui/react-dialog";
-import { Cross1Icon, Pencil2Icon } from "@radix-ui/react-icons";
+import { Cross1Icon, Cross2Icon, FileIcon, Pencil2Icon } from "@radix-ui/react-icons";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { ChangeEvent, useEffect, useState } from "react";
 import { useController, useForm } from "react-hook-form";
-import { api } from "../../providers/Api";
 import { Load } from "../Load/Load";
 import Select from "react-select";
 import { editReportFormData, editReportFormSchema } from "../../schemas/editReportFormSchema";
-import useEditPatientReport from "../../hooks/useEditPatientReport";
 import useGetPatientReport from "../../hooks/useGetPatientReport";
+import { useMutation, useQueryClient } from "react-query";
+import { api } from "../../providers/Api";
 
 type EditPatientReportModalProps = {
   id: string;
   patientId: string;
 };
 
+type UploadFileResponse = {
+  fileUrl: string;
+};
+
 type ReportData = {
   id: string;
+  filename: string;
+	attachment: string;
   createdAt: string;
   updatedAt: string;
 };
 
+type ReportResponse = {
+  id: string;
+  patientId: string;
+  shift: string;
+  author: string;
+  report_text: string;
+  createdAt: string;
+  updatedAt: string;
+  attachments: string;
+};
+
 const turnOptions = [
-  { value: "Matutino", label: "Matutino" },
-  { value: "Diurno", label: "Diurno" },
-  { value: "Noturno", label: "Noturno" },
+  { label: "Matutino", value: "Matutino" },
+  { label: "Diurno", value: "Diurno" },
+  { label: "Noturno", value: "Noturno" },
 ];
 
 const EditPatientReportModal = (props: EditPatientReportModalProps) => {
@@ -33,55 +50,104 @@ const EditPatientReportModal = (props: EditPatientReportModalProps) => {
     useForm<editReportFormData>({
       resolver: zodResolver(editReportFormSchema),
     });
+  const queryClient = useQueryClient();
 
   const [data, setData] = useState<ReportData>({} as ReportData);
   const [callRequest, setCallRequest] = useState<boolean>(false);
-	const [fecthedAttachment, setFecthedAttachment] = useState<string | undefined>();
-	const [attachedFile, setAttachedFile] = useState<string | null | undefined>();
-	const [attachment, setAttachment] = useState<string | null | undefined>();
+  const [filename, setFilename] = useState<string>("");
+  const [fecthedFilename, setFetchedFilename] = useState<string>("");
+	const [fecthedAttachment, setFecthedAttachment] = useState<string>("");
+	const [attachedFile, setAttachedFile] = useState<any | undefined>();
+	const [attachment, setAttachment] = useState<any | undefined>();
 
   const { field: selectShift } = useController({ name: "shift", control });
   const { value: selectShiftValue, onChange: selectShiftOnChange, ...restSelectShift } = selectShift;
 
-  const { isLoading: isLoadingPatientReportData } = useGetPatientReport({ 
+  const { isLoading } = useGetPatientReport({ 
     id: props.id, 
     reset: reset,
     setData: setData,
-    setFecthedAttachment: setFecthedAttachment,
     callRequest: callRequest  
   });
   
-  const { isLoading: savingChanges, mutate } = useEditPatientReport({ patientId: props.patientId })
+  const { isLoading: savingChanges, mutate } = useMutation({
+    mutationKey: ["update-patient-report"],
+    mutationFn: async (data: editReportFormData) => {
+      const formData = new FormData();
+      formData.append('file', attachedFile);
 
+      if (attachedFile != undefined && fecthedAttachment === "") {
+        const upload = await api.post<UploadFileResponse>('uploads/file/', formData)
+
+        await api.patch<ReportResponse>(`/reports/${props.id}`, {
+          ...data,
+          filename: filename,
+          attachment: upload.data.fileUrl,
+        });
+      }
+      if (fecthedAttachment != "" && attachedFile === undefined) {
+        await api.patch<ReportResponse>(`/reports/${props.id}`, {
+          ...data,
+        });
+      } 
+      if (fecthedAttachment === "" && attachedFile === undefined) {
+        await api.patch<ReportResponse>(`/reports/${props.id}`, {
+          ...data,
+          filename: '',
+          attachment: ''
+        });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["list-all-reports"] });
+    },
+  });
+  
   useEffect(() => {
     if (open != true) {
       setCallRequest(false);
-			setAttachedFile(null)
-			setAttachment(null)
+			setAttachedFile(undefined)
+      setFecthedAttachment("")
+			setAttachment(undefined)
       reset();
     } else {
       setCallRequest(true);
     }
   }, [open, setCallRequest, setAttachedFile, reset]);
 
+  useEffect(() => {
+    if (data.filename != null || "") {
+      setFetchedFilename(data.filename);
+    }
+    if (data.attachment != null || "") {
+      setFecthedAttachment(data.attachment);
+    }
+  }, [data, setFetchedFilename, setFecthedAttachment])
+
 	useEffect(() => {
-		if(fecthedAttachment) {
-			setAttachment(fecthedAttachment)
-		}
 		if(attachedFile) {
-			setAttachment(attachedFile)
+			setFetchedFilename("");
+      setFecthedAttachment("");
 		}
 	}, [attachment, setAttachment, fecthedAttachment, attachedFile])
 
   const handleFile = (event: ChangeEvent<HTMLInputElement>) => {
-    if (event?.target?.files?.[0].name) {
-			const file = event?.target?.files?.[0].name;
-			const formData = new FormData();
-			formData.append("file", event!.target!.files![0]!, file);
-			api.post("/files/upload", formData);
-			setAttachedFile(file);
-		}
+    if (event?.target?.files?.[0]) {
+      const file = event.target.files[0];
+      setAttachedFile(file);
+      setFilename(file.name);
+    }
   };
+
+  const removeFecthedAttachment = () => {
+    setFetchedFilename("");
+    setFecthedAttachment("");
+  }
+
+  const removeAttachment = () => {
+    setAttachedFile(undefined);
+    setFilename("");
+  }
 
 	const send = (data: editReportFormData) => {
     const request = {
@@ -93,7 +159,7 @@ const EditPatientReportModal = (props: EditPatientReportModalProps) => {
 
   return (
     <Dialog.Root onOpenChange={setOpen} open={open}>
-      <div className="px-1 py-1 border-none rounded hover:bg-gray-50">
+      <div className="px-2 py-1 border border-gray-200 rounded hover:border-[#b3b3b3] flex items-center text-brand-standard-black font-semibold gap-1">
         <Dialog.Trigger className="w-16 flex items-center gap-1 text-brand-standard-black font-semibold">
           <Pencil2Icon /> Editar
         </Dialog.Trigger>
@@ -109,174 +175,218 @@ const EditPatientReportModal = (props: EditPatientReportModalProps) => {
               <Cross1Icon width={24} height={24} />
             </Dialog.Close>
           </div>
-          <div className="w-full px-6 py-6 flex flex-col gap-4">
-            {isLoadingPatientReportData ? (
-              <Load
-                divProps={{
-                  className:
-                    "w-full h-[488px] flex items-center justify-center relative bg-gray-500-50",
-                }}
-              />
-            ) : savingChanges ? (
-              <Load
-                divProps={{
-                  className:
-                    "w-full h-[488px] flex items-center justify-center relative bg-gray-500-50",
-                }}
-              />
-            ) : (
-              <>
-                <div className="w-full flex justify-between">
-                  <div className="flex items-center gap-2">
+          {isLoading && 
+            <div className="w-full h-full absolute z-20">
+              <div className="w-full h-full bg-[#f9fafb8b]">
+                <Load
+                  divProps={{
+                    className:
+                      "w-full h-[488px] relative flex items-center justify-center bg-gray-500-50",
+                  }}
+                />
+              </div>
+            </div>
+          }
+          {savingChanges && 
+            <div className="w-full h-full absolute z-20">
+              <div className="w-full h-full bg-[#f9fafb8b]">
+                <Load
+                  divProps={{
+                    className:
+                      "w-full h-[488px] relative flex items-center justify-center bg-gray-500-50",
+                  }}
+                />
+              </div>
+            </div>
+          }
+          <div 
+            id="modal-scroll"
+            className="w-full h-[402px] overflow-y-scroll"
+          >
+            <div className="w-full px-6 py-6 flex flex-col gap-4">
+              <div className="w-full flex justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-base font-semibold text-brand-standard-black">
+                    ID:
+                  </span>
+                  <p className="text-base font-normal text-brand-standard-black">
+                    {data?.id}
+                  </p>
+                </div>
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-1">
                     <span className="text-base font-semibold text-brand-standard-black">
-                      ID:
+                      Data de criação:
                     </span>
                     <p className="text-base font-normal text-brand-standard-black">
-                      {data?.id}
+                      {data?.createdAt}
                     </p>
                   </div>
-                  <div className="flex flex-col">
-                    <div className="flex items-center gap-1">
-                      <span className="text-base font-semibold text-brand-standard-black">
-                        Data de criação:
-                      </span>
-                      <p className="text-base font-normal text-brand-standard-black">
-                        {data?.createdAt}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <span className="text-base font-semibold text-brand-standard-black">
-                        Data da última edição:
-                      </span>
-                      <p className="text-base font-normal text-brand-standard-black">
-                        {data?.updatedAt}
-                      </p>
-                    </div>
+                  <div className="flex items-center gap-1">
+                    <span className="text-base font-semibold text-brand-standard-black">
+                      Data da última edição:
+                    </span>
+                    <p className="text-base font-normal text-brand-standard-black">
+                      {data?.updatedAt}
+                    </p>
                   </div>
                 </div>
-                <form
-                  onSubmit={handleSubmit(send)}
-                  className="w-full flex flex-col h-360 gap-3"
-                >
-                  <div className="w-full flex flex-col gap-6">
-                    <div className="w-full flex flex-row gap-3">
-                      <div className="w-[184px] flex flex-col gap-3">
-                        <label htmlFor="shift" className="w-full text-sm font-normal text-brand-standard-black">Turno</label>
-                        <Select
-                          styles={{
-                            control: (baseStyles, state) => ({
-                              ...baseStyles,
-                              width: 184,
-                              height: 40,
-                              borderColor: state.isFocused
-                                ? "#e2e8f0"
-                                : "#e2e8f0",
-                              whiteSpace: "nowrap",
-                              textOverflow: "ellipsis",
-                              fontFamily: "Inter",
-                              fontWeight: 400,
-                              fontSize: "0.875rem",
-                              lineHeight: "1.25rem",
-                            }),
-                          }}
-                          theme={(theme) => ({
-                            ...theme,
-                            borderRadius: 4,
-                            colors: {
-                              ...theme.colors,
-                              primary75: "#cbd5e1",
-                              primary50: "##e2e8f0",
-                              primary25: "#f8fafc",
-                              primary: "#212529",
-                            },
-                          })}
-                          placeholder="Selecione o turno"
-                          isSearchable={false}
-                          options={turnOptions}
-                          value={
-                            selectShiftValue
-                              ? turnOptions.find(
-                                  (x) => x.value === selectShiftValue
-                                )
-                              : selectShiftValue
-                          }
-                          onChange={(option) =>
-                            selectShiftOnChange(option ? option.value : option)
-                          }
-                          {...restSelectShift}
-                        />
-                      </div>
-                      <div className="w-full flex flex-col gap-3">
-                        <label htmlFor="author" className="w-full text-sm font-normal text-brand-standard-black">Veterinário responsável</label>
-                        <input
-                          type="text"
-                          className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                          {...register("author")}
-                        />
-                      </div>
+              </div>
+              <form
+                onSubmit={handleSubmit(send)}
+                className="w-full flex flex-col h-360 gap-6"
+              >
+                <div className="w-full flex flex-col gap-6">
+                  <div className="w-full flex flex-row gap-3">
+                    <div className="w-[184px] flex flex-col gap-3">
+                      <label htmlFor="shift" className="w-full text-sm font-normal text-brand-standard-black">Turno</label>
+                      <Select
+                        styles={{
+                          control: (baseStyles, state) => ({
+                            ...baseStyles,
+                            width: 184,
+                            height: 40,
+                            borderColor: state.isFocused
+                              ? "#e2e8f0"
+                              : "#e2e8f0",
+                            whiteSpace: "nowrap",
+                            textOverflow: "ellipsis",
+                            fontFamily: "Inter",
+                            fontWeight: 400,
+                            fontSize: "0.875rem",
+                            lineHeight: "1.25rem",
+                          }),
+                        }}
+                        theme={(theme) => ({
+                          ...theme,
+                          borderRadius: 4,
+                          colors: {
+                            ...theme.colors,
+                            primary75: "#cbd5e1",
+                            primary50: "##e2e8f0",
+                            primary25: "#f8fafc",
+                            primary: "#212529",
+                          },
+                        })}
+                        placeholder="Selecione o turno"
+                        isSearchable={false}
+                        options={turnOptions}
+                        value={
+                          selectShiftValue
+                            ? turnOptions.find(
+                                (x) => x.value === selectShiftValue
+                              )
+                            : selectShiftValue
+                        }
+                        onChange={(option) =>
+                          selectShiftOnChange(option ? option.value : option)
+                        }
+                        {...restSelectShift}
+                      />
                     </div>
                     <div className="w-full flex flex-col gap-3">
-                    <label htmlFor="report_text" className="w-full text-sm font-normal text-brand-standard-black">Relatório</label>
-                      <div>
-                        <textarea
-                          cols={30}
-                          rows={10}
-                          className="w-full px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                          {...register("report_text")}
-                        ></textarea>
-                        {errors.report_text && (
-                          <span className="w-full mt-1 flex items-center font-normal text-sm text-red-500">
-                            {errors.report_text.message}
-                          </span>
-                        )}
-                      </div>
+                      <label htmlFor="author" className="w-full text-sm font-normal text-brand-standard-black">Veterinário responsável</label>
+                      <input
+                        type="text"
+                        className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                        {...register("author")}
+                      />
                     </div>
                   </div>
                   <div className="w-full flex flex-col gap-3">
-                    <div className="w-[558.4px] flex items-center">
-                      <p className="w-[558.4px] max-w-[500px] whitespace-nowrap overflow-hidden text-ellipsis text-sm font-normal text-brand-standard-black">
-                        {attachment} 
-                      </p>
+                    <label htmlFor="author" className="w-full text-sm font-normal text-brand-standard-black">Título</label>
+                    <input
+                      type="text"
+                      className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                      {...register("title")}  
+                    />
+                  </div>
+                  <div className="w-full flex flex-col gap-3">
+                    <label htmlFor="report_text" className="w-full text-sm font-normal text-brand-standard-black">Relatório</label>
+                    <div>
+                      <textarea
+                        cols={30}
+                        rows={10}
+                        className="w-full px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                        {...register("report_text")}
+                      ></textarea>
+                      {errors.report_text && (
+                        <span className="w-full mt-1 flex items-center font-normal text-sm text-red-500">
+                          {errors.report_text.message}
+                        </span>
+                      )}
                     </div>
-                    <div className="w-full flex justify-between">
-                      <div className="w-full flex">
-                        <label
-                          htmlFor="patient-photo-file"
-                          className="border border-gray-200 flex items-center px-3 py-[6px] gap-1 rounded text-base text-brand-standard-black font-medium bg-white hover:border-[#b3b3b3] cursor-pointer"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="#212529"
-                            className="w-5 h-5"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"
-                            />
-                          </svg>
-                          Adicionar um anexo
-                        </label>
-                        <input
-                          type="file"
-                          accept=".doc, .docx, .pdf"
-                          id="patient-photo-file"
-                          className="hidden"
-                          onChange={handleFile}
-                        />
-                      </div>
-                      <div className="w-full flex justify-end">
-                        <button className="border border-gray-200 px-3 py-[6px] rounded text-base text-brand-standard-black font-medium bg-white hover:bg-gray-50">
-                          Salvar alterações
+                  </div>
+                  {fecthedAttachment && 
+                    <div className="w-full flex gap-3 items-center">
+                      <div className="w-[558.4px] px-2 py-2 flex justify-between items-center border rounded">
+                        <div className="w-[488px] gap-2 flex items-center">
+                          <FileIcon width={20} height={20} />
+                          <a href={data.attachment} className="w-[500px] max-w-[500px] whitespace-nowrap overflow-hidden text-ellipsis text-sm font-medium text-brand-standard-black">
+                            {fecthedFilename}
+                          </a>
+                        </div>
+                        <button onClick={removeFecthedAttachment}>
+                          <Cross2Icon />
                         </button>
                       </div>
                     </div>
+                  }
+                  {attachedFile &&  
+                    <div className="w-full flex gap-3 items-center">
+                      <div className="w-[558.4px] px-2 py-2 flex justify-between items-center border rounded">
+                        <div className="w-[488px] gap-2 flex items-center">
+                          <FileIcon width={20} height={20} />
+                          <p className="w-[500px] max-w-[500px] whitespace-nowrap overflow-hidden text-ellipsis text-sm font-medium text-brand-standard-black">
+                            {filename}
+                          </p>
+                        </div>
+                        <button onClick={removeAttachment}>
+                          <Cross2Icon />
+                        </button>
+                      </div>
+                    </div>
+                  }
+                </div>
+                <div className="w-full flex flex-col gap-3">
+                  <div className="w-full flex justify-between">
+                    <div className="w-full flex">
+                      <label
+                        htmlFor="patient-photo-file"
+                        className="border border-gray-200 flex items-center px-3 py-[6px] gap-1 rounded text-base text-brand-standard-black font-medium bg-white hover:border-[#b3b3b3] cursor-pointer"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="#212529"
+                          className="w-5 h-5"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"
+                          />
+                        </svg>
+                        Adicionar um anexo
+                      </label>
+                      <input
+                        type="file"
+                        accept=".doc, .docx, .pdf"
+                        id="patient-photo-file"
+                        className="hidden"
+                        onChange={handleFile}
+                      />
+                    </div>
+                    <div className="w-full flex justify-end">
+                      <button className="border border-gray-200 px-3 py-[6px] rounded text-base text-brand-standard-black font-medium bg-white hover:bg-gray-50">
+                        Salvar alterações
+                      </button>
+                    </div>
                   </div>
-                </form>
-              </>
-            )}
+                </div>
+              </form>
+            </div>
           </div>
         </Dialog.Content>
       </Dialog.Portal>

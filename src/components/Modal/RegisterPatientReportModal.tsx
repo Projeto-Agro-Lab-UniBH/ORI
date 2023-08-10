@@ -25,15 +25,15 @@ type MutationReportResponse = {
   title: string;
   report_text: string;
   filename: string;
-  attachments: string; 
+  attachment: string; 
   createdAt: string;
   updatedAt: string;
 };
 
 const turnOptions = [
-  { value: "Matutino", label: "Matutino" },
-  { value: "Diurno", label: "Diurno" },
-  { value: "Noturno", label: "Noturno" },
+  { label: "Matutino", value: "Matutino" },
+  { label: "Diurno", value: "Diurno" },
+  { label: "Noturno", value: "Noturno" },
 ];
 
 const RegisterPatientReportModal = (props: RegisterPatientReportProps) => {
@@ -44,7 +44,7 @@ const RegisterPatientReportModal = (props: RegisterPatientReportProps) => {
     });
 
   const [attachedFile, setAttachedFile] = useState<any | undefined>();
-  const [previewAttachedFile, setPreviewAttachedFile] = useState<string>("");
+  const [filename, setFilename] = useState<string | null>();
 
   const { field: selectShift } = useController({ name: "shift", control });
   const { value: selectShiftValue, onChange: selectShiftOnChange, ...restSelectShift } = selectShift;
@@ -60,12 +60,13 @@ const RegisterPatientReportModal = (props: RegisterPatientReportProps) => {
       if (attachedFile != undefined) {
         const upload = await api.post<UploadFileResponse>('uploads/file/', formData)
 
-        await api.post<MutationReportResponse>("/reports", {
+        const fetch = await api.post<MutationReportResponse>("/reports", {
           ...data,
           patientId: props.patientId,
-          filename: previewAttachedFile,
-          attachment: upload
+          filename: filename,
+          attachment: upload.data.fileUrl,
         });
+        console.log(fetch)
       } else {
         await api.post<MutationReportResponse>("/reports", {
           ...data,
@@ -82,10 +83,12 @@ const RegisterPatientReportModal = (props: RegisterPatientReportProps) => {
     },
   });
 
+  console.log(filename)
+
   useEffect(() => {
     if (open != true) {
       setAttachedFile(undefined);
-      setPreviewAttachedFile("");
+      setFilename("");
       reset();
     }
   }, [open, reset]);
@@ -94,13 +97,13 @@ const RegisterPatientReportModal = (props: RegisterPatientReportProps) => {
     if (event?.target?.files?.[0]) {
       const file = event.target.files[0];
       setAttachedFile(file);
-      setPreviewAttachedFile(file.name)
+      setFilename(String(file.name))
     }
   }
 
   const removeAttachment = () => {
     setAttachedFile(undefined);
-    setPreviewAttachedFile("");
+    setFilename("");
   }
 
   const send = (data: registerReportFormData) => {
@@ -113,14 +116,14 @@ const RegisterPatientReportModal = (props: RegisterPatientReportProps) => {
   return (
     <Dialog.Root onOpenChange={setOpen} open={open}>
       <Dialog.Trigger className="border border-gray-200 px-3 py-[6px] rounded text-base text-brand-standard-black font-medium bg-white hover:bg-gray-50">
-        Criar um relatório
+        Criar novo relatório
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className="bg-black/60 inset-0 fixed z-20" />
         <Dialog.Content className="w-[608px] rounded-lg border border-gray-200 bg-white fixed overflow-hidden pt-4 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
           <div className="w-full px-6 pb-4 border-b-[1px] border-gray-200 flex items-center flex-row justify-between">
             <Dialog.Title className="font-semibold text-2xl">
-              Criar um novo relatório
+              Criar novo relatório
             </Dialog.Title>
             <Dialog.Close className="w-[32px] h-[32px] flex justify-center items-center">
               <Cross1Icon width={24} height={24} />
@@ -226,7 +229,7 @@ const RegisterPatientReportModal = (props: RegisterPatientReportProps) => {
                       <div className="w-[488px] gap-2 flex items-center">
                         <FileIcon width={20} height={20} />
                         <p className="w-[500px] max-w-[500px] whitespace-nowrap overflow-hidden text-ellipsis text-sm font-medium text-brand-standard-black">
-                          {previewAttachedFile}
+                          { filename }
                         </p>
                       </div>
                       <button onClick={removeAttachment}>

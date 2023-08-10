@@ -22,8 +22,8 @@ const createOption = (label: string) => ({
 });
 
 const genderOptions = [
-  { value: "Macho", label: "Macho" },
-  { value: "Fêmea", label: "Fêmea" },
+  { label: "Macho", value: "Macho" },
+  { label: "Fêmea", value: "Fêmea" },
 ];
 
 const physicalShapeOptions = [
@@ -33,14 +33,14 @@ const physicalShapeOptions = [
 ];
 
 const prognosisOptions = [
-  { value: "Alta", label: "Alta" },
-  { value: "Aguardando alta médica", label: "Aguardando alta médica" },
-  { value: "Obscuro", label: "Obscuro" },
-  { value: "Desfávoravel", label: "Desfávoravel" },
-  { value: "Reservado", label: "Reservado" },
-  { value: "Favorável", label: "Favorável" },
-  { value: "Risco", label: "Risco" },
-  { value: "Alto risco", label: "Alto risco" },
+  { label: "Alta", value: "Alta" },
+  { label: "Aguardando alta médica", value: "Aguardando alta médica" },
+  { label: "Obscuro", value: "Obscuro" },
+  { label: "Desfávoravel", value: "Desfávoravel" },
+  { label: "Reservado", value: "Reservado" },
+  { label: "Favorável", value: "Favorável" },
+  { label: "Risco", value: "Risco" },
+  { label: "Alto risco", value: "Alto risco" },
 ];
 
 const RegisterPatientModal = () => {

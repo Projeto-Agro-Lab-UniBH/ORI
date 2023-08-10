@@ -11,12 +11,13 @@ import { ChangeEvent, KeyboardEventHandler, useEffect, useState } from "react";
 import { editPatientProfileFormData, editPatientProfileFormSchema } from "../../schemas/editPatientProfileFormSchema";
 import useEditPatientProfile from "../../hooks/useEditPatientProfile";
 import useGetPatientProfile from "../../hooks/useGetPatientProfile";
-import StakedReportList from "../Lists/StakedReportList";
+import Report from '../Report';
 import RegisterPatientReportModal from "./RegisterPatientReportModal";
 import CreatableSelect from "react-select/creatable";
 import AddAttachmentModal from "./AddAttachmentModal";
-import StakedExamList from "../Lists/StakedExamList";
 import RegisterPatientExamModal from "./RegisterPatientExamModal";
+import useListPatientReports from "../../hooks/useListPatientReports";
+import Exam from "../Exam";
 
 type EditPatientProfileModalProps = {
   patientId: string;
@@ -29,25 +30,25 @@ const createOption = (label: string) => ({
 });
 
 const genderOptions = [
-  { value: "Macho", label: "Macho" },
-  { value: "Fêmea", label: "Fêmea" },
+  { label: "Macho", value: "Macho" },
+  { label: "Fêmea", value: "Fêmea" },
 ];
 
 const physicalShapeOptions = [
-  { value: "Grande porte", label: "Grande porte" },
-  { value: "Médio porte", label: "Médio porte" },
-  { value: "Pequeno porte", label: "Pequeno porte" },
+  { label: "Grande porte", value: "Grande porte" },
+  { label: "Médio porte", value: "Médio porte" },
+  { label: "Pequeno porte", value: "Pequeno porte" },
 ];
 
 const prognosisOptions = [
-  { value: "Alta", label: "Alta" },
-  { value: "Aguardando alta médica", label: "Aguardando alta médica" },
-  { value: "Obscuro", label: "Obscuro" },
-  { value: "Desfávoravel", label: "Desfávoravel" },
-  { value: "Reservado", label: "Reservado" },
-  { value: "Favorável", label: "Favorável" },
-  { value: "Risco", label: "Risco" },
-  { value: "Alto risco", label: "Alto risco" },
+  { label: "Alta", value: "Alta" },
+  { label: "Aguardando alta médica", value: "Aguardando alta médica" },
+  { label: "Obscuro", value: "Obscuro" },
+  { label: "Desfávoravel", value: "Desfávoravel" },
+  { label: "Reservado", value: "Reservado" },
+  { label: "Favorável", value: "Favorável" },
+  { label: "Risco", value: "Risco" },
+  { label: "Alto risco", value: "Alto risco" },
 ];
 
 const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
@@ -59,11 +60,11 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
     });
 
   const [files, setFiles] = useState<FileList>({} as FileList);
-
-  const [diagnosisInputValue, setDiagnosisInputValue] = useState("");
+  const [selectedImage, setSelectedImage] = useState<File | undefined>(undefined);  
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [fetchedImage, setFetchedImage] = useState<string | null>(null);
   const [photo, setPhoto] = useState<string | null>(null);
+  const [diagnosisInputValue, setDiagnosisInputValue] = useState("");
   const [valueDiagnosis, setValueDiagnosis] = useState<readonly Option[]>([]);
 
   const { field: selectPhysicalShape } = useController({ name: "physical_shape", control });
@@ -73,17 +74,23 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
   const { value: selectGenderValue, onChange: selectGenderOnChange,...restSelectGender } = selectGender;
   const { value: selectPrognosisValue, onChange: selectPrognosisOnChange, ...restSelectPrognosis } = selectPrognosis;
 
-  const { isLoading: isLoadingPatientData } = useGetPatientProfile({
-    id: props.patientId,
-    reset: reset,
-    setValueDiagnosis: setValueDiagnosis,
-    setFetchedImage: setFetchedImage,
-    callRequest: callRequest,
+  const { isLoading: loadingPatientData } = useGetPatientProfile({ 
+    id: props.patientId, 
+    reset: reset, 
+    setValueDiagnosis: setValueDiagnosis, 
+    setFetchedImage: setFetchedImage, 
+    callRequest: callRequest 
+  });
+
+  const { isLoading: loadingReports, data: reports } = useListPatientReports({ 
+    patientId: props.patientId, 
+    callRequest: callRequest 
   });
 
   useEffect(() => {
     if (open != true) {
       setCallRequest(false);
+      setPreviewImage(null);
       setPhoto(null);
       reset();
     } else {
@@ -98,7 +105,7 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
     if (previewImage) {
       setPhoto(previewImage);
     }
-  }, [photo, setPhoto, fetchedImage, previewImage]);
+  }, [photo, setPhoto, fetchedImage, previewImage, open]);
 
   useEffect(() => {
     setValue("diagnosis", valueDiagnosis);
@@ -107,11 +114,8 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
   const handleImage = (event: ChangeEvent<HTMLInputElement>) => {
     if (event?.target?.files?.[0]) {
       const file = event.target.files[0];
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      setSelectedImage(file);
+      setPreviewImage(URL.createObjectURL(file))
     }
   };
 
@@ -129,9 +133,10 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
     }
   };
 
-  const { isLoading: savingChanges, mutate } = useEditPatientProfile({
-    id: props.patientId,
-    photo: photo
+  const { isLoading: savingProfileDataChanges, mutate } = useEditPatientProfile({ 
+    id: props.patientId, 
+    image: selectedImage, 
+    photo: photo 
   });
 
   const send = (data: editPatientProfileFormData) => {
@@ -189,336 +194,145 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                   Documentos & Anexos
                 </Tabs.Trigger>
               </Tabs.List>
-              <Tabs.Content value="profile" >
+              <Tabs.Content value="profile">
+                {loadingPatientData && 
+                  <div className="w-full h-full absolute z-20">
+                    <div className="w-full h-full bg-[#f9fafb8b]">
+                      <Load
+                        divProps={{
+                          className:
+                            "w-full h-[488px] relative flex items-center justify-center bg-gray-500-50",
+                        }}
+                      />
+                    </div>
+                  </div>
+                }  
+                {savingProfileDataChanges && 
+                  <div className="w-full h-full absolute z-20">
+                    <div className="w-full h-full bg-[#f9fafb8b]">
+                      <Load
+                        divProps={{
+                          className:
+                            "w-full h-[488px] relative flex items-center justify-center bg-gray-500-50",
+                        }}
+                      />
+                    </div>
+                  </div>
+                }
                 <div
                   id="modal-scroll"
                   className="w-full h-[488px] px-6 py-6 overflow-y-scroll"
                 >
-                  {isLoadingPatientData || savingChanges ? (
-                    <Load
-                      divProps={{
-                        className:
-                          "w-full h-[488px] flex items-center justify-center relative bg-gray-500-50",
-                      }}
-                    />
-                  ) : (
-                    <form
-                      className="w-full flex flex-col gap-10"
-                      onSubmit={handleSubmit(send)}
-                    >
-                      <div className="w-full flex flex-col gap-6">
-                        <div className="w-full flex flex-col gap-2">
-                          <div className="w-full flex items-center gap-4">
-                            <div className="w-[72px] flex items-center flex-col gap-2">
-                              <div className="w-full flex items-center justify-center">
-                                <span className="text-sm font-semibold text-brand-standard-black">
-                                  Foto
-                                </span>
-                              </div>
-                              <div className="w-full flex items-center justify-center">
-                                <Avatar.Root
-                                  className={
-                                    !photo
-                                      ? "w-16 h-16 border border-gray-200 rounded-full flex items-center justify-center overflow-hidden"
-                                      : "w-16 h-16 rounded-full flex items-center justify-center overflow-hidden"
-                                  }
-                                >
-                                  {!photo ? (
-                                    <div className="w-4 h-4">
-                                      <CameraIcon
-                                        className="w-full h-full object-cover"
-                                        color="#e5e7eb"
-                                      />
-                                    </div>
-                                  ) : (
-                                    <Avatar.Image
-                                      className="w-full h-full object-cover"
-                                      src={photo}
-                                    />
-                                  )}
-                                </Avatar.Root>
-                              </div>
+                  <form
+                    className="w-full flex flex-col gap-10"
+                    onSubmit={handleSubmit(send)}
+                  >
+                    <div className="w-full flex flex-col gap-6">
+                      <div className="w-full flex flex-col gap-2">
+                        <div className="w-full flex items-center gap-4">
+                          <div className="w-[72px] flex items-center flex-col gap-2">
+                            <div className="w-full flex items-center justify-center">
+                              <span className="text-sm font-semibold text-brand-standard-black">
+                                Foto
+                              </span>
                             </div>
-                            <div className="w-full h-full flex">
-                              <div className="w-full flex justify-center flex-col gap-1">
-                                <label
-                                  htmlFor="patient-photo-file"
-                                  className="w-[156px] text-base font-normal text-[#4573D2] cursor-pointer"
-                                >
-                                  Selecionar uma foto
-                                </label>
-                                <input
-                                  type="file"
-                                  accept=".jpg, .jpeg, .png"
-                                  id="patient-photo-file"
-                                  className="hidden"
-                                  onChange={handleImage}
-                                />
-                                <div className="w-full">
-                                  <div className="w-[516px] flex flex-col">
-                                    <p className="w-16 text-brand-standard-black font-semibold text-sm">
-                                      Dica:
-                                    </p>
-                                    <p className="w-[500px] text-gray-500 font-normal text-sm whitespace-nowrap">
-                                      Uma foto de perfil do paciente o ajuda a ser
-                                      reconhecido na plataforma.
-                                    </p>
+                            <div className="w-full flex items-center justify-center">
+                              <Avatar.Root
+                                className={
+                                  !photo
+                                    ? "w-16 h-16 border border-gray-200 rounded-full flex items-center justify-center overflow-hidden"
+                                    : "w-16 h-16 rounded-full flex items-center justify-center overflow-hidden"
+                                }
+                              >
+                                {!photo ? (
+                                  <div className="w-4 h-4">
+                                    <CameraIcon
+                                      className="w-full h-full object-cover"
+                                      color="#e5e7eb"
+                                    />
                                   </div>
+                                ) : (
+                                  <Avatar.Image
+                                    className="w-full h-full object-cover"
+                                    src={photo}
+                                  />
+                                )}
+                              </Avatar.Root>
+                            </div>
+                          </div>
+                          <div className="w-full h-full flex">
+                            <div className="w-full flex justify-center flex-col gap-1">
+                              <label
+                                htmlFor="patient-photo-file"
+                                className="w-[156px] text-base font-normal text-[#4573D2] cursor-pointer"
+                              >
+                                Selecionar uma foto
+                              </label>
+                              <input
+                                type="file"
+                                accept=".jpg, .jpeg, .png"
+                                id="patient-photo-file"
+                                className="hidden"
+                                onChange={handleImage}
+                              />
+                              <div className="w-full">
+                                <div className="w-[516px] flex flex-col">
+                                  <p className="w-16 text-brand-standard-black font-semibold text-sm">
+                                    Dica:
+                                  </p>
+                                  <p className="w-[500px] text-gray-500 font-normal text-sm whitespace-nowrap">
+                                    Uma foto de perfil do paciente o ajuda a ser
+                                    reconhecido na plataforma.
+                                  </p>
                                 </div>
                               </div>
                             </div>
                           </div>
-                          <div className="w-full h-10 flex items-center gap-2">
-                            <span className="text-sm font-semibold text-brand-standard-black">
-                              ID:
-                            </span>
-                            <p className="text-base font-normal text-brand-standard-black">
-                              {props?.patientId}
-                            </p>
-                          </div>
                         </div>
-                        <div className="w-full flex flex-row gap-4">
-                          <div className="w-44">
-                            <div className="w-44 flex flex-col gap-6">
-                              <div className="w-full flex flex-col gap-3">
-                                <label htmlFor="entry_date" className="w-full text-sm font-normal text-brand-standard-black">Data de entrada</label>
-                                <input
-                                  type="text"
-                                  className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                                  {...register("entry_date")}
-                                />
-                              </div>
-                            </div>
-                          </div>
-                          <div className="w-44">
-                            <div className="w-44 flex flex-col gap-6">
-                              <div className="w-full flex flex-col gap-3">
-                                <label htmlFor="departure_date" className="w-full text-sm font-normal text-brand-standard-black">Data de saída</label>
-                                <input
-                                  type="text"
-                                  className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                                  {...register("departure_date")}
-                                />
-                              </div>
-                            </div>
-                          </div>
-                          <div className="w-full">
-                            <div className="w-full flex flex-col gap-6">
-                              <div className="w-full flex flex-col gap-3">
-                                <label htmlFor="prognosis" className="w-full text-sm font-normal text-brand-standard-black">Prognóstico</label>
-                                <Select
-                                  styles={{
-                                    control: (baseStyles, state) => ({
-                                      ...baseStyles,
-                                      width: "100%",
-                                      height: 40,
-                                      borderColor: state.isFocused ? "#e2e8f0" : "#e2e8f0",
-                                      borderRadius: 4,
-                                      whiteSpace: "nowrap",
-                                      textOverflow: "ellipsis",
-                                      fontFamily: "Inter",
-                                      fontWeight: 400,
-                                      fontSize: "0.875rem",
-                                      lineHeight: "1.25rem",
-                                    }),
-                                  }}
-                                  theme={(theme) => ({
-                                    ...theme,
-                                    colors: {
-                                      ...theme.colors,
-                                      primary75: "#cbd5e1",
-                                      primary50: "##e2e8f0",
-                                      primary25: "#f8fafc",
-                                      primary: "#212529",
-                                    },
-                                  })}
-                                  placeholder="Selecione o prognóstico"
-                                  isSearchable={false}
-                                  options={prognosisOptions}
-                                  value={
-                                    selectPrognosisValue
-                                      ? prognosisOptions.find(
-                                          (x) => x.value === selectPrognosisValue
-                                        )
-                                      : selectPrognosisValue
-                                  }
-                                  onChange={(option) =>
-                                    selectPrognosisOnChange(option ? option.value : option)
-                                  }
-                                  {...restSelectPrognosis}
-                                />
-                              </div>
-                            </div>
-                          </div>
+                        <div className="w-full h-10 flex items-center gap-2">
+                          <span className="text-sm font-semibold text-brand-standard-black">
+                            ID:
+                          </span>
+                          <p className="text-base font-normal text-brand-standard-black">
+                            {props?.patientId}
+                          </p>
                         </div>
-                        <div className="w-full flex flex-row gap-4">
-                          <div className="w-[368px]">
-                            <div className="w-[368px] flex flex-col gap-3">
-                              <label htmlFor="name" className="w-full text-sm font-normal text-brand-standard-black">Nome do paciente</label>
-                              <input
-                                type="text"
-                                className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                                {...register("name")}
-                              />
-                            </div>
-                          </div>
-                          <div className="w-full">
+                      </div>
+                      <div className="w-full flex flex-row gap-4">
+                        <div className="w-44">
+                          <div className="w-44 flex flex-col gap-6">
                             <div className="w-full flex flex-col gap-3">
-                              <label htmlFor="specie" className="w-full text-sm font-normal text-brand-standard-black">Espécie</label>
+                              <label htmlFor="entry_date" className="w-full text-sm font-normal text-brand-standard-black">Data de entrada</label>
                               <input
                                 type="text"
                                 className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                                {...register("specie")}
+                                {...register("entry_date")}
                               />
                             </div>
                           </div>
                         </div>
-                        <div className="w-full flex flex-row gap-4">
-                          <div className="w-[368px]">
-                            <div className="w-[368px] flex flex-col gap-3">
-                              <label htmlFor="owner" className="w-full text-sm font-normal text-brand-standard-black">Nome do tutor(a)</label>
+                        <div className="w-44">
+                          <div className="w-44 flex flex-col gap-6">
+                            <div className="w-full flex flex-col gap-3">
+                              <label htmlFor="departure_date" className="w-full text-sm font-normal text-brand-standard-black">Data de saída</label>
                               <input
                                 type="text"
                                 className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                                {...register("owner")}
+                                {...register("departure_date")}
                               />
-                            </div>
-                          </div>
-                          <div className="w-full">
-                            <div className="w-full flex flex-col gap-6">
-                              <div className="w-full flex flex-col gap-3">
-                                <label htmlFor="race" className="w-full text-sm font-normal text-brand-standard-black">Raça</label>
-                                <input
-                                  type="text"
-                                  className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                                  {...register("race")}
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="w-full flex flex-row gap-4">
-                          <div className="w-44">
-                            <div className="w-44 flex flex-col gap-6">
-                              <div className="w-full flex flex-col gap-3">
-                                <label htmlFor="physical_shape" className="w-full text-sm font-normal text-brand-standard-black">Porte físico</label>
-                                <Select
-                                  styles={{
-                                    control: (baseStyles, state) => ({
-                                      ...baseStyles,
-                                      width: "100%",
-                                      height: 40,
-                                      borderColor: state.isFocused ? "#e2e8f0" : "#e2e8f0",
-                                      borderRadius: 4,
-                                      whiteSpace: "nowrap",
-                                      textOverflow: "ellipsis",
-                                      fontFamily: "Inter",
-                                      fontWeight: 400,
-                                      fontSize: "0.875rem",
-                                      lineHeight: "1.25rem",
-                                    }),
-                                  }}
-                                  theme={(theme) => ({
-                                    ...theme,
-                                    colors: {
-                                      ...theme.colors,
-                                      primary75: "#cbd5e1",
-                                      primary50: "##e2e8f0",
-                                      primary25: "#f8fafc",
-                                      primary: "#212529",
-                                    },
-                                  })}
-                                  placeholder="Selecione"
-                                  isSearchable={false}
-                                  options={physicalShapeOptions}
-                                  value={
-                                    selectPhysicalShapeValue
-                                      ? physicalShapeOptions.find(
-                                          (x) => x.value === selectPhysicalShapeValue
-                                        )
-                                      : selectPhysicalShapeValue
-                                  }
-                                  onChange={(option) =>
-                                    selectPhysicalShapeOnChange(
-                                      option ? option.value : option
-                                    )
-                                  }
-                                  {...restSelectPhysicalShape}
-                                />
-                              </div>
-                            </div>
-                          </div>
-                          <div className="w-44">
-                            <div className="w-44 flex flex-col gap-6">
-                              <div className="w-full flex flex-col gap-3">
-                                <label htmlFor="weight" className="w-full text-sm font-normal text-brand-standard-black">Peso</label>
-                                <input
-                                  type="text"
-                                  className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                                  {...register("weight")}
-                                />
-                              </div>
-                            </div>
-                          </div>
-                          <div className="w-full">
-                            <div className="w-full flex flex-col gap-6">
-                              <div className="w-full flex flex-col gap-3">
-                                <label htmlFor="gender" className="w-full text-sm font-normal text-brand-standard-black">Gênero</label>
-                                <Select
-                                  styles={{
-                                    control: (baseStyles, state) => ({
-                                      ...baseStyles,
-                                      width: "100%",
-                                      height: 40,
-                                      borderColor: state.isFocused ? "#e2e8f0" : "#e2e8f0",
-                                      borderRadius: 4,
-                                      whiteSpace: "nowrap",
-                                      textOverflow: "ellipsis",
-                                      fontFamily: "Inter",
-                                      fontWeight: 400,
-                                      fontSize: "0.875rem",
-                                      lineHeight: "1.25rem",
-                                    }),
-                                  }}
-                                  theme={(theme) => ({
-                                    ...theme,
-                                    colors: {
-                                      ...theme.colors,
-                                      primary75: "#cbd5e1",
-                                      primary50: "##e2e8f0",
-                                      primary25: "#f8fafc",
-                                      primary: "#212529",
-                                    },
-                                  })}
-                                  placeholder="Selecione o sexo do paciente"
-                                  isSearchable={false}
-                                  options={genderOptions}
-                                  onChange={(option) =>
-                                    selectGenderOnChange(option ? option.value : option)
-                                  }
-                                  value={
-                                    selectGenderValue
-                                      ? genderOptions.find(
-                                          (x) => x.value === selectGenderValue
-                                        )
-                                      : selectGenderValue
-                                  }
-                                  {...restSelectGender}
-                                />
-                              </div>
                             </div>
                           </div>
                         </div>
                         <div className="w-full">
-                          <div className="w-full flex flex-col gap-5">
+                          <div className="w-full flex flex-col gap-6">
                             <div className="w-full flex flex-col gap-3">
-                              <label htmlFor="diagnosis" className="w-full text-sm font-normal text-brand-standard-black">Diagnóstico/Suspeita Clínica</label>
-                              <CreatableSelect
+                              <label htmlFor="prognosis" className="w-full text-sm font-normal text-brand-standard-black">Prognóstico</label>
+                              <Select
                                 styles={{
                                   control: (baseStyles, state) => ({
                                     ...baseStyles,
                                     width: "100%",
-                                    minHeight: 40,
+                                    height: 40,
                                     borderColor: state.isFocused ? "#e2e8f0" : "#e2e8f0",
                                     borderRadius: 4,
                                     whiteSpace: "nowrap",
@@ -539,38 +353,277 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                                     primary: "#212529",
                                   },
                                 })}
-                                components={{ DropdownIndicator: null }}
-                                inputValue={diagnosisInputValue}
-                                isClearable
-                                isMulti
-                                menuIsOpen={false}
-                                onChange={(newValue) => setValueDiagnosis(newValue)}
-                                onInputChange={(newValue) =>
-                                  setDiagnosisInputValue(newValue)
+                                placeholder="Selecione o prognóstico"
+                                isSearchable={false}
+                                options={prognosisOptions}
+                                value={
+                                  selectPrognosisValue
+                                    ? prognosisOptions.find(
+                                        (x) => x.value === selectPrognosisValue
+                                      )
+                                    : selectPrognosisValue
                                 }
-                                onKeyDown={handleKeyDown}
-                                placeholder="Digite o nome da doença diagnosticada/suspeita clínica e depois aperte a tecla 'Enter'"
-                                value={valueDiagnosis}
+                                onChange={(option) =>
+                                  selectPrognosisOnChange(option ? option.value : option)
+                                }
+                                {...restSelectPrognosis}
                               />
                             </div>
                           </div>
                         </div>
                       </div>
-                      <div className="w-full flex justify-end">
-                        <button
-                          type="submit"
-                          className="border border-gray-200 px-3 py-[6px] rounded text-base text-brand-standard-black font-medium bg-white hover:bg-gray-50"
-                        >
-                          Salvar alterações
-                        </button>
+                      <div className="w-full flex flex-row gap-4">
+                        <div className="w-[368px]">
+                          <div className="w-[368px] flex flex-col gap-3">
+                            <label htmlFor="name" className="w-full text-sm font-normal text-brand-standard-black">Nome do paciente</label>
+                            <input
+                              type="text"
+                              className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                              {...register("name")}
+                            />
+                          </div>
+                        </div>
+                        <div className="w-full">
+                          <div className="w-full flex flex-col gap-3">
+                            <label htmlFor="specie" className="w-full text-sm font-normal text-brand-standard-black">Espécie</label>
+                            <input
+                              type="text"
+                              className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                              {...register("specie")}
+                            />
+                          </div>
+                        </div>
                       </div>
-                    </form>
-                  )}
+                      <div className="w-full flex flex-row gap-4">
+                        <div className="w-[368px]">
+                          <div className="w-[368px] flex flex-col gap-3">
+                            <label htmlFor="owner" className="w-full text-sm font-normal text-brand-standard-black">Nome do tutor(a)</label>
+                            <input
+                              type="text"
+                              className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                              {...register("owner")}
+                            />
+                          </div>
+                        </div>
+                        <div className="w-full">
+                          <div className="w-full flex flex-col gap-6">
+                            <div className="w-full flex flex-col gap-3">
+                              <label htmlFor="race" className="w-full text-sm font-normal text-brand-standard-black">Raça</label>
+                              <input
+                                type="text"
+                                className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                                {...register("race")}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="w-full flex flex-row gap-4">
+                        <div className="w-44">
+                          <div className="w-44 flex flex-col gap-6">
+                            <div className="w-full flex flex-col gap-3">
+                              <label htmlFor="physical_shape" className="w-full text-sm font-normal text-brand-standard-black">Porte físico</label>
+                              <Select
+                                styles={{
+                                  control: (baseStyles, state) => ({
+                                    ...baseStyles,
+                                    width: "100%",
+                                    height: 40,
+                                    borderColor: state.isFocused ? "#e2e8f0" : "#e2e8f0",
+                                    borderRadius: 4,
+                                    whiteSpace: "nowrap",
+                                    textOverflow: "ellipsis",
+                                    fontFamily: "Inter",
+                                    fontWeight: 400,
+                                    fontSize: "0.875rem",
+                                    lineHeight: "1.25rem",
+                                  }),
+                                }}
+                                theme={(theme) => ({
+                                  ...theme,
+                                  colors: {
+                                    ...theme.colors,
+                                    primary75: "#cbd5e1",
+                                    primary50: "##e2e8f0",
+                                    primary25: "#f8fafc",
+                                    primary: "#212529",
+                                  },
+                                })}
+                                placeholder="Selecione"
+                                isSearchable={false}
+                                options={physicalShapeOptions}
+                                value={
+                                  selectPhysicalShapeValue
+                                    ? physicalShapeOptions.find(
+                                        (x) => x.value === selectPhysicalShapeValue
+                                      )
+                                    : selectPhysicalShapeValue
+                                }
+                                onChange={(option) =>
+                                  selectPhysicalShapeOnChange(
+                                    option ? option.value : option
+                                  )
+                                }
+                                {...restSelectPhysicalShape}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="w-44">
+                          <div className="w-44 flex flex-col gap-6">
+                            <div className="w-full flex flex-col gap-3">
+                              <label htmlFor="weight" className="w-full text-sm font-normal text-brand-standard-black">Peso</label>
+                              <input
+                                type="text"
+                                className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                                {...register("weight")}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="w-full">
+                          <div className="w-full flex flex-col gap-6">
+                            <div className="w-full flex flex-col gap-3">
+                              <label htmlFor="gender" className="w-full text-sm font-normal text-brand-standard-black">Gênero</label>
+                              <Select
+                                styles={{
+                                  control: (baseStyles, state) => ({
+                                    ...baseStyles,
+                                    width: "100%",
+                                    height: 40,
+                                    borderColor: state.isFocused ? "#e2e8f0" : "#e2e8f0",
+                                    borderRadius: 4,
+                                    whiteSpace: "nowrap",
+                                    textOverflow: "ellipsis",
+                                    fontFamily: "Inter",
+                                    fontWeight: 400,
+                                    fontSize: "0.875rem",
+                                    lineHeight: "1.25rem",
+                                  }),
+                                }}
+                                theme={(theme) => ({
+                                  ...theme,
+                                  colors: {
+                                    ...theme.colors,
+                                    primary75: "#cbd5e1",
+                                    primary50: "##e2e8f0",
+                                    primary25: "#f8fafc",
+                                    primary: "#212529",
+                                  },
+                                })}
+                                placeholder="Selecione o sexo do paciente"
+                                isSearchable={false}
+                                options={genderOptions}
+                                onChange={(option) =>
+                                  selectGenderOnChange(option ? option.value : option)
+                                }
+                                value={
+                                  selectGenderValue
+                                    ? genderOptions.find(
+                                        (x) => x.value === selectGenderValue
+                                      )
+                                    : selectGenderValue
+                                }
+                                {...restSelectGender}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="w-full">
+                        <div className="w-full flex flex-col gap-5">
+                          <div className="w-full flex flex-col gap-3">
+                            <label htmlFor="diagnosis" className="w-full text-sm font-normal text-brand-standard-black">Diagnóstico/Suspeita Clínica</label>
+                            <CreatableSelect
+                              styles={{
+                                control: (baseStyles, state) => ({
+                                  ...baseStyles,
+                                  width: "100%",
+                                  minHeight: 40,
+                                  borderColor: state.isFocused ? "#e2e8f0" : "#e2e8f0",
+                                  borderRadius: 4,
+                                  whiteSpace: "nowrap",
+                                  textOverflow: "ellipsis",
+                                  fontFamily: "Inter",
+                                  fontWeight: 400,
+                                  fontSize: "0.875rem",
+                                  lineHeight: "1.25rem",
+                                }),
+                              }}
+                              theme={(theme) => ({
+                                ...theme,
+                                colors: {
+                                  ...theme.colors,
+                                  primary75: "#cbd5e1",
+                                  primary50: "##e2e8f0",
+                                  primary25: "#f8fafc",
+                                  primary: "#212529",
+                                },
+                              })}
+                              components={{ DropdownIndicator: null }}
+                              inputValue={diagnosisInputValue}
+                              isClearable
+                              isMulti
+                              menuIsOpen={false}
+                              onChange={(newValue) => setValueDiagnosis(newValue)}
+                              onInputChange={(newValue) =>
+                                setDiagnosisInputValue(newValue)
+                              }
+                              onKeyDown={handleKeyDown}
+                              placeholder="Digite o nome da doença diagnosticada/suspeita clínica e depois aperte a tecla 'Enter'"
+                              value={valueDiagnosis}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="w-full flex justify-end">
+                      <button
+                        type="submit"
+                        className="border border-gray-200 px-3 py-[6px] rounded text-base text-brand-standard-black font-medium bg-white hover:bg-gray-50"
+                      >
+                        Salvar alterações
+                      </button>
+                    </div>
+                  </form>
                 </div>
               </Tabs.Content>
               <Tabs.Content value="reports">
-                <div id="modal-scroll" className="w-full h-[362px] px-6 py-6 overflow-y-scroll">
-                  <StakedReportList patientId={props.patientId} />
+                {loadingReports && 
+                  <div className="w-full h-full absolute z-20">
+                    <div className="w-full h-full bg-[#f9fafb8b]">
+                      <Load
+                        divProps={{
+                          className:
+                            "w-full h-[488px] relative flex items-center justify-center bg-gray-500-50",
+                        }}
+                      />
+                    </div>
+                  </div>
+                }
+                <div 
+                  id="modal-scroll" 
+                  className="w-full h-[362px] px-6 py-6 overflow-y-scroll"
+                >
+                  <div className="w-full flex flex-col items-center gap-6">
+                    {reports && 
+                      reports?.map((data) => (
+                        <Report
+                          key={data.id}
+                          id={data.id}
+                          patientId={data.patientId}
+                          shift={data.shift}
+                          author={data.author}
+                          title={data.title}
+                          report_text={data.report_text}
+                          filename={data.filename}
+                          attachment={data.attachment}
+                          createdAt={data.createdAt}
+                          updatedAt={data.updatedAt}
+                        />
+                      ))
+                    }
+                  </div>
                 </div>
                 <div className="w-full flex justify-end px-6 py-6">
                   <RegisterPatientReportModal patientId={props.patientId} />
@@ -581,7 +634,9 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                   id="modal-scroll"
                   className="w-full h-[362px] px-6 py-6 overflow-y-scroll"
                 >
-                  <StakedExamList />
+                  <div className="w-full flex flex-col items-center gap-6">
+                    <Exam />
+                  </div>
                 </div>
                 <div className="w-full flex justify-end px-6 py-6">
                   <RegisterPatientExamModal />

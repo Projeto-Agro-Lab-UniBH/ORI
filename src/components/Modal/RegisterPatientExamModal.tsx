@@ -1,35 +1,36 @@
 import * as Dialog from "@radix-ui/react-dialog";
-import { Cross1Icon } from "@radix-ui/react-icons";
+import { Cross1Icon, UploadIcon } from "@radix-ui/react-icons";
+
+/**
+ * Tarefas para este componente:
+ * [] Implementar o formulário.
+ * [] Implementar o input drag and drop de arquivos.
+ * [] Implementar integração com o back-end.
+ */
 
 const RegisterPatientExamModal = () => {
   return (
     <Dialog.Root>
       <Dialog.Trigger className="border border-gray-200 px-3 py-[6px] rounded text-base text-brand-standard-black font-medium bg-white hover:bg-gray-50">
-        Cadastrar novo exame
+        Registrar novo exame
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className="bg-black/60 inset-0 fixed z-20" />
         <Dialog.Content className="w-[608px] rounded-lg border border-gray-200 bg-white fixed overflow-hidden pt-4 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
           <div className="w-full px-6 pb-4 border-b-[1px] border-gray-200 flex items-center flex-row justify-between">
             <Dialog.Title className="font-semibold text-2xl">
-              Cadastrar exame
+              Registrar novo exame
             </Dialog.Title>
             <Dialog.Close className="w-[32px] h-[32px] flex justify-center items-center">
               <Cross1Icon width={24} height={24} />
             </Dialog.Close>
           </div>
-          <div id="modal-scroll" className="w-full px-6 pt-6 pb-6">
+          <div 
+            id="modal-scroll" 
+            className="w-full h-[402px] px-6 py-6 overflow-y-scroll"
+          >
             <form className="w-full flex flex-col h-360">
               <div className="w-full flex flex-col gap-6">
-                <div className="w-[224px]">
-                  <div className="w-[224px] flex flex-col gap-3">
-                    <label htmlFor="" className="w-full text-sm font-normal text-brand-standard-black">Tipo de exame</label>
-                    <input
-                      type="text"
-                      className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                    />
-                  </div>
-                </div>
                 <div className="w-full flex flex-row gap-3">
                   <div className="w-[224px]">
                     <div className="w-[224px] flex flex-col gap-3">
@@ -40,8 +41,19 @@ const RegisterPatientExamModal = () => {
                       />
                     </div>
                   </div>
-                  <div className="w-[322.4px]">
-                    <div className="w-[322.4px] flex flex-col gap-3">
+                </div>
+                <div className="w-full flex flex-row gap-3">
+                  <div className="w-[224px]">
+                    <div className="w-[224px] flex flex-col gap-3">
+                      <label htmlFor="" className="w-full text-sm font-normal text-brand-standard-black">Tipo de exame</label>
+                      <input
+                        type="text"
+                        className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                      />
+                    </div>
+                  </div>
+                  <div className="w-[316.8px]">
+                    <div className="w-[316.8px] flex flex-col gap-3">
                       <label htmlFor="" className="w-full text-sm font-normal text-brand-standard-black">Nome do responsável</label>
                       <input
                         type="text"
@@ -49,7 +61,7 @@ const RegisterPatientExamModal = () => {
                       />
                     </div>
                   </div>
-                </div>
+                </div>      
                 <div className="w-full flex flex-col gap-3">
                   <label htmlFor="annotations" className="w-full text-sm font-normal text-brand-standard-black">Anotações</label>
                   <div>
@@ -61,44 +73,31 @@ const RegisterPatientExamModal = () => {
                   </div>
                 </div>
                 <div className="w-full flex flex-col gap-3">
-                  <div className="w-[558.4px] flex items-center">
-                    <p className="w-[558.4px] max-w-[500px] whitespace-nowrap overflow-hidden text-ellipsis text-sm font-normal text-brand-standard-black">
-                      
-                    </p>
-                  </div>
-                  <div className="w-full flex justify-between">
-                    <div className="w-full flex">
-                      <label
-                        htmlFor="patient-photo-file"
-                        className="border border-gray-200 flex items-center px-3 py-[6px] gap-1 rounded text-base text-brand-standard-black font-medium bg-white hover:border-[#b3b3b3] cursor-pointer"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="#212529"
-                          className="w-5 h-5"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"
-                          />
-                        </svg>
-                        Adicionar um anexo
-                      </label>
-                      <input
-                        type="file"
+                  <div className="max-w-xl">
+                    <label
+                      className="flex justify-center w-full h-24 px-4 transition bg-white border border-gray-200 border-dashed rounded-md appearance-none cursor-pointer hover:border-[#b3b3b3] focus:outline-none"
+                    >
+                      <span className="flex items-center space-x-2">
+                        <UploadIcon width={20} height={20} />
+                        <span className="font-medium text-gray-600">
+                          Pegue e arraste os arquivos para anexar aqui
+                        </span>
+                      </span>
+                      <input 
+                        type="file" 
+                        multiple
                         accept=".doc, .docx, .pdf"
-                        id="patient-photo-file"
+                        id="patient-photo-file" 
                         className="hidden"
                       />
-                    </div>
-                    <div className="w-full flex justify-end">
-                      <button type="submit" className="border border-gray-200 px-3 py-[6px] rounded text-base text-brand-standard-black font-medium bg-white hover:bg-gray-50">
-                        Salvar
-                      </button>
-                    </div>
+                    </label>
+                  </div>
+                </div>
+                <div className="w-full flex flex-col gap-3">
+                  <div className="w-full flex justify-end">
+                    <button type="submit" className="border border-gray-200 px-3 py-[6px] rounded text-base text-brand-standard-black font-medium bg-white hover:bg-gray-50">
+                      Salvar
+                    </button>
                   </div>
                 </div>
               </div>

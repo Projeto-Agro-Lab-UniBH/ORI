@@ -1,33 +1,28 @@
 import EditPatientReportModal from "./Modal/EditPatientReportModal";
 import { DownloadIcon } from "@radix-ui/react-icons";
 import { useEffect, useState } from "react";
-import { api } from "../providers/Api";
 
 type ReportProps = {
-  id: string;
+  id: string
   patientId: string;
-  shift: string;
-  author: string;
-  report_text: string;
-  createdAt: string;
-  updatedAt: string;
-  attachments: string;
+	shift: string;
+	author: string;
+	title: string;
+	report_text: string;
+	filename: string;
+	attachment: string;
+	createdAt: string;
+	updatedAt: string;
 };
 
 const Report = (props: ReportProps) => {
   const [download, setDownload] = useState<any>({} as any);
   
 	useEffect(() => {
-    if (props?.attachments) {
-      (async () => {
-        const response = await api.get(
-          `files/get-file-by-name/${props.attachments}`
-        );
-        const downloadLink = document.createElement("a");
-        downloadLink.href = `data:application/pdf;base64,${response.data}`;
-        downloadLink.download = `${props?.attachments}`;
-        setDownload(downloadLink);
-      })();
+    if (props.attachment) {
+      const downloadLink = document.createElement("a");
+      downloadLink.href = `${props.attachment}`
+      setDownload(downloadLink)
     }
   }, [props]);
 	
@@ -38,7 +33,7 @@ const Report = (props: ReportProps) => {
           <div className="w-full flex flex-row items-center justify-between">
             <div className="w-[504px] items-center flex">
               <span className="w-[504px] whitespace-nowrap text-2xl text-brand-standard-black font-semibold overflow-hidden text-ellipsis">
-                {props.shift}
+                {props.title}
               </span>
             </div>
             <div className="flex items-center gap-4">
@@ -51,8 +46,12 @@ const Report = (props: ReportProps) => {
           <div className="w-full flex-row flex justify-between items-center">
             <div className="w-full flex-row flex items-center gap-5">
               <div className="flex items-center gap-1">
+                <span className="text-sm text-brand-standard-black font-semibold">Turno:</span>
+                <p className="text-base font-normal text-brand-standard-black">{props.shift}</p>    
+              </div>
+              <div className="flex items-center gap-1">
                 <span className="text-sm text-brand-standard-black font-semibold">
-                  Data de realização do exame:
+                  Data de criação:
                 </span>
                 <p className="text-base font-normal text-brand-standard-black">
                   {props.createdAt}
@@ -68,13 +67,13 @@ const Report = (props: ReportProps) => {
               </div>
             </div>
           </div>
-          {!props.attachments ? null : (
+          {props.attachment && (
             <div className="w-full flex gap-2 items-center">
               <button
                 onClick={() => download.click()}
-                className="px-1 py-1 border-none rounded hover:bg-gray-50 flex items-center text-brand-standard-black font-semibold gap-1"
+                className="px-2 py-1 border border-gray-200 rounded hover:border-[#b3b3b3] flex items-center text-brand-standard-black font-semibold gap-1"
               >
-                Arquivo anexado <DownloadIcon />
+                Baixar anexo <DownloadIcon />
               </button>
             </div>
           )}

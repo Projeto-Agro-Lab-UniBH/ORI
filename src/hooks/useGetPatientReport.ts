@@ -4,17 +4,21 @@ import { Dispatch, SetStateAction } from "react";
 
 type ReportResponse = {
   id: string;
-  patientId: string;
-  shift: string;
-  author: string;
-  report_text: string;
-  createdAt: string;
-  updatedAt: string;
-  attachments: string;
+	patientId: string;
+	shift: string;
+	author: string;
+	title: string;
+	report_text: string;
+	filename: string;
+	attachment: string;
+	createdAt: string;
+	updatedAt: string;
 };
 
 type ReportData = {
   id: string;
+  filename: string;
+	attachment: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -22,8 +26,7 @@ type ReportData = {
 export default function useGetPatientReport(param: { 
   id: string, 
   reset: any, 
-  setData: Dispatch<SetStateAction<ReportData>>, 
-  setFecthedAttachment: Dispatch<SetStateAction<string | undefined>>, 
+  setData: Dispatch<SetStateAction<ReportData>>,
   callRequest: boolean 
 }) {
   return useQuery({
@@ -32,7 +35,6 @@ export default function useGetPatientReport(param: {
       await api.get<ReportResponse>(`/reports/${param.id}`).then((res) => {
         param.reset(res.data);
         param.setData(res.data);
-				param.setFecthedAttachment(res.data.attachments)
       });
     },
     enabled: param.callRequest,
