@@ -4,14 +4,12 @@ import { parseCookies } from "nookies";
 import { useRouter } from "next/router";
 import { useEffect, useId } from "react";
 import { GetServerSideProps } from "next";
-import { ExitIcon } from "@radix-ui/react-icons";
 import { useAuthContext } from "../../contexts/AuthContext";
-import UserProfileSkeleton from "../../components/Skeletons/UserProfileSkeleton";
 import RegisterPatientModal from "../../components/Modal/RegisterPatientModal";
 import DataPatientCard from "../../components/Cards/DataPatientCard";
 import Pagination from "../../components/Pagination/Pagination";
 import { LoadingDataPatienCardsSkeletons } from "../../components/Load/LoadingDataPatienCardsSkeletons";
-import UserProfile from "../../components/UserProfile";
+import Header from "../../components/Header/Header";
 import { useSearchParams } from "next/navigation";
 import useSearch from "../../hooks/useSearch";
 
@@ -101,29 +99,7 @@ export default function AppPage() {
 
   return (
     <div className="w-full h-full flex flex-col justify-center px-14 mt-4 mb-10 gap-6">
-      <div className="w-full h-20 flex justify-center">
-        <div className="w-[1280px] flex justify-between">
-          {!user ? (
-            <UserProfileSkeleton />
-          ) : (
-            <UserProfile
-              id={user?.id}
-              profile_photo={user?.profile_photo}
-              username={user?.username}
-              email={user?.email}
-            />
-          )}
-          <div className="w-14 flex justify-end items-center">
-            <button
-              onClick={() => logOut()}
-              className="w-8 h-8 rounded flex justify-center items-center hover:bg-slate-50"
-            >
-              <ExitIcon width={16} height={16} />
-            </button>
-          </div>
-        </div>
-      </div>
-
+      <Header user={user} logOut={logOut} />
       <div className="w-full h-full flex flex-col gap-6 items-center">
         <div className="w-[1280px] h-24 flex items-center flex-col ">
           <div className="w-full h-24 flex items-center gap-3 z-10">
@@ -274,7 +250,6 @@ export default function AppPage() {
           </div>
         </div>
       </div>
-
       <div className="w-full h-full flex flex-col items-center">
         <div className={"w-[1280px] h-full flex flex-col gap-6"}>
           <div className={"w-[1280px] h-full flex flex-col gap-6"}>
