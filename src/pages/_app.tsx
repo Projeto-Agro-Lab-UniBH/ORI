@@ -4,7 +4,7 @@ import { queryClient } from "../providers/QueryClient";
 import { AuthProvider } from "../contexts/AuthContext";
 import { pdfworker } from "../utils/pdfworker";
 import "../styles/globals.css";
-import "../styles/load.css";
+import "../styles/rounded.head.comet.loader.css";
 import "tailwindcss/tailwind.css";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
