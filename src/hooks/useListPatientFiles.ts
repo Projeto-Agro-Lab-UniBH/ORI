@@ -9,7 +9,7 @@ type FileResponse = {
   fileSize: number;
 }
 
-export function useListPatientFiles(param: { patientId: string; callRequest: boolean; }) {
+export default function useListPatientFiles(param: { patientId: string; callRequest: boolean; }) {
   return useQuery({
     queryKey: ["get-file-by-patientId"],
     queryFn: async () => {
