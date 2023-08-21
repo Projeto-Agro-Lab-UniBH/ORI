@@ -8,10 +8,11 @@ const Load = (props: ILoadProps) => {
 	return (
 		<>
 			<div className="container-load" {...props.divProps}>
-				<div className="spinner"></div>
+				<div className="spinner">
+				</div>
 			</div>
 		</>
 	);
 };
 
-export { Load };
+export default Load;

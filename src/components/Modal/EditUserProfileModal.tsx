@@ -8,7 +8,7 @@ import { useMutation, useQuery } from "react-query"
 import { api } from "../../providers/Api";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Load } from "../Load/Load";
+import Load from "../Load/Load";
 
 const editUserProfileFormSchema = z.object({
   username: z.string().nonempty(),

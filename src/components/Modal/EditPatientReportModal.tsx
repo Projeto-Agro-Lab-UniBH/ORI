@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Select from "react-select";
-import { Load } from "../Load/Load";
 import { useMutation } from "react-query";
 import { api } from "../../providers/Api";
 import * as Dialog from "@radix-ui/react-dialog";
@@ -22,6 +21,7 @@ import WarningToDeleteReportModal from "./WarningToDeleteReportModal";
 import useGetPatientReport from "../../hooks/useGetPatientReport";
 import { formatFileSize } from "../../functions/formatBytes";
 import { queryClient } from "../../providers/QueryClient";
+import Load from "../Load/Load";
 
 type EditPatientReportModalProps = {
   id: string;

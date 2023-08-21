@@ -10,11 +10,11 @@ import {
 } from "../../schemas/registerReportFormSchema";
 import { useMutation } from "react-query";
 import { api } from "../../providers/Api";
-import { Load } from "../Load/Load";
 import Select from "react-select";
 import { Document, Page } from "react-pdf";
 import { formatFileSize } from "../../functions/formatBytes";
 import { queryClient } from "../../providers/QueryClient";
+import Load from "../Load/Load";
 
 type RegisterPatientReportProps = {
   patientId: string | null;

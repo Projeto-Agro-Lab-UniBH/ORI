@@ -4,10 +4,10 @@ import { Cross1Icon, TrashIcon, UploadIcon } from "@radix-ui/react-icons";
 import { ChangeEvent, useEffect, useState } from "react";
 import { api } from "../../providers/Api";
 import { useMutation } from "react-query";
-import { Load } from "../Load/Load";
 import { Document, Page } from "react-pdf";
 import { formatFileSize } from "../../functions/formatBytes";
 import { queryClient } from "../../providers/QueryClient";
+import Load from "../Load/Load";
 
 type AddAttachmentModalProps = {
   patientId: string | null;
