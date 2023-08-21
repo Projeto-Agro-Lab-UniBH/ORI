@@ -10,7 +10,8 @@ type ReportResponse = {
 	title: string;
 	report_text: string;
 	filename: string;
-	attachment: string;
+	fileUrl: string;
+  fileSize: number;
 	createdAt: string;
 	updatedAt: string;
 };
@@ -18,7 +19,8 @@ type ReportResponse = {
 type ReportData = {
   id: string;
   filename: string;
-	attachment: string;
+	fileUrl: string;
+  fileSize: number;
   createdAt: string;
   updatedAt: string;
 };

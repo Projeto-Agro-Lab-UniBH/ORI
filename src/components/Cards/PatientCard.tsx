@@ -6,7 +6,7 @@ import EditPatientProfileModal from "../Modal/EditPatientProfileModal";
 import { Badges } from "../Badges/Badges";
 import { Option } from "../../interfaces/Option";
 
-type DataPatientCardProps = {
+type PatientCardProps = {
   id: string;
   profile_photo?: string;
   name: string;
@@ -20,7 +20,7 @@ type DataPatientCardProps = {
   exams: Array<string>;
 };
 
-const DataPatientCard = (props: DataPatientCardProps) => {
+const PatientCard = (props: PatientCardProps) => {
   const [copyArea, setCopyArea] = useState("");
 
   useEffect(() => {
@@ -162,4 +162,4 @@ const DataPatientCard = (props: DataPatientCardProps) => {
   );
 };
 
-export default DataPatientCard;
+export default PatientCard;

@@ -1,28 +1,30 @@
 import Select from "react-select";
 import { Load } from "../Load/Load";
+import ReportCard from "../Cards/ReportCard";
 import * as Tabs from "@radix-ui/react-tabs";
 import * as Avatar from "@radix-ui/react-avatar";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Option } from "../../interfaces/Option";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useController } from "react-hook-form";
-import { CameraIcon, Cross1Icon, FileTextIcon } from "@radix-ui/react-icons";
+import { CameraIcon, Cross1Icon } from "@radix-ui/react-icons";
 import { ChangeEvent, KeyboardEventHandler, useEffect, useState } from "react";
 import { editPatientProfileFormData, editPatientProfileFormSchema } from "../../schemas/editPatientProfileFormSchema";
 import useEditPatientProfile from "../../hooks/useEditPatientProfile";
 import useGetPatientProfile from "../../hooks/useGetPatientProfile";
-import Report from '../Report';
 import RegisterPatientReportModal from "./RegisterPatientReportModal";
 import CreatableSelect from "react-select/creatable";
 import AddAttachmentModal from "./AddAttachmentModal";
 import RegisterPatientExamModal from "./RegisterPatientExamModal";
 import useListPatientReports from "../../hooks/useListPatientReports";
-import Exam from "../Exam";
+import { useListPatientFiles } from "../../hooks/useListPatientFiles";
+import { FileCard } from "../Cards/FileCard";
+import ExamCard from "../Cards/ExamCard";
 
 type EditPatientProfileModalProps = {
   patientId: string;
-	children: React.ReactNode;
-}
+  children: React.ReactNode;
+};
 
 const createOption = (label: string) => ({
   label,
@@ -54,37 +56,67 @@ const prognosisOptions = [
 const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
   const [open, setOpen] = useState<boolean>(false);
   const [callRequest, setCallRequest] = useState<boolean>(false);
-  const { reset, register, control, formState: { errors }, handleSubmit, setValue} = 
-    useForm<editPatientProfileFormData>({
-      resolver: zodResolver(editPatientProfileFormSchema),
-    });
+  const {
+    reset,
+    register,
+    control,
+    formState: { errors },
+    handleSubmit,
+    setValue,
+  } = useForm<editPatientProfileFormData>({
+    resolver: zodResolver(editPatientProfileFormSchema),
+  });
 
-  const [files, setFiles] = useState<FileList>({} as FileList);
-  const [selectedImage, setSelectedImage] = useState<File | undefined>(undefined);  
+  const [selectedImage, setSelectedImage] = useState<File | undefined>(
+    undefined
+  );
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [fetchedImage, setFetchedImage] = useState<string | null>(null);
   const [photo, setPhoto] = useState<string | null>(null);
   const [diagnosisInputValue, setDiagnosisInputValue] = useState("");
   const [valueDiagnosis, setValueDiagnosis] = useState<readonly Option[]>([]);
 
-  const { field: selectPhysicalShape } = useController({ name: "physical_shape", control });
+  const { field: selectPhysicalShape } = useController({
+    name: "physical_shape",
+    control,
+  });
   const { field: selectGender } = useController({ name: "gender", control });
-  const { field: selectPrognosis } = useController({ name: "prognosis", control });
-  const { value: selectPhysicalShapeValue, onChange: selectPhysicalShapeOnChange, ...restSelectPhysicalShape } = selectPhysicalShape;
-  const { value: selectGenderValue, onChange: selectGenderOnChange,...restSelectGender } = selectGender;
-  const { value: selectPrognosisValue, onChange: selectPrognosisOnChange, ...restSelectPrognosis } = selectPrognosis;
+  const { field: selectPrognosis } = useController({
+    name: "prognosis",
+    control,
+  });
+  const {
+    value: selectPhysicalShapeValue,
+    onChange: selectPhysicalShapeOnChange,
+    ...restSelectPhysicalShape
+  } = selectPhysicalShape;
+  const {
+    value: selectGenderValue,
+    onChange: selectGenderOnChange,
+    ...restSelectGender
+  } = selectGender;
+  const {
+    value: selectPrognosisValue,
+    onChange: selectPrognosisOnChange,
+    ...restSelectPrognosis
+  } = selectPrognosis;
 
-  const { isLoading: loadingPatientData } = useGetPatientProfile({ 
-    id: props.patientId, 
-    reset: reset, 
-    setValueDiagnosis: setValueDiagnosis, 
-    setFetchedImage: setFetchedImage, 
-    callRequest: callRequest 
+  const { isLoading: loadingPatientData } = useGetPatientProfile({
+    id: props.patientId,
+    reset: reset,
+    setValueDiagnosis: setValueDiagnosis,
+    setFetchedImage: setFetchedImage,
+    callRequest: callRequest,
   });
 
-  const { isLoading: loadingReports, data: reports } = useListPatientReports({ 
-    patientId: props.patientId, 
-    callRequest: callRequest 
+  const { isLoading: loadingReports, data: reports } = useListPatientReports({
+    patientId: props.patientId,
+    callRequest: callRequest,
+  });
+
+  const { isLoading: loadingFiles, data: patientFiles } = useListPatientFiles({
+    patientId: props.patientId,
+    callRequest: callRequest,
   });
 
   useEffect(() => {
@@ -115,7 +147,7 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
     if (event?.target?.files?.[0]) {
       const file = event.target.files[0];
       setSelectedImage(file);
-      setPreviewImage(URL.createObjectURL(file))
+      setPreviewImage(URL.createObjectURL(file));
     }
   };
 
@@ -133,11 +165,13 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
     }
   };
 
-  const { isLoading: savingProfileDataChanges, mutate } = useEditPatientProfile({ 
-    id: props.patientId, 
-    image: selectedImage, 
-    photo: photo 
-  });
+  const { isLoading: savingProfileDataChanges, mutate } = useEditPatientProfile(
+    {
+      id: props.patientId,
+      image: selectedImage,
+      photo: photo,
+    }
+  );
 
   const send = (data: editPatientProfileFormData) => {
     const request = {
@@ -172,12 +206,12 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                 >
                   Perfil
                 </Tabs.Trigger>
-                <Tabs.Trigger 
+                <Tabs.Trigger
                   value="reports"
                   id="button-tab"
                   className="inline-block px-[12px] pt-[6px] pb-3 rounded-t-lg border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 >
-                  Relatório
+                  Relatórios
                 </Tabs.Trigger>
                 <Tabs.Trigger
                   value="exams"
@@ -191,11 +225,11 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                   id="button-tab"
                   className="inline-block px-[12px] pt-[6px] pb-3 rounded-t-lg border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 >
-                  Documentos & Anexos
+                  Arquivos
                 </Tabs.Trigger>
               </Tabs.List>
               <Tabs.Content value="profile">
-                {loadingPatientData && 
+                {loadingPatientData && (
                   <div className="w-full h-full absolute z-20">
                     <div className="w-full h-full bg-[#f9fafb8b]">
                       <Load
@@ -206,8 +240,8 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                       />
                     </div>
                   </div>
-                }  
-                {savingProfileDataChanges && 
+                )}
+                {savingProfileDataChanges && (
                   <div className="w-full h-full absolute z-20">
                     <div className="w-full h-full bg-[#f9fafb8b]">
                       <Load
@@ -218,7 +252,7 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                       />
                     </div>
                   </div>
-                }
+                )}
                 <div
                   id="modal-scroll"
                   className="w-full h-[488px] px-6 py-6 overflow-y-scroll"
@@ -302,7 +336,12 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                         <div className="w-44">
                           <div className="w-44 flex flex-col gap-6">
                             <div className="w-full flex flex-col gap-3">
-                              <label htmlFor="entry_date" className="w-full text-sm font-normal text-brand-standard-black">Data de entrada</label>
+                              <label
+                                htmlFor="entry_date"
+                                className="w-full text-sm font-normal text-brand-standard-black"
+                              >
+                                Data de entrada
+                              </label>
                               <input
                                 type="text"
                                 className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
@@ -314,7 +353,12 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                         <div className="w-44">
                           <div className="w-44 flex flex-col gap-6">
                             <div className="w-full flex flex-col gap-3">
-                              <label htmlFor="departure_date" className="w-full text-sm font-normal text-brand-standard-black">Data de saída</label>
+                              <label
+                                htmlFor="departure_date"
+                                className="w-full text-sm font-normal text-brand-standard-black"
+                              >
+                                Data de saída
+                              </label>
                               <input
                                 type="text"
                                 className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
@@ -326,14 +370,21 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                         <div className="w-full">
                           <div className="w-full flex flex-col gap-6">
                             <div className="w-full flex flex-col gap-3">
-                              <label htmlFor="prognosis" className="w-full text-sm font-normal text-brand-standard-black">Prognóstico</label>
+                              <label
+                                htmlFor="prognosis"
+                                className="w-full text-sm font-normal text-brand-standard-black"
+                              >
+                                Prognóstico
+                              </label>
                               <Select
                                 styles={{
                                   control: (baseStyles, state) => ({
                                     ...baseStyles,
                                     width: "100%",
                                     height: 40,
-                                    borderColor: state.isFocused ? "#e2e8f0" : "#e2e8f0",
+                                    borderColor: state.isFocused
+                                      ? "#e2e8f0"
+                                      : "#e2e8f0",
                                     borderRadius: 4,
                                     whiteSpace: "nowrap",
                                     textOverflow: "ellipsis",
@@ -364,7 +415,9 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                                     : selectPrognosisValue
                                 }
                                 onChange={(option) =>
-                                  selectPrognosisOnChange(option ? option.value : option)
+                                  selectPrognosisOnChange(
+                                    option ? option.value : option
+                                  )
                                 }
                                 {...restSelectPrognosis}
                               />
@@ -375,7 +428,12 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                       <div className="w-full flex flex-row gap-4">
                         <div className="w-[368px]">
                           <div className="w-[368px] flex flex-col gap-3">
-                            <label htmlFor="name" className="w-full text-sm font-normal text-brand-standard-black">Nome do paciente</label>
+                            <label
+                              htmlFor="name"
+                              className="w-full text-sm font-normal text-brand-standard-black"
+                            >
+                              Nome do paciente
+                            </label>
                             <input
                               type="text"
                               className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
@@ -385,7 +443,12 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                         </div>
                         <div className="w-full">
                           <div className="w-full flex flex-col gap-3">
-                            <label htmlFor="specie" className="w-full text-sm font-normal text-brand-standard-black">Espécie</label>
+                            <label
+                              htmlFor="specie"
+                              className="w-full text-sm font-normal text-brand-standard-black"
+                            >
+                              Espécie
+                            </label>
                             <input
                               type="text"
                               className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
@@ -397,7 +460,12 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                       <div className="w-full flex flex-row gap-4">
                         <div className="w-[368px]">
                           <div className="w-[368px] flex flex-col gap-3">
-                            <label htmlFor="owner" className="w-full text-sm font-normal text-brand-standard-black">Nome do tutor(a)</label>
+                            <label
+                              htmlFor="owner"
+                              className="w-full text-sm font-normal text-brand-standard-black"
+                            >
+                              Nome do tutor(a)
+                            </label>
                             <input
                               type="text"
                               className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
@@ -408,7 +476,12 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                         <div className="w-full">
                           <div className="w-full flex flex-col gap-6">
                             <div className="w-full flex flex-col gap-3">
-                              <label htmlFor="race" className="w-full text-sm font-normal text-brand-standard-black">Raça</label>
+                              <label
+                                htmlFor="race"
+                                className="w-full text-sm font-normal text-brand-standard-black"
+                              >
+                                Raça
+                              </label>
                               <input
                                 type="text"
                                 className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
@@ -422,14 +495,21 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                         <div className="w-44">
                           <div className="w-44 flex flex-col gap-6">
                             <div className="w-full flex flex-col gap-3">
-                              <label htmlFor="physical_shape" className="w-full text-sm font-normal text-brand-standard-black">Porte físico</label>
+                              <label
+                                htmlFor="physical_shape"
+                                className="w-full text-sm font-normal text-brand-standard-black"
+                              >
+                                Porte físico
+                              </label>
                               <Select
                                 styles={{
                                   control: (baseStyles, state) => ({
                                     ...baseStyles,
                                     width: "100%",
                                     height: 40,
-                                    borderColor: state.isFocused ? "#e2e8f0" : "#e2e8f0",
+                                    borderColor: state.isFocused
+                                      ? "#e2e8f0"
+                                      : "#e2e8f0",
                                     borderRadius: 4,
                                     whiteSpace: "nowrap",
                                     textOverflow: "ellipsis",
@@ -455,7 +535,8 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                                 value={
                                   selectPhysicalShapeValue
                                     ? physicalShapeOptions.find(
-                                        (x) => x.value === selectPhysicalShapeValue
+                                        (x) =>
+                                          x.value === selectPhysicalShapeValue
                                       )
                                     : selectPhysicalShapeValue
                                 }
@@ -472,7 +553,12 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                         <div className="w-44">
                           <div className="w-44 flex flex-col gap-6">
                             <div className="w-full flex flex-col gap-3">
-                              <label htmlFor="weight" className="w-full text-sm font-normal text-brand-standard-black">Peso</label>
+                              <label
+                                htmlFor="weight"
+                                className="w-full text-sm font-normal text-brand-standard-black"
+                              >
+                                Peso
+                              </label>
                               <input
                                 type="text"
                                 className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
@@ -484,14 +570,21 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                         <div className="w-full">
                           <div className="w-full flex flex-col gap-6">
                             <div className="w-full flex flex-col gap-3">
-                              <label htmlFor="gender" className="w-full text-sm font-normal text-brand-standard-black">Gênero</label>
+                              <label
+                                htmlFor="gender"
+                                className="w-full text-sm font-normal text-brand-standard-black"
+                              >
+                                Gênero
+                              </label>
                               <Select
                                 styles={{
                                   control: (baseStyles, state) => ({
                                     ...baseStyles,
                                     width: "100%",
                                     height: 40,
-                                    borderColor: state.isFocused ? "#e2e8f0" : "#e2e8f0",
+                                    borderColor: state.isFocused
+                                      ? "#e2e8f0"
+                                      : "#e2e8f0",
                                     borderRadius: 4,
                                     whiteSpace: "nowrap",
                                     textOverflow: "ellipsis",
@@ -515,7 +608,9 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                                 isSearchable={false}
                                 options={genderOptions}
                                 onChange={(option) =>
-                                  selectGenderOnChange(option ? option.value : option)
+                                  selectGenderOnChange(
+                                    option ? option.value : option
+                                  )
                                 }
                                 value={
                                   selectGenderValue
@@ -533,14 +628,21 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                       <div className="w-full">
                         <div className="w-full flex flex-col gap-5">
                           <div className="w-full flex flex-col gap-3">
-                            <label htmlFor="diagnosis" className="w-full text-sm font-normal text-brand-standard-black">Diagnóstico/Suspeita Clínica</label>
+                            <label
+                              htmlFor="diagnosis"
+                              className="w-full text-sm font-normal text-brand-standard-black"
+                            >
+                              Diagnóstico/Suspeita Clínica
+                            </label>
                             <CreatableSelect
                               styles={{
                                 control: (baseStyles, state) => ({
                                   ...baseStyles,
                                   width: "100%",
                                   minHeight: 40,
-                                  borderColor: state.isFocused ? "#e2e8f0" : "#e2e8f0",
+                                  borderColor: state.isFocused
+                                    ? "#e2e8f0"
+                                    : "#e2e8f0",
                                   borderRadius: 4,
                                   whiteSpace: "nowrap",
                                   textOverflow: "ellipsis",
@@ -565,7 +667,9 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                               isClearable
                               isMulti
                               menuIsOpen={false}
-                              onChange={(newValue) => setValueDiagnosis(newValue)}
+                              onChange={(newValue) =>
+                                setValueDiagnosis(newValue)
+                              }
                               onInputChange={(newValue) =>
                                 setDiagnosisInputValue(newValue)
                               }
@@ -589,26 +693,26 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                 </div>
               </Tabs.Content>
               <Tabs.Content value="reports">
-                {loadingReports && 
+                {loadingReports && (
                   <div className="w-full h-full absolute z-20">
                     <div className="w-full h-full bg-[#f9fafb8b]">
                       <Load
                         divProps={{
                           className:
-                            "w-full h-[488px] relative flex items-center justify-center bg-gray-500-50",
+                            "w-full h-[362px] relative flex items-center justify-center bg-gray-500-50",
                         }}
                       />
                     </div>
                   </div>
-                }
-                <div 
-                  id="modal-scroll" 
+                )}
+                <div
+                  id="modal-scroll"
                   className="w-full h-[362px] px-6 py-6 overflow-y-scroll"
                 >
                   <div className="w-full flex flex-col items-center gap-6">
-                    {reports && 
+                    {reports &&
                       reports?.map((data) => (
-                        <Report
+                        <ReportCard
                           key={data.id}
                           id={data.id}
                           patientId={data.patientId}
@@ -617,12 +721,11 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                           title={data.title}
                           report_text={data.report_text}
                           filename={data.filename}
-                          attachment={data.attachment}
+                          fileUrl={data.fileUrl}
                           createdAt={data.createdAt}
                           updatedAt={data.updatedAt}
                         />
-                      ))
-                    }
+                      ))}
                   </div>
                 </div>
                 <div className="w-full flex justify-end px-6 py-6">
@@ -635,26 +738,45 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                   className="w-full h-[362px] px-6 py-6 overflow-y-scroll"
                 >
                   <div className="w-full flex flex-col items-center gap-6">
-                    <Exam />
+                    <ExamCard />
                   </div>
                 </div>
                 <div className="w-full flex justify-end px-6 py-6">
-                  <RegisterPatientExamModal />
+                  <RegisterPatientExamModal patientId={props.patientId} />
                 </div>
               </Tabs.Content>
               <Tabs.Content value="attachments">
-                <div id="modal-scroll" className="w-full h-[488px] px-6 py-6 overflow-y-scroll">
+                {loadingFiles && (
+                  <div className="w-full h-full absolute z-20">
+                    <div className="w-full h-full bg-[#f9fafb8b]">
+                      <Load
+                        divProps={{
+                          className:
+                            "w-full h-[488px] relative flex items-center justify-center bg-gray-500-50",
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+                <div
+                  id="modal-scroll"
+                  className="w-full h-[488px] px-6 py-6 overflow-y-scroll"
+                >
                   <div className="w-full flex flex-col items-center gap-6">
                     <div className="w-full flex justify-start">
-                      <AddAttachmentModal patientId={props.patientId} setFiles={setFiles} files={files} />
+                      <AddAttachmentModal patientId={props.patientId} />
                     </div>
-                    <div className="w-full grid grid-cols-4 gap-[28px]">
-                      {Array.from(files).map((file, i) => (
-                        <div key={i} className="w-[146px] h-[146px] border rounded border-gray-200 flex items-center justify-center flex-col">
-                          <FileTextIcon key={i} height={100} width={100} />
-                          {file.name}
-                        </div>
-                      ))}
+                    <div className="w-full grid grid-cols-3 gap-[28px]">
+                      {patientFiles &&
+                        patientFiles?.map((data) => (
+                          <FileCard
+                            key={data.id}
+                            id={data.id}
+                            filename={data.filename}
+                            fileUrl={data.fileUrl}
+                            fileSize={data.fileSize}
+                          />
+                        ))}
                     </div>
                   </div>
                 </div>

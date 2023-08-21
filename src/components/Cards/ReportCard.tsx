@@ -1,31 +1,31 @@
-import EditPatientReportModal from "./Modal/EditPatientReportModal";
+import EditPatientReportModal from "../Modal/EditPatientReportModal";
 import { DownloadIcon } from "@radix-ui/react-icons";
 import { useEffect, useState } from "react";
 
-type ReportProps = {
-  id: string
+type ReportCardProps = {
+  id: string;
   patientId: string;
-	shift: string;
-	author: string;
-	title: string;
-	report_text: string;
-	filename: string;
-	attachment: string;
-	createdAt: string;
-	updatedAt: string;
+  shift: string;
+  author: string;
+  title: string;
+  report_text: string;
+  filename: string;
+  fileUrl: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
-const Report = (props: ReportProps) => {
+const ReportCard = (props: ReportCardProps) => {
   const [download, setDownload] = useState<any>({} as any);
-  
-	useEffect(() => {
-    if (props.attachment) {
+
+  useEffect(() => {
+    if (props.fileUrl) {
       const downloadLink = document.createElement("a");
-      downloadLink.href = `${props.attachment}`
-      setDownload(downloadLink)
+      downloadLink.href = `${props.fileUrl}`;
+      setDownload(downloadLink);
     }
   }, [props]);
-	
+
   return (
     <div className="w-full flex flex-col items-center gap-6">
       <div className="w-full flex flex-col items-center gap-3 pb-6 border-b border-gray-200">
@@ -37,7 +37,10 @@ const Report = (props: ReportProps) => {
               </span>
             </div>
             <div className="flex items-center gap-4">
-              <EditPatientReportModal id={props.id} patientId={props.patientId} />
+              <EditPatientReportModal
+                id={props.id}
+                patientId={props.patientId}
+              />
             </div>
           </div>
           <div className="w-full font-light text-brand-standard-black">
@@ -46,8 +49,12 @@ const Report = (props: ReportProps) => {
           <div className="w-full flex-row flex justify-between items-center">
             <div className="w-full flex-row flex items-center gap-5">
               <div className="flex items-center gap-1">
-                <span className="text-sm text-brand-standard-black font-semibold">Turno:</span>
-                <p className="text-base font-normal text-brand-standard-black">{props.shift}</p>    
+                <span className="text-sm text-brand-standard-black font-semibold">
+                  Turno:
+                </span>
+                <p className="text-base font-normal text-brand-standard-black">
+                  {props.shift}
+                </p>
               </div>
               <div className="flex items-center gap-1">
                 <span className="text-sm text-brand-standard-black font-semibold">
@@ -67,7 +74,7 @@ const Report = (props: ReportProps) => {
               </div>
             </div>
           </div>
-          {props.attachment && (
+          {props.fileUrl && (
             <div className="w-full flex gap-2 items-center">
               <button
                 onClick={() => download.click()}
@@ -88,4 +95,4 @@ const Report = (props: ReportProps) => {
   );
 };
 
-export default Report;
+export default ReportCard;

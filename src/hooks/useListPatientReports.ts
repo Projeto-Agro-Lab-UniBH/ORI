@@ -9,7 +9,8 @@ type ListPatientReportsResponse = {
 	title: string;
 	report_text: string;
 	filename: string;
-	attachment: string;
+  fileUrl: string;
+  fileSize: number;
 	createdAt: string;
 	updatedAt: string;
 };

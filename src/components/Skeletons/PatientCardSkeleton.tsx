@@ -2,7 +2,7 @@ import React from "react";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 
-const DataPatientCardsSkeleton = () => {
+const PatientCardSkeleton = () => {
   return (
     <div className="w-full h-[104px] px-4 pt-2 pb-2 flex items-center bg-white border border-gray-200 rounded-lg">
       <div className="w-full">
@@ -77,4 +77,4 @@ const DataPatientCardsSkeleton = () => {
   )
 }
 
-export default DataPatientCardsSkeleton;
+export default PatientCardSkeleton;

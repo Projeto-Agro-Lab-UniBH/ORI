@@ -6,9 +6,9 @@ import { useEffect, useId } from "react";
 import { GetServerSideProps } from "next";
 import { useAuthContext } from "../../contexts/AuthContext";
 import RegisterPatientModal from "../../components/Modal/RegisterPatientModal";
-import DataPatientCard from "../../components/Cards/DataPatientCard";
+import PatientCard from "../../components/Cards/PatientCard";
 import Pagination from "../../components/Pagination/Pagination";
-import { LoadingDataPatienCardsSkeletons } from "../../components/Load/LoadingDataPatienCardsSkeletons";
+import { CardListLoadingLayout } from "../../components/Load/CardListLoadingLayout";
 import Header from "../../components/Header/Header";
 import { useSearchParams } from "next/navigation";
 import useSearch from "../../hooks/useSearch";
@@ -255,11 +255,11 @@ export default function AppPage() {
           <div className={"w-[1280px] h-full flex flex-col gap-6"}>
             {isLoading ? (
               <>
-                <LoadingDataPatienCardsSkeletons />
+                <CardListLoadingLayout />
               </>
             ) : (
               data?.results.map((data) => (
-                <DataPatientCard
+                <PatientCard
                   key={data.id}
                   id={data.id}
                   name={data.name}

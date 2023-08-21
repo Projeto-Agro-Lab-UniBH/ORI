@@ -1,13 +1,20 @@
+import Image from "next/image";
 import * as Dialog from "@radix-ui/react-dialog";
-import { Cross1Icon, Cross2Icon, FileIcon } from "@radix-ui/react-icons";
+import { Cross1Icon, TrashIcon } from "@radix-ui/react-icons";
 import { useController, useForm } from "react-hook-form";
 import { ChangeEvent, useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { registerReportFormData, registerReportFormSchema } from "../../schemas/registerReportFormSchema";
-import { useMutation, useQueryClient } from "react-query";
+import {
+  registerReportFormData,
+  registerReportFormSchema,
+} from "../../schemas/registerReportFormSchema";
+import { useMutation } from "react-query";
 import { api } from "../../providers/Api";
 import { Load } from "../Load/Load";
 import Select from "react-select";
+import { Document, Page } from "react-pdf";
+import { formatFileSize } from "../../functions/formatBytes";
+import { queryClient } from "../../providers/QueryClient";
 
 type RegisterPatientReportProps = {
   patientId: string | null;
@@ -25,7 +32,8 @@ type MutationReportResponse = {
   title: string;
   report_text: string;
   filename: string;
-  attachment: string; 
+  fileUrl: string;
+  fileSize: number;
   createdAt: string;
   updatedAt: string;
 };
@@ -38,52 +46,65 @@ const turnOptions = [
 
 const RegisterPatientReportModal = (props: RegisterPatientReportProps) => {
   const [open, setOpen] = useState<boolean>(false);
-  const { reset, register, control, handleSubmit, formState: { errors } } = 
-    useForm<registerReportFormData>({
-      resolver: zodResolver(registerReportFormSchema),
-    });
+  const {
+    reset,
+    register,
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<registerReportFormData>({
+    resolver: zodResolver(registerReportFormSchema),
+  });
 
+  const [hasAttachment, setHasAttachment] = useState<boolean>(false);
+  const [numPages, setNumPages] = useState<number | undefined>(undefined);
   const [attachedFile, setAttachedFile] = useState<any | undefined>();
-  const [filename, setFilename] = useState<string | null>();
+  const [filename, setFilename] = useState<string>("");
 
   const { field: selectShift } = useController({ name: "shift", control });
-  const { value: selectShiftValue, onChange: selectShiftOnChange, ...restSelectShift } = selectShift;
-  
-  const queryClient = useQueryClient();  
+  const {
+    value: selectShiftValue,
+    onChange: selectShiftOnChange,
+    ...restSelectShift
+  } = selectShift;
 
   const { isLoading, mutate } = useMutation({
     mutationKey: ["create-report"],
     mutationFn: async (data: registerReportFormData) => {
       const formData = new FormData();
-      formData.append('file', attachedFile);
+      formData.append("file", attachedFile);
 
       if (attachedFile != undefined) {
-        const upload = await api.post<UploadFileResponse>('uploads/file/', formData)
+        const upload = await api.post<UploadFileResponse>(
+          "uploads/file/",
+          formData
+        );
 
-        const fetch = await api.post<MutationReportResponse>("/reports", {
+        await api.post<MutationReportResponse>("/reports", {
           ...data,
           patientId: props.patientId,
           filename: filename,
-          attachment: upload.data.fileUrl,
+          fileUrl: upload.data.fileUrl,
+          fileSize: attachedFile.size,
         });
-        console.log(fetch)
       } else {
         await api.post<MutationReportResponse>("/reports", {
           ...data,
           patientId: props.patientId,
-          filename: '',
-          attachment: ''
+          filename: "",
+          fileUrl: "",
+          fileSize: null,
         });
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["list-all-reports"] });
-      reset();
-      setOpen(false);
+      if (isLoading != true) {
+        reset();
+        setOpen(false);
+      }
     },
   });
-
-  console.log(filename)
 
   useEffect(() => {
     if (open != true) {
@@ -93,18 +114,30 @@ const RegisterPatientReportModal = (props: RegisterPatientReportProps) => {
     }
   }, [open, reset]);
 
+  useEffect(() => {
+    if (attachedFile) {
+      setHasAttachment(true);
+    } else {
+      setHasAttachment(false);
+    }
+  }, [attachedFile, setHasAttachment]);
+
   const handleFile = (event: ChangeEvent<HTMLInputElement>) => {
     if (event?.target?.files?.[0]) {
       const file = event.target.files[0];
       setAttachedFile(file);
-      setFilename(String(file.name))
+      setFilename(String(file.name));
     }
-  }
+  };
 
   const removeAttachment = () => {
     setAttachedFile(undefined);
     setFilename("");
-  }
+  };
+
+  const onDocumentLoadSuccess = ({ numPages }: any) => {
+    setNumPages(numPages);
+  };
 
   const send = (data: registerReportFormData) => {
     const request = {
@@ -129,7 +162,7 @@ const RegisterPatientReportModal = (props: RegisterPatientReportProps) => {
               <Cross1Icon width={24} height={24} />
             </Dialog.Close>
           </div>
-          {isLoading && 
+          {isLoading && (
             <div className="w-full h-full absolute z-20">
               <div className="w-full h-full bg-[#f9fafb8b]">
                 <Load
@@ -140,9 +173,9 @@ const RegisterPatientReportModal = (props: RegisterPatientReportProps) => {
                 />
               </div>
             </div>
-          }
+          )}
           <div
-            id="modal-scroll" 
+            id="modal-scroll"
             className="w-full h-[402px] px-6 py-6 overflow-y-scroll"
           >
             <form
@@ -152,7 +185,12 @@ const RegisterPatientReportModal = (props: RegisterPatientReportProps) => {
               <div className="w-full flex flex-col gap-6">
                 <div className="w-full flex flex-row gap-3">
                   <div className="w-[184px] flex flex-col gap-3">
-                    <label htmlFor="shift" className="w-full text-sm font-normal text-brand-standard-black">Turno</label>
+                    <label
+                      htmlFor="shift"
+                      className="w-full text-sm font-normal text-brand-standard-black"
+                    >
+                      Turno
+                    </label>
                     <Select
                       styles={{
                         control: (baseStyles, state) => ({
@@ -196,7 +234,12 @@ const RegisterPatientReportModal = (props: RegisterPatientReportProps) => {
                     />
                   </div>
                   <div className="w-full flex flex-col gap-3">
-                    <label htmlFor="author" className="w-full text-sm font-normal text-brand-standard-black">Nome do responsável</label>
+                    <label
+                      htmlFor="author"
+                      className="w-full text-sm font-normal text-brand-standard-black"
+                    >
+                      Nome do responsável
+                    </label>
                     <input
                       type="text"
                       className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
@@ -205,15 +248,25 @@ const RegisterPatientReportModal = (props: RegisterPatientReportProps) => {
                   </div>
                 </div>
                 <div className="w-full flex flex-col gap-3">
-                  <label htmlFor="author" className="w-full text-sm font-normal text-brand-standard-black">Título</label>
+                  <label
+                    htmlFor="author"
+                    className="w-full text-sm font-normal text-brand-standard-black"
+                  >
+                    Título
+                  </label>
                   <input
                     type="text"
                     className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                    {...register("title")}  
+                    {...register("title")}
                   />
                 </div>
                 <div className="w-full flex flex-col gap-3">
-                  <label htmlFor="report_text" className="w-full text-sm font-normal text-brand-standard-black">Descrição / Relatório</label>
+                  <label
+                    htmlFor="report_text"
+                    className="w-full text-sm font-normal text-brand-standard-black"
+                  >
+                    Descrição / Relatório
+                  </label>
                   <div>
                     <textarea
                       cols={30}
@@ -223,58 +276,96 @@ const RegisterPatientReportModal = (props: RegisterPatientReportProps) => {
                     ></textarea>
                   </div>
                 </div>
-                {attachedFile &&  
-                  <div className="w-full flex gap-3 items-center">
-                    <div className="w-[558.4px] px-2 py-2 flex justify-between items-center border rounded">
-                      <div className="w-[488px] gap-2 flex items-center">
-                        <FileIcon width={20} height={20} />
-                        <p className="w-[500px] max-w-[500px] whitespace-nowrap overflow-hidden text-ellipsis text-sm font-medium text-brand-standard-black">
-                          { filename }
-                        </p>
+                {attachedFile && (
+                  <div className="w-[552.8px] border rounded border-gray-200 overflow-hidden flex flex-col items-center">
+                    <div className="w-[552.8px] h-44 overflow-hidden">
+                      <Document
+                        file={attachedFile}
+                        onLoadSuccess={onDocumentLoadSuccess}
+                      >
+                        <Page pageNumber={1} width={552.8} />
+                      </Document>
+                    </div>
+                    <div className="w-[552.8px] h-14 border-t-[1px] border-gray-200 flex items-center p-2 gap-2">
+                      <Image
+                        src="/pdf-svgrepo-com.svg"
+                        alt="pdf-icon"
+                        width={24}
+                        height={24}
+                      />
+                      <div className="w-80 flex flex-col items-center justify-center">
+                        <div className="w-80 whitespace-nowrap overflow-hidden text-ellipsis">
+                          <p className="max-w-80 whitespace-nowrap overflow-hidden text-ellipsis font-semibold text-[14.8px]">
+                            {filename.split(".").slice(0, -1).join(".")}
+                          </p>
+                        </div>
+                        <div className="w-80 flex flex-row items-center text-center gap-1">
+                          <span className="text-[10px] font-light">
+                            {numPages} páginas
+                          </span>
+                          <span className="text-[10px] font-light">•</span>
+                          <span className="text-[10px] font-light">
+                            {filename.split(".").pop()?.toUpperCase()}
+                          </span>
+                          <span className="text-[10px] font-light">•</span>
+                          <span className="text-[10px] font-light">
+                            {formatFileSize(attachedFile.size)}
+                          </span>
+                        </div>
                       </div>
-                      <button onClick={removeAttachment}>
-                        <Cross2Icon />
-                      </button>
+                      <div className="w-[176.8px] flex justify-end">
+                        <button
+                          onClick={removeAttachment}
+                          className="w-7 h-7 flex justify-center items-center bg-white border rounded border-gray-200 overflow-hidden cursor-pointer"
+                        >
+                          <TrashIcon color="#212529" width={16} height={16} />
+                        </button>
+                      </div>
                     </div>
                   </div>
-                }
+                )}
               </div>
               <div className="w-full flex justify-between">
-                <div className="w-full flex">
-                  <label
-                    htmlFor="patient-photo-file"
-                    className="border border-gray-200 flex items-center px-3 py-[6px] gap-1 rounded text-base text-brand-standard-black font-medium bg-white hover:border-[#b3b3b3] cursor-pointer"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="#212529"
-                      className="w-5 h-5"
+                {hasAttachment === true ? undefined : (
+                  <div className="w-full flex">
+                    <label
+                      htmlFor="patient-photo-file"
+                      className="border border-gray-200 flex items-center px-3 py-[6px] gap-1 rounded text-base text-brand-standard-black font-medium bg-white hover:border-[#b3b3b3] cursor-pointer"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"
-                      />
-                    </svg>
-                    Adicionar um anexo
-                  </label>
-                  <input
-                    type="file"
-                    accept=".doc, .docx, .pdf"
-                    id="patient-photo-file"
-                    className="hidden"
-                    onChange={handleFile}
-                  />
-                </div>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="#212529"
+                        className="w-5 h-5"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"
+                        />
+                      </svg>
+                      Adicionar um anexo
+                    </label>
+                    <input
+                      type="file"
+                      accept=".pdf"
+                      id="patient-photo-file"
+                      className="hidden"
+                      onChange={handleFile}
+                    />
+                  </div>
+                )}
                 <div className="w-full flex justify-end">
-                  <button type="submit" className="border border-gray-200 px-3 py-[6px] rounded text-base text-brand-standard-black font-medium bg-white hover:bg-gray-50">
+                  <button
+                    type="submit"
+                    className="border border-gray-200 px-3 py-[6px] rounded text-base text-brand-standard-black font-medium bg-white hover:bg-gray-50"
+                  >
                     Salvar
                   </button>
                 </div>
               </div>
-            </form> 
+            </form>
           </div>
         </Dialog.Content>
       </Dialog.Portal>

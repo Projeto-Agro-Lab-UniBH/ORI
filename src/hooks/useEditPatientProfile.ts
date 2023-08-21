@@ -1,7 +1,8 @@
 import { api } from "../providers/Api";
 import { Option } from "../interfaces/Option";
-import { useMutation, useQueryClient } from "react-query";
+import { useMutation} from "react-query";
 import { editPatientProfileFormData } from "../schemas/editPatientProfileFormSchema";
+import { queryClient } from "../providers/QueryClient";
 
 type UploadImageResponse = {
   imageUrl: string;
@@ -28,7 +29,6 @@ export default function useEditPatientProfile(param: {
   image: any
   photo: string | null
 }) {
-  const queryClient = useQueryClient()
   return useMutation({
     mutationKey: ["update-patient"],
     mutationFn: async (data: editPatientProfileFormData) => {
