@@ -10,6 +10,7 @@ import { formatFileSize } from "../../functions/formatBytes";
 import { queryClient } from "../../providers/QueryClient";
 import { useMutation } from "react-query";
 import { api } from "../../providers/Api";
+import Load from "../Load/Load";
 
 type RegisterPatientReportProps = {
   patientId: string | null;
@@ -74,12 +75,12 @@ const RegisterPatientExamModal = (props: RegisterPatientReportProps) => {
           patientId: props.patientId,
           filename: "",
           fileUrl: "",
-          fileSize: null,
+          fileSize: 0,
         });
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["list-all-reports"] });
+      queryClient.invalidateQueries({ queryKey: ["list-all-exams"] });
       if (isLoading != true) {
         reset();
         setOpen(false);
@@ -143,6 +144,18 @@ const RegisterPatientExamModal = (props: RegisterPatientReportProps) => {
               <Cross1Icon width={24} height={24} />
             </Dialog.Close>
           </div>
+          {isLoading && (
+            <div className="w-full h-full absolute z-20">
+              <div className="w-full h-full bg-[#f9fafb8b]">
+                <Load
+                  divProps={{
+                    className:
+                      "w-full h-[488px] relative flex items-center justify-center bg-gray-500-50",
+                  }}
+                />
+              </div>
+            </div>
+          )}
           <div
             id="modal-scroll"
             className="w-full h-[402px] px-6 py-6 overflow-y-scroll"
