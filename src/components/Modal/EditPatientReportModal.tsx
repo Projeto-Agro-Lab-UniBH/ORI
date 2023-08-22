@@ -7,16 +7,8 @@ import { Document, Page } from "react-pdf";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ChangeEvent, useEffect, useState } from "react";
 import { useController, useForm } from "react-hook-form";
-import {
-  Cross1Icon,
-  DownloadIcon,
-  Pencil2Icon,
-  TrashIcon,
-} from "@radix-ui/react-icons";
-import {
-  editReportFormData,
-  editReportFormSchema,
-} from "../../schemas/editReportFormSchema";
+import { Cross1Icon, DownloadIcon, Pencil2Icon, TrashIcon } from "@radix-ui/react-icons";
+import { editReportFormData, editReportFormSchema } from "../../schemas/editReportFormSchema";
 import WarningToDeleteReportModal from "./WarningToDeleteReportModal";
 import useGetPatientReport from "../../hooks/useGetPatientReport";
 import { formatFileSize } from "../../functions/formatBytes";
@@ -59,6 +51,12 @@ const turnOptions = [
   { label: "Diurno", value: "Diurno" },
   { label: "Noturno", value: "Noturno" },
 ];
+
+/*
+ * Tarefas do componente:  
+ * Resolver o botão de dowload
+ * Isolar os botões da função padrão do useForm
+ */
 
 const EditPatientReportModal = (props: EditPatientReportModalProps) => {
   const {
@@ -112,7 +110,8 @@ const EditPatientReportModal = (props: EditPatientReportModalProps) => {
         await api.patch<ReportResponse>(`/reports/${props.id}`, {
           ...data,
           filename: filename,
-          attachment: upload.data.fileUrl,
+          fileUrl: upload.data.fileUrl,
+          fileSize: attachedFile.size
         });
       }
       if (fecthedAttachment != "" && attachedFile === undefined) {
@@ -124,7 +123,8 @@ const EditPatientReportModal = (props: EditPatientReportModalProps) => {
         await api.patch<ReportResponse>(`/reports/${props.id}`, {
           ...data,
           filename: "",
-          attachment: "",
+          fileUrl: "",
+          fileSize: 0,
         });
       }
     },
@@ -205,7 +205,6 @@ const EditPatientReportModal = (props: EditPatientReportModalProps) => {
   const send = (data: editReportFormData) => {
     const request = {
       ...data,
-      attachments: attachment as string,
     };
     mutate(request);
   };
@@ -424,7 +423,7 @@ const EditPatientReportModal = (props: EditPatientReportModalProps) => {
                         </div>
                         <div className="w-[176.8px] flex justify-end">
                           <div className="flex gap-2">
-                            <button
+                            {/* <button
                               onClick={() => download.click()}
                               className="w-7 h-7 flex justify-center items-center bg-white border rounded border-gray-200 overflow-hidden cursor-pointer"
                             >
@@ -433,7 +432,7 @@ const EditPatientReportModal = (props: EditPatientReportModalProps) => {
                                 width={16}
                                 height={16}
                               />
-                            </button>
+                            </button> */}
                             <button
                               onClick={removeFecthedAttachment}
                               className="w-7 h-7 flex justify-center items-center bg-white border rounded border-gray-200 overflow-hidden cursor-pointer"
