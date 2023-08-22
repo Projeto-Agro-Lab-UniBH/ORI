@@ -93,7 +93,7 @@ const RegisterPatientReportModal = (props: RegisterPatientReportProps) => {
           patientId: props.patientId,
           filename: "",
           fileUrl: "",
-          fileSize: null,
+          fileSize: 0,
         });
       }
     },
