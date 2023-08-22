@@ -7,7 +7,6 @@ import CreatableSelect from "react-select/creatable";
 import { useController, useForm } from "react-hook-form";
 import { useState, KeyboardEventHandler, useEffect, ChangeEvent } from "react";
 import { useMutation } from "react-query";
-import { Load } from "../Load/Load";
 import { api } from "../../providers/Api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -15,6 +14,7 @@ import {
   registerPatientFormSchema,
 } from "../../schemas/registerPatientFormSchema";
 import { queryClient } from "../../providers/QueryClient";
+import Load from "../Load/Load";
 
 type UploadImageResponse = {
   imageUrl: string;
