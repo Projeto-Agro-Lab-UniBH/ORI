@@ -1,5 +1,4 @@
 import Select from "react-select";
-import { Load } from "../Load/Load";
 import ReportCard from "../Cards/ReportCard";
 import * as Tabs from "@radix-ui/react-tabs";
 import * as Avatar from "@radix-ui/react-avatar";
@@ -17,9 +16,11 @@ import CreatableSelect from "react-select/creatable";
 import AddAttachmentModal from "./AddAttachmentModal";
 import RegisterPatientExamModal from "./RegisterPatientExamModal";
 import useListPatientReports from "../../hooks/useListPatientReports";
-import { useListPatientFiles } from "../../hooks/useListPatientFiles";
 import { FileCard } from "../Cards/FileCard";
 import ExamCard from "../Cards/ExamCard";
+import useListPatientFiles from "../../hooks/useListPatientFiles";
+import useListPatientExams from "../../hooks/useListPatientExams";
+import Load from "../Load/Load";
 
 type EditPatientProfileModalProps = {
   patientId: string;
@@ -85,16 +86,19 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
     name: "prognosis",
     control,
   });
+
   const {
     value: selectPhysicalShapeValue,
     onChange: selectPhysicalShapeOnChange,
     ...restSelectPhysicalShape
   } = selectPhysicalShape;
+
   const {
     value: selectGenderValue,
     onChange: selectGenderOnChange,
     ...restSelectGender
   } = selectGender;
+
   const {
     value: selectPrognosisValue,
     onChange: selectPrognosisOnChange,
@@ -109,10 +113,15 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
     callRequest: callRequest,
   });
 
-  const { isLoading: loadingReports, data: reports } = useListPatientReports({
+  const { isLoading: loadingReports, data: patientReports } = useListPatientReports({
     patientId: props.patientId,
     callRequest: callRequest,
   });
+
+  const { isLoading: loadingExams, data: patientExams } = useListPatientExams({
+    patientId: props.patientId,
+    callRequest: callRequest,
+  })
 
   const { isLoading: loadingFiles, data: patientFiles } = useListPatientFiles({
     patientId: props.patientId,
@@ -710,8 +719,8 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                   className="w-full h-[362px] px-6 py-6 overflow-y-scroll"
                 >
                   <div className="w-full flex flex-col items-center gap-6">
-                    {reports &&
-                      reports?.map((data) => (
+                    {patientReports &&
+                      patientReports?.map((data) => (
                         <ReportCard
                           key={data.id}
                           id={data.id}
@@ -733,12 +742,41 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                 </div>
               </Tabs.Content>
               <Tabs.Content value="exams">
+                {loadingExams && (
+                  <div className="w-full h-full absolute z-20">
+                    <div className="w-full h-full bg-[#f9fafb8b]">
+                      <Load
+                        divProps={{
+                          className:
+                            "w-full h-[362px] relative flex items-center justify-center bg-gray-500-50",
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
                 <div
                   id="modal-scroll"
                   className="w-full h-[362px] px-6 py-6 overflow-y-scroll"
                 >
                   <div className="w-full flex flex-col items-center gap-6">
-                    <ExamCard />
+                    {patientExams && 
+                      patientExams.map((data) => (
+                        <ExamCard 
+                          key={data.id}
+                          id={data.id} 
+                          patientId={data.patientId} 
+                          date={data.date} 
+                          author={data.author} 
+                          type_of_exam={data.type_of_exam} 
+                          annotations={data.annotations} 
+                          filename={data.filename} 
+                          fileUrl={data.fileUrl} 
+                          fileSize={data.fileSize} 
+                          createdAt={data.createdAt} 
+                          updatedAt={data.updatedAt} 
+                        />
+                      )
+                    )}
                   </div>
                 </div>
                 <div className="w-full flex justify-end px-6 py-6">
@@ -776,7 +814,8 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                             fileUrl={data.fileUrl}
                             fileSize={data.fileSize}
                           />
-                        ))}
+                        )
+                      )}
                     </div>
                   </div>
                 </div>
