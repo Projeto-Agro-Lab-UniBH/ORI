@@ -332,14 +332,6 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                             </div>
                           </div>
                         </div>
-                        <div className="w-full h-10 flex items-center gap-2">
-                          <span className="text-sm font-semibold text-brand-standard-black">
-                            ID:
-                          </span>
-                          <p className="text-base font-normal text-brand-standard-black">
-                            {props?.patientId}
-                          </p>
-                        </div>
                       </div>
                       <div className="w-full flex flex-row gap-4">
                         <div className="w-44">
