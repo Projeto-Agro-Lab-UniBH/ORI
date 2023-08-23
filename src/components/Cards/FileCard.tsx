@@ -23,6 +23,11 @@ export const FileCard = (props: FileCardProps) => {
       setDownload(downloadLink)
     }
   }, [props]);
+
+  const downloadFile = (event: any) => {
+    event.preventDefault();
+    download.click();
+  }
   
   const onDocumentLoadSuccess = ({ numPages }: any) => {
     setNumPages(numPages);
@@ -34,7 +39,7 @@ export const FileCard = (props: FileCardProps) => {
         <div className="w-[202.8px] h-[264px] flex px-2 py-2 rounded justify-end absolute z-10">
           <div className="flex flex-col gap-2">
             <button
-              onClick={() => download.click()} 
+              onClick={downloadFile} 
               className="w-[26px] h-[26px] flex justify-center items-center bg-white border rounded border-gray-200 overflow-hidden cursor-pointer"
             >
               <DownloadIcon 

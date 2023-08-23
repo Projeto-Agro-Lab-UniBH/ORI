@@ -144,7 +144,7 @@ const AddAttachmentModal = (props: AddAttachmentModalProps) => {
                     <input
                       type="file"
                       accept=".pdf"
-                      id="patient-photo-file"
+                      id="attachfile"
                       className="hidden"
                       onChange={handleFile}
                     />

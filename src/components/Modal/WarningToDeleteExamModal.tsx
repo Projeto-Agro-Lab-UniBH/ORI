@@ -1,26 +1,26 @@
-import * as Dialog from "@radix-ui/react-dialog";
-import { ExclamationTriangleIcon, TrashIcon } from "@radix-ui/react-icons";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { useMutation } from "react-query";
-import { api } from "../../providers/Api";
-import { queryClient } from "../../providers/QueryClient";
+import * as Dialog from '@radix-ui/react-dialog';
+import { ExclamationTriangleIcon, TrashIcon } from '@radix-ui/react-icons';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { useMutation } from 'react-query';
+import { api } from '../../providers/Api';
+import { queryClient } from '../../providers/QueryClient';
 
-type WarningToDeleteReportModalProps = {
+type WarningToDeleteExamModalProps = {
   id: string;
-  setLoading: Dispatch<SetStateAction<boolean>>;
   modalIsOpen: Dispatch<SetStateAction<boolean>>;
-};
+  setLoading: Dispatch<SetStateAction<boolean>>;
+}
 
-const WarningToDeleteReportModal = (props: WarningToDeleteReportModalProps) => {
+const WarningToDeleteExamModal = (props: WarningToDeleteExamModalProps) => {
   const [open, setOpen] = useState<boolean>(false);
 
   const { isLoading, mutate } = useMutation({
-    mutationKey: ["delete-report-by-id"],
+    mutationKey: ["delete-exam-by-id"],
     mutationFn: async () => {
-      await api.delete(`/reports/${props.id}`);
+      await api.delete(`/exams/${props.id}`)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["list-all-reports"] });
+      queryClient.invalidateQueries({ queryKey: ["list-all-exams"] });
       if (isLoading != true) {
         setOpen(false);
         props.modalIsOpen(false);
@@ -38,12 +38,16 @@ const WarningToDeleteReportModal = (props: WarningToDeleteReportModalProps) => {
     event.preventDefault();
     mutate();
     setOpen(false);
-  };
-
+  }
+  
   return (
     <Dialog.Root onOpenChange={setOpen} open={open}>
       <Dialog.Trigger className="border border-gray-200 px-[6px] py-[6px] rounded text-base text-brand-standard-black font-medium bg-white hover:bg-gray-50">
-        <TrashIcon color="#212529" width={20} height={20} />
+        <TrashIcon
+          color="#212529" 
+          width={20} 
+          height={20}
+        />
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className="bg-black/60 inset-0 fixed z-20" />
@@ -58,10 +62,10 @@ const WarningToDeleteReportModal = (props: WarningToDeleteReportModalProps) => {
             <span>Tem certeza que você quer remover este registro?</span>
             <div className="flex justify-center gap-6">
               <Dialog.Close className="w-[124px] px-3 py-[6px] border rounded font-medium text-base text-slate-900 shadow-md hover:shadow-blue-500/50 hover:border-none hover:text-neutral-50 hover: hover:bg-blue-500">
-                Não
+                Não  
               </Dialog.Close>
               <button
-                onClick={(e) => acceptRemoveFile(e)}
+                onClick={(e) => acceptRemoveFile(e)} 
                 className="w-[124px] px-3 py-[6px] border rounded font-medium text-base text-slate-900 shadow-md hover:shadow-blue-500/50 hover:border-none hover:text-neutral-50 hover: hover:bg-blue-500"
               >
                 Sim
@@ -71,7 +75,7 @@ const WarningToDeleteReportModal = (props: WarningToDeleteReportModalProps) => {
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
-  );
-};
+  )
+}
 
-export default WarningToDeleteReportModal;
+export default WarningToDeleteExamModal;

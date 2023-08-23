@@ -26,6 +26,11 @@ const ReportCard = (props: ReportCardProps) => {
     }
   }, [props]);
 
+  const downloadFile = (event: any) => {
+    event.preventDefault();
+    download.click();
+  }
+
   return (
     <div className="w-full flex flex-col items-center gap-6">
       <div className="w-full flex flex-col items-center gap-3 pb-6 border-b border-gray-200">
@@ -77,7 +82,7 @@ const ReportCard = (props: ReportCardProps) => {
           {props.fileUrl && (
             <div className="w-full flex gap-2 items-center">
               <button
-                onClick={() => download.click()}
+                onClick={downloadFile}
                 className="px-2 py-1 border border-gray-200 rounded hover:border-[#b3b3b3] flex items-center text-brand-standard-black font-semibold gap-1"
               >
                 Baixar anexo <DownloadIcon />

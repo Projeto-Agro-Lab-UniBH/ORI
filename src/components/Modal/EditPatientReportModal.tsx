@@ -5,7 +5,7 @@ import { api } from "../../providers/Api";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Document, Page } from "react-pdf";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, SetStateAction, useEffect, useState } from "react";
 import { useController, useForm } from "react-hook-form";
 import { Cross1Icon, DownloadIcon, Pencil2Icon, TrashIcon } from "@radix-ui/react-icons";
 import { editReportFormData, editReportFormSchema } from "../../schemas/editReportFormSchema";
@@ -52,12 +52,6 @@ const turnOptions = [
   { label: "Noturno", value: "Noturno" },
 ];
 
-/*
- * Tarefas do componente:  
- * Resolver o botão de dowload
- * Isolar os botões da função padrão do useForm
- */
-
 const EditPatientReportModal = (props: EditPatientReportModalProps) => {
   const {
     reset,
@@ -80,6 +74,7 @@ const EditPatientReportModal = (props: EditPatientReportModalProps) => {
   const [fecthedAttachment, setFecthedAttachment] = useState<string>("");
   const [attachedFile, setAttachedFile] = useState<any | undefined>();
   const [attachment, setAttachment] = useState<any | undefined>();
+  const [isRemovingRecord, setIsRemovingRecord] = useState<boolean>(false);
 
   const { field: selectShift } = useController({ name: "shift", control });
   const {
@@ -188,6 +183,11 @@ const EditPatientReportModal = (props: EditPatientReportModalProps) => {
     }
   };
 
+  const downloadFile = (event: any) => {
+    event.preventDefault();
+    download.click();
+  }
+
   const removeFecthedAttachment = () => {
     setFetchedFilename("");
     setFecthedAttachment("");
@@ -240,6 +240,18 @@ const EditPatientReportModal = (props: EditPatientReportModalProps) => {
             </div>
           )}
           {savingChanges && (
+            <div className="w-full h-full absolute z-20">
+              <div className="w-full h-full bg-[#f9fafb8b]">
+                <Load
+                  divProps={{
+                    className:
+                      "w-full h-[488px] relative flex items-center justify-center bg-gray-500-50",
+                  }}
+                />
+              </div>
+            </div>
+          )}
+          {isRemovingRecord && (
             <div className="w-full h-full absolute z-20">
               <div className="w-full h-full bg-[#f9fafb8b]">
                 <Load
@@ -423,8 +435,8 @@ const EditPatientReportModal = (props: EditPatientReportModalProps) => {
                         </div>
                         <div className="w-[176.8px] flex justify-end">
                           <div className="flex gap-2">
-                            {/* <button
-                              onClick={() => download.click()}
+                            <button
+                              onClick={downloadFile}
                               className="w-7 h-7 flex justify-center items-center bg-white border rounded border-gray-200 overflow-hidden cursor-pointer"
                             >
                               <DownloadIcon
@@ -432,7 +444,7 @@ const EditPatientReportModal = (props: EditPatientReportModalProps) => {
                                 width={16}
                                 height={16}
                               />
-                            </button> */}
+                            </button>
                             <button
                               onClick={removeFecthedAttachment}
                               className="w-7 h-7 flex justify-center items-center bg-white border rounded border-gray-200 overflow-hidden cursor-pointer"
@@ -502,7 +514,7 @@ const EditPatientReportModal = (props: EditPatientReportModalProps) => {
                     {hasAttachment === true ? undefined : (
                       <div className="w-full flex">
                         <label
-                          htmlFor="patient-photo-file"
+                          htmlFor="attachfile"
                           className="border border-gray-200 flex items-center px-3 py-[6px] gap-1 rounded text-base text-brand-standard-black font-medium bg-white hover:border-[#b3b3b3] cursor-pointer"
                         >
                           <svg
@@ -522,8 +534,8 @@ const EditPatientReportModal = (props: EditPatientReportModalProps) => {
                         </label>
                         <input
                           type="file"
-                          accept=".doc, .docx, .pdf"
-                          id="patient-photo-file"
+                          accept=".pdf"
+                          id="attachfile"
                           className="hidden"
                           onChange={handleFile}
                         />
@@ -532,7 +544,8 @@ const EditPatientReportModal = (props: EditPatientReportModalProps) => {
                     <div className="w-full flex justify-end gap-2">
                       <WarningToDeleteReportModal
                         id={props.id}
-                        modalIsOpen={setOpen}
+                        modalIsOpen={setOpen} 
+                        setLoading={setIsRemovingRecord} 
                       />
                       <button className="border border-gray-200 px-3 py-[6px] rounded text-base text-brand-standard-black font-medium bg-white hover:bg-gray-50">
                         Salvar alterações

@@ -7,7 +7,7 @@ import {
   Pencil2Icon,
   TrashIcon,
 } from "@radix-ui/react-icons";
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, SetStateAction, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
   editExamFormData,
@@ -20,6 +20,7 @@ import { queryClient } from "../../providers/QueryClient";
 import { api } from "../../providers/Api";
 import { useMutation } from "react-query";
 import { formatFileSize } from "../../functions/formatBytes";
+import WarningToDeleteExamModal from "./WarningToDeleteExamModal";
 
 type EditPatientExamModalProps = {
   id: string;
@@ -53,12 +54,6 @@ type ExamResponse = {
   updatedAt: string;
 };
 
-/*
- * Tarefas do componente:  
- * Resolver o botão de dowload
- * Isolar os botões da função padrão do useForm
- */
-
 const EditPatientExamModal = (props: EditPatientExamModalProps) => {
   const {
     reset,
@@ -80,6 +75,7 @@ const EditPatientExamModal = (props: EditPatientExamModalProps) => {
   const [fecthedAttachment, setFecthedAttachment] = useState<string>("");
   const [attachedFile, setAttachedFile] = useState<any | undefined>();
   const [attachment, setAttachment] = useState<any | undefined>();
+  const [isRemovingRecord, setIsRemovingRecord] = useState<boolean>(false);
 
   const { isLoading } = useGetPatientExam({
     id: props.id,
@@ -181,6 +177,11 @@ const EditPatientExamModal = (props: EditPatientExamModalProps) => {
     }
   };
 
+  const downloadFile = (event: any) => {
+    event.preventDefault();
+    download.click();
+  }
+
   const removeFecthedAttachment = () => {
     setFetchedFilename("");
     setFecthedAttachment("");
@@ -233,6 +234,18 @@ const EditPatientExamModal = (props: EditPatientExamModalProps) => {
             </div>
           )}
           {savingChanges && (
+            <div className="w-full h-full absolute z-20">
+              <div className="w-full h-full bg-[#f9fafb8b]">
+                <Load
+                  divProps={{
+                    className:
+                      "w-full h-full relative flex items-center justify-center bg-gray-500-50",
+                  }}
+                />
+              </div>
+            </div>
+          )}
+          {isRemovingRecord && (
             <div className="w-full h-full absolute z-20">
               <div className="w-full h-full bg-[#f9fafb8b]">
                 <Load
@@ -390,7 +403,7 @@ const EditPatientExamModal = (props: EditPatientExamModalProps) => {
                         <div className="w-[176.8px] flex justify-end">
                           <div className="flex gap-2">
                             <button
-                              onClick={() => download.click()}
+                              onClick={downloadFile}
                               className="w-7 h-7 flex justify-center items-center bg-white border rounded border-gray-200 overflow-hidden cursor-pointer"
                             >
                               <DownloadIcon
@@ -468,7 +481,7 @@ const EditPatientExamModal = (props: EditPatientExamModalProps) => {
                     {hasAttachment === true ? undefined : (
                       <div className="w-full flex">
                         <label
-                          htmlFor="patient-photo-file"
+                          htmlFor="attachfile"
                           className="border border-gray-200 flex items-center px-3 py-[6px] gap-1 rounded text-base text-brand-standard-black font-medium bg-white hover:border-[#b3b3b3] cursor-pointer"
                         >
                           <svg
@@ -489,13 +502,17 @@ const EditPatientExamModal = (props: EditPatientExamModalProps) => {
                         <input
                           type="file"
                           accept=".pdf"
-                          id="patient-photo-file"
+                          id="attachfile"
                           className="hidden"
                           onChange={handleFile}
                         />
                       </div>
                     )}
                     <div className="w-full flex justify-end gap-2">
+                      <WarningToDeleteExamModal 
+                        id={props.id}
+                        modalIsOpen={setOpen} 
+                        setLoading={setIsRemovingRecord}                      />
                       <button className="border border-gray-200 px-3 py-[6px] rounded text-base text-brand-standard-black font-medium bg-white hover:bg-gray-50">
                         Salvar alterações
                       </button>

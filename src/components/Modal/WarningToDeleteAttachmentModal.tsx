@@ -49,7 +49,7 @@ const WarningToDeleteAttachmentModal = (props: WarningToDeleteAttachmentModalPro
             </Dialog.Title>
           </div>
           <div className="w-full flex flex-col justify-center text-center gap-4 px-6 pt-6 pb-6">
-            <span>Tem certeza que você remover este registro?</span>
+            <span>Tem certeza que você quer remover este registro?</span>
             <div className="flex justify-center gap-6">
               <Dialog.Close className="w-[124px] px-3 py-[6px] border rounded font-medium text-base text-slate-900 shadow-md hover:shadow-blue-500/50 hover:border-none hover:text-neutral-50 hover: hover:bg-blue-500">
                 Não  
