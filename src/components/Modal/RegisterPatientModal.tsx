@@ -131,7 +131,6 @@ const RegisterPatientModal = () => {
       } else {
         await api.post("/patient", {
           ...data,
-          profile_photo: null,
         });
       }
     },
