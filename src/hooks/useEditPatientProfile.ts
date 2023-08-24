@@ -26,8 +26,7 @@ type EditedPatientResponse = {
 
 export default function useEditPatientProfile(param: {
   id: string;
-  image: any
-  photo: string | null
+  image: any;
 }) {
   return useMutation({
     mutationKey: ["update-patient"],
@@ -45,7 +44,6 @@ export default function useEditPatientProfile(param: {
       } else {
         await api.patch<EditedPatientResponse>(`/patient/${param.id}`, {
           ...data,
-          profile_photo: param.photo,
         });
       }
     },
