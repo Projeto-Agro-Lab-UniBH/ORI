@@ -178,7 +178,6 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
     {
       id: props.patientId,
       image: selectedImage,
-      photo: photo,
     }
   );
 
