@@ -9,15 +9,10 @@ const Load = (props: ILoadProps) => {
 		<>
 			<div className="container-load" {...props.divProps}>
 				<div className="spinner">
-					<div></div>
-					<div></div>
-					<div></div>
-					<div></div>
-					<div></div>
 				</div>
 			</div>
 		</>
 	);
 };
 
-export { Load };
+export default Load;
