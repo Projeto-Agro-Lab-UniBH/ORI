@@ -1,21 +1,15 @@
+import Load from "../Load/Load";
+import { api } from "../../providers/Api";
+import { useForm } from "react-hook-form";
 import * as Avatar from "@radix-ui/react-avatar";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Cross1Icon } from "@radix-ui/react-icons";
 import { PersonIcon } from "@radix-ui/react-icons";
-import { useForm } from "react-hook-form";
-import React, { ChangeEvent, useEffect, useState } from "react";
 import { useMutation, useQuery } from "react-query"
-import { api } from "../../providers/Api";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Load from "../Load/Load";
-
-const editUserProfileFormSchema = z.object({
-  username: z.string().nonempty(),
-  email: z.string().nonempty(),
-});
-
-type editUserProfileFormData = z.infer<typeof editUserProfileFormSchema>;
+import React, { ChangeEvent, useEffect, useState } from "react";
+import { editUserProfileFormData, editUserProfileFormSchema } from "../../schemas/editUserProfileFormSchema";
+import { useRouter } from "next/router";
 
 type Response = {
   profile_photo: string;
@@ -23,23 +17,23 @@ type Response = {
   email: string;
 };
 
+type UploadImageResponse = {
+  imageUrl: string;
+};
+
 type IEditUserProfileModal = {
   id: string | undefined | null;
   children: React.ReactNode;
 };
 
-/**
- * Tarefas para esse componente:
- * consertar o preview da imagem que quando sai continua mesmo não estando salvo
- * implementar o upload da imagem da seguinte forma, primeiro o await da rota de upload => await de update junto da url que a rota de upload retorna
- */
 const EditUserProfileModal = (props: IEditUserProfileModal) => {
+  const router = useRouter();
   const { reset, register, handleSubmit } = useForm<editUserProfileFormData>({
     resolver: zodResolver(editUserProfileFormSchema),
   });
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [photo, setPhoto] = useState<string | null>(null);
-  const [selectedImage, setSelectedImage] = useState<File | undefined>(undefined);
+  const [selectedImage, setSelectedImage] = useState<any | undefined>(undefined);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [fetchedImage, setFetchedImage] = useState<string | null>(null);
   const [callRequest, setCallRequest] = useState<boolean>(false);
@@ -55,15 +49,31 @@ const EditUserProfileModal = (props: IEditUserProfileModal) => {
     enabled: callRequest,
   });
 
-  console.log(photo)
-
   const { isLoading: savingChanges, mutate } = useMutation({
     mutationKey: ["update-account-data"],
     mutationFn: async (data: editUserProfileFormData) => {
-      await api.patch<Response>(`/user/${props.id}`, {
-        ...data,
-        profile_photo: photo,
-      });
+      const formData = new FormData();
+      formData.append('image', selectedImage);
+
+      if (selectedImage != null || undefined) {
+        const upload = await api.post<UploadImageResponse>('uploads/image/', formData);
+
+        await api.patch<Response>(`/user/${props.id}`, {
+          ...data,
+          profile_photo: upload.data.imageUrl,  
+        });
+      } else {
+        await api.patch<Response>(`/user/${props.id}`, {
+          ...data,
+        });
+      }
+    },
+    onSuccess: () => {
+      if (savingChanges != true) {
+        reset();
+        setIsOpen(false);
+        router.reload();
+      }
     },
   });
 
@@ -87,8 +97,6 @@ const EditUserProfileModal = (props: IEditUserProfileModal) => {
       setPhoto(previewImage);
     }
   }, [photo, setPhoto, fetchedImage, previewImage]);
-
-  console.log(selectedImage)
 
   const handleImage = (event: ChangeEvent<HTMLInputElement>) => {
     if (event?.target?.files?.[0]) {
@@ -147,7 +155,7 @@ const EditUserProfileModal = (props: IEditUserProfileModal) => {
               </div>
             </div>
           }  
-          <div id="modal-scroll" className="w-full h-[506px] px-6 py-6">
+          <div className="w-full px-6 py-6">
             <form
               onSubmit={handleSubmit(send)}
               className="w-full flex flex-col gap-[136px]"
@@ -231,17 +239,6 @@ const EditUserProfileModal = (props: IEditUserProfileModal) => {
                         type="text"
                         className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                         {...register("email")}
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div className="w-full flex flex-row gap-4">
-                  <div className="w-[327.2px]">
-                    <div className="w-full flex flex-col gap-3">
-                      <label htmlFor="password" className="w-full text-sm font-normal text-brand-standard-black">Senha</label>
-                      <input
-                        type="password"
-                        className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                       />
                     </div>
                   </div>
