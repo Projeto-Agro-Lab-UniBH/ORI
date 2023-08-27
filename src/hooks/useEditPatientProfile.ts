@@ -1,8 +1,8 @@
 import { api } from "../providers/Api";
 import { Option } from "../interfaces/Option";
 import { useMutation} from "react-query";
-import { editPatientProfileFormData } from "../schemas/editPatientProfileFormSchema";
 import { queryClient } from "../providers/QueryClient";
+import { editPatientProfileFormData } from "../components/Modal/EditPatientProfileModal";
 
 type UploadImageResponse = {
   imageUrl: string;
