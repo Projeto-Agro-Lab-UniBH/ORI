@@ -141,6 +141,15 @@ export type editPatientProfileFormData = z.infer<
   typeof editPatientProfileFormSchema
 >;
 
+/**
+ * 
+ * Tarefas do componente:
+ * 
+ * [] Criar modal de edição de imagem de perfil do paciente 
+ * [] Opção para poder remover a imagem
+ *  
+ */
+
 const EditPatientProfileModal: React.FC<EditPatientProfileModalProps> = ({
   patientId,
   children,
@@ -575,8 +584,7 @@ const EditPatientProfileModal: React.FC<EditPatientProfileModalProps> = ({
                                 <input
                                   type="text"
                                   className={
-                                    errors.specie &&
-                                    watch("undefined_specie") == false
+                                    errors.specie 
                                       ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
                                       : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                                   }
@@ -632,8 +640,7 @@ const EditPatientProfileModal: React.FC<EditPatientProfileModalProps> = ({
                                 <input
                                   type="text"
                                   className={
-                                    errors.owner &&
-                                    watch("ownerless_patient") == false
+                                    errors.owner 
                                       ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
                                       : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                                   }
@@ -685,8 +692,7 @@ const EditPatientProfileModal: React.FC<EditPatientProfileModalProps> = ({
                                 <input
                                   type="text"
                                   className={
-                                    errors.race &&
-                                    watch("undefined_race") == false
+                                    errors.race 
                                       ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
                                       : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                                   }
