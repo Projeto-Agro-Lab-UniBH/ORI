@@ -24,26 +24,14 @@ const Header = (props: HeaderProps) => {
           ) : (
           <div className="w-[300px] flex items-center gap-2">
             <EditUserProfileModal id={props.user.id}>
-              <Avatar.Root
-                className={
-                  !props.user.profile_photo
-                    ? "w-10 h-10 border border-gray-200 rounded-full flex items-center justify-center overflow-hidden"
-                    : "w-10 h-10 rounded-full flex items-center justify-center overflow-hidden"
-                }
-              >
-                {!props.user.profile_photo ? (
-                  <div className="w-[14px] h-[14px]">
-                    <PersonIcon
-                      color="#e5e7eb"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                ) : (
-                  <Avatar.Image
-                    className="w-full h-full object-cover"
-                    src={props.user.profile_photo}
-                  />
-                )}
+              <Avatar.Root className="w-10 h-10 flex items-center justify-center rounded-full overflow-hidden">
+                <Avatar.Image
+                  src={props.user.profile_photo}
+                  className="w-full h-full object-cover"
+                />
+                <Avatar.Fallback className="w-10 h-10 flex items-center justify-center border border-gray-200 rounded-full overflow-hidden" delayMs={600}>
+                  <PersonIcon width={14} height={14} color="#e5e7eb" />    
+                </Avatar.Fallback>
               </Avatar.Root>
             </EditUserProfileModal>
             <div className="w-[244px] h-14 flex justify-center items-center flex-col">

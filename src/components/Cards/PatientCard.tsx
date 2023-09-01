@@ -55,26 +55,14 @@ const PatientCard = (props: PatientCardProps) => {
             <div className="w-[238.6px] h-full flex items-center">
               <EditPatientProfileModal patientId={props.id}>
                 <div className="w-16 h-16 flex items-center">
-                  <Avatar.Root
-                    className={
-                      !props.profile_photo
-                        ? "w-16 h-16 border border-gray-200 rounded-full flex items-center justify-center overflow-hidden"
-                        : "w-16 h-16 rounded-full flex items-center justify-center overflow-hidden"
-                    }
-                  >
-                    {!props.profile_photo ? (
-                      <div className="w-4 h-4">
-                        <CameraIcon
-                          className="w-full h-full object-cover"
-                          color="#e5e7eb"
-                        />
-                      </div>
-                    ) : (
-                      <Avatar.Image
-                        className="w-full h-full object-cover"
-                        src={props.profile_photo}
-                      />
-                    )}
+                  <Avatar.Root className="w-16 h-16 flex items-center justify-center rounded-full overflow-hidden">
+                    <Avatar.Image
+                      src={props.profile_photo}
+                      className="w-full h-full object-cover"
+                    /> 
+                    <Avatar.Fallback className="w-16 h-16 flex items-center justify-center border border-gray-200 rounded-full overflow-hidden" delayMs={600}>
+                      <CameraIcon width={16} height={16} color="#e5e7eb" />    
+                    </Avatar.Fallback>
                   </Avatar.Root>
                 </div>
                 <div className="w-[158.6px] flex items-center">

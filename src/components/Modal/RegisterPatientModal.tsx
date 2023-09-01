@@ -208,26 +208,14 @@ const RegisterPatientModal = () => {
                       </span>
                     </div>
                     <div className="w-full flex items-center justify-center">
-                      <Avatar.Root
-                        className={
-                          !previewImage
-                            ? "w-16 h-16 border border-gray-200 rounded-full flex items-center justify-center"
-                            : "w-16 h-16 rounded-full flex items-center justify-center overflow-hidden"
-                        }
-                      >
-                        {!previewImage ? (
-                          <div className="w-4 h-4">
-                            <CameraIcon
-                              className="w-full h-full object-cover"
-                              color="#e5e7eb"
-                            />
-                          </div>
-                        ) : (
-                          <Avatar.Image
-                            src={previewImage}
-                            className="w-full h-full object-cover"
-                          />
-                        )}
+                      <Avatar.Root className="w-16 h-16 flex items-center justify-center rounded-full overflow-hidden">
+                        <Avatar.Image
+                          src={previewImage as string | undefined}
+                          className="w-full h-full object-cover"
+                        />
+                        <Avatar.Fallback className="w-16 h-16 border border-gray-200 flex items-center justify-center rounded-full overflow-hidden" delayMs={600}>
+                          <CameraIcon width={16} height={16} color="#e5e7eb" />    
+                        </Avatar.Fallback>
                       </Avatar.Root>
                     </div>
                   </div>

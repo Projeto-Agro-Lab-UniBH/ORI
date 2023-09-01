@@ -380,26 +380,14 @@ const EditPatientProfileModal: React.FC<EditPatientProfileModalProps> = ({
                               </span>
                             </div>
                             <div className="w-full flex items-center justify-center">
-                              <Avatar.Root
-                                className={
-                                  !photo
-                                    ? "w-16 h-16 border border-gray-200 rounded-full flex items-center justify-center overflow-hidden"
-                                    : "w-16 h-16 rounded-full flex items-center justify-center overflow-hidden"
-                                }
-                              >
-                                {!photo ? (
-                                  <div className="w-4 h-4">
-                                    <CameraIcon
-                                      className="w-full h-full object-cover"
-                                      color="#e5e7eb"
-                                    />
-                                  </div>
-                                ) : (
-                                  <Avatar.Image
-                                    className="w-full h-full object-cover"
-                                    src={photo}
-                                  />
-                                )}
+                              <Avatar.Root className="w-16 h-16 flex items-center justify-center rounded-full overflow-hidden">
+                                <Avatar.Image
+                                  src={photo as string | undefined}
+                                  className="w-full h-full object-cover"
+                                />
+                                <Avatar.Fallback className="w-16 h-16 border border-gray-200 flex items-center justify-center rounded-full overflow-hidden" delayMs={600}>
+                                  <CameraIcon width={16} height={16} color="#e5e7eb" />    
+                                </Avatar.Fallback>
                               </Avatar.Root>
                             </div>
                           </div>

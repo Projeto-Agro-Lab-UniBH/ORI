@@ -169,26 +169,14 @@ const EditUserProfileModal = (props: IEditUserProfileModal) => {
                       </span>
                     </div>
                     <div className="w-full flex items-center justify-center">
-                      <Avatar.Root
-                        className={
-                          !photo
-                            ? "w-16 h-16 border border-gray-200 rounded-full flex items-center justify-center overflow-hidden"
-                            : "w-16 h-16 rounded-full flex items-center justify-center overflow-hidden"
-                        }
-                      >
-                        {!photo ? (
-                          <div className="w-5 h-5">
-                            <PersonIcon
-                              className="w-full h-full object-cover"
-                              color="#e5e7eb"
-                            />
-                          </div>
-                        ) : (
-                          <Avatar.Image
-                            className="w-full h-full object-cover"
-                            src={photo}
-                          />
-                        )}
+                      <Avatar.Root className="w-16 h-16 flex items-center justify-center rounded-full overflow-hidden">
+                        <Avatar.Image
+                          src={photo as string | undefined}
+                          className="w-full h-full object-cover"
+                        />
+                        <Avatar.Fallback className="w-16 h-16 flex items-center justify-center border border-gray-200 rounded-full overflow-hidden" delayMs={600}>
+                          <PersonIcon width={20} height={20} color="#e5e7eb" />    
+                        </Avatar.Fallback>
                       </Avatar.Root>
                     </div>
                   </div>
