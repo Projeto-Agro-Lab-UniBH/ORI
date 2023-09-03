@@ -1,9 +1,9 @@
 import * as Dialog from "@radix-ui/react-dialog";
+import { api } from "../../providers/Api";
+import { useMutation } from "react-query";
+import { queryClient } from "../../providers/QueryClient";
 import { ExclamationTriangleIcon, TrashIcon } from "@radix-ui/react-icons";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { useMutation } from "react-query";
-import { api } from "../../providers/Api";
-import { queryClient } from "../../providers/QueryClient";
 
 type WarningToDeleteReportModalProps = {
   id: string;
@@ -11,28 +11,28 @@ type WarningToDeleteReportModalProps = {
   modalIsOpen: Dispatch<SetStateAction<boolean>>;
 };
 
-const WarningToDeleteReportModal = (props: WarningToDeleteReportModalProps) => {
+const WarningToDeleteReportModal: React.FC<WarningToDeleteReportModalProps> = ({ id, modalIsOpen, setLoading }) => {
   const [open, setOpen] = useState<boolean>(false);
 
   const { isLoading, mutate } = useMutation({
     mutationKey: ["delete-report-by-id"],
     mutationFn: async () => {
-      await api.delete(`/reports/${props.id}`);
+      await api.delete(`/reports/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["list-all-reports"] });
       if (isLoading != true) {
         setOpen(false);
-        props.modalIsOpen(false);
+        modalIsOpen(false);
       }
     },
   });
 
   useEffect(() => {
     if (isLoading) {
-      props.setLoading(isLoading);
+      setLoading(isLoading);
     }
-  }, [props, isLoading]);
+  }, [setLoading, isLoading]);
 
   const acceptRemoveFile = (event: any) => {
     event.preventDefault();
@@ -42,8 +42,8 @@ const WarningToDeleteReportModal = (props: WarningToDeleteReportModalProps) => {
 
   return (
     <Dialog.Root onOpenChange={setOpen} open={open}>
-      <Dialog.Trigger className="border border-gray-200 px-[6px] py-[6px] rounded text-base text-brand-standard-black font-medium bg-white hover:bg-gray-50">
-        <TrashIcon color="#212529" width={20} height={20} />
+      <Dialog.Trigger className="w-10 flex items-center justify-center border border-gray-200 rounded text-base text-brand-standard-black font-medium bg-white hover:border-red-500">
+        <TrashIcon color="#ef4444" width={20} height={20} />
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className="bg-black/60 inset-0 fixed z-20" />

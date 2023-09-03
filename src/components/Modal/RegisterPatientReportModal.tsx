@@ -1,20 +1,17 @@
 import Image from "next/image";
+import Load from "../Load/Load";
+import Select from "react-select";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Cross1Icon, TrashIcon } from "@radix-ui/react-icons";
 import { useController, useForm } from "react-hook-form";
 import { ChangeEvent, useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  registerReportFormData,
-  registerReportFormSchema,
-} from "../../schemas/registerReportFormSchema";
 import { useMutation } from "react-query";
 import { api } from "../../providers/Api";
-import Select from "react-select";
 import { Document, Page } from "react-pdf";
 import { formatFileSize } from "../../functions/formatBytes";
 import { queryClient } from "../../providers/QueryClient";
-import Load from "../Load/Load";
+import { z } from "zod";
 
 type RegisterPatientReportProps = {
   patientId: string | null;
@@ -44,8 +41,27 @@ const turnOptions = [
   { label: "Noturno", value: "Noturno" },
 ];
 
-const RegisterPatientReportModal = (props: RegisterPatientReportProps) => {
-  const [open, setOpen] = useState<boolean>(false);
+const registerReportFormSchema = z.object({
+  shift: z.any(),
+  author: z
+    .string()
+    .nonempty("Preencha o seu nome completo.")
+    .transform((name) => {
+      return name
+        .trim()
+        .split(" ")
+        .map((word) => {
+          return word[0].toLocaleUpperCase().concat(word.substring(1));
+        })
+        .join(" ");
+    }),
+  title: z.string().nonempty("O relatório precisa ter um título."),
+  report_text: z.string().optional(),
+});
+
+type registerReportFormData = z.infer<typeof registerReportFormSchema>;
+
+const RegisterPatientReportModal: React.FC<RegisterPatientReportProps> = ({ patientId }) => {
   const {
     reset,
     register,
@@ -56,6 +72,7 @@ const RegisterPatientReportModal = (props: RegisterPatientReportProps) => {
     resolver: zodResolver(registerReportFormSchema),
   });
 
+  const [open, setOpen] = useState<boolean>(false);
   const [hasAttachment, setHasAttachment] = useState<boolean>(false);
   const [numPages, setNumPages] = useState<number | undefined>(undefined);
   const [attachedFile, setAttachedFile] = useState<any | undefined>();
@@ -82,7 +99,7 @@ const RegisterPatientReportModal = (props: RegisterPatientReportProps) => {
 
         await api.post<MutationReportResponse>("/reports", {
           ...data,
-          patientId: props.patientId,
+          patientId: patientId,
           filename: filename,
           fileUrl: upload.data.fileUrl,
           fileSize: attachedFile.size,
@@ -90,7 +107,7 @@ const RegisterPatientReportModal = (props: RegisterPatientReportProps) => {
       } else {
         await api.post<MutationReportResponse>("/reports", {
           ...data,
-          patientId: props.patientId,
+          patientId: patientId,
           filename: "",
           fileUrl: "",
           fileSize: 0,
@@ -148,7 +165,7 @@ const RegisterPatientReportModal = (props: RegisterPatientReportProps) => {
 
   return (
     <Dialog.Root onOpenChange={setOpen} open={open}>
-      <Dialog.Trigger className="border border-gray-200 px-3 py-[6px] rounded text-base text-brand-standard-black font-medium bg-white hover:bg-gray-50">
+      <Dialog.Trigger className="w-[164px] h-10 border border-gray-200 rounded font-medium text-base text-brand-standard-black bg-white hover:border-none hover:text-neutral-50 hover: hover:bg-blue-500">
         Criar novo relatório
       </Dialog.Trigger>
       <Dialog.Portal>
@@ -233,32 +250,54 @@ const RegisterPatientReportModal = (props: RegisterPatientReportProps) => {
                       {...restSelectShift}
                     />
                   </div>
+                  <div className="w-full flex flex-col gap-2">
+                    <div className="w-full flex flex-col gap-3">
+                      <label
+                        htmlFor="author"
+                        className="w-full text-sm font-normal text-brand-standard-black"
+                      >
+                        Nome do responsável
+                      </label>
+                      <input
+                        type="text"
+                        className={
+                          errors.author
+                            ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                            : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                        }
+                        {...register("author")}
+                      />
+                    </div>
+                    {errors.author && (
+                      <span className="text-xs font-normal text-red-500">
+                        {errors.author.message}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="w-full flex flex-col gap-2">
                   <div className="w-full flex flex-col gap-3">
                     <label
                       htmlFor="author"
                       className="w-full text-sm font-normal text-brand-standard-black"
                     >
-                      Nome do responsável
+                      Título
                     </label>
                     <input
                       type="text"
-                      className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                      {...register("author")}
+                      className={
+                        errors.title
+                          ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                          : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                      }
+                      {...register("title")}
                     />
                   </div>
-                </div>
-                <div className="w-full flex flex-col gap-3">
-                  <label
-                    htmlFor="author"
-                    className="w-full text-sm font-normal text-brand-standard-black"
-                  >
-                    Título
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                    {...register("title")}
-                  />
+                  {errors.title && (
+                    <span className="text-xs font-normal text-red-500">
+                      {errors.title.message}
+                    </span>
+                  )}
                 </div>
                 <div className="w-full flex flex-col gap-3">
                   <label
@@ -318,7 +357,7 @@ const RegisterPatientReportModal = (props: RegisterPatientReportProps) => {
                           onClick={removeAttachment}
                           className="w-7 h-7 flex justify-center items-center bg-white border rounded border-gray-200 overflow-hidden cursor-pointer"
                         >
-                          <TrashIcon color="#212529" width={16} height={16} />
+                          <TrashIcon color="#ef4444" width={16} height={16} />
                         </button>
                       </div>
                     </div>
@@ -356,12 +395,12 @@ const RegisterPatientReportModal = (props: RegisterPatientReportProps) => {
                     />
                   </div>
                 )}
-                <div className="w-full flex justify-end">
+                <div className="w-full h-10 flex justify-end">
                   <button
                     type="submit"
-                    className="border border-gray-200 px-3 py-[6px] rounded text-base text-brand-standard-black font-medium bg-white hover:bg-gray-50"
+                    className="w-[132px] h-10 border border-gray-200 rounded font-medium text-base text-brand-standard-black bg-white hover:border-none hover:text-neutral-50 hover: hover:bg-blue-500"
                   >
-                    Salvar
+                    Salvar relatório
                   </button>
                 </div>
               </div>

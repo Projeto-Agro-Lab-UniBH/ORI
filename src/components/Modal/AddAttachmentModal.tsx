@@ -25,7 +25,7 @@ type MutationFileResponse = {
   fileSize: number;
 };
 
-const AddAttachmentModal = (props: AddAttachmentModalProps) => {
+const AddAttachmentModal: React.FC<AddAttachmentModalProps> = ({ patientId }) => {
   const [open, setOpen] = useState<boolean>(false);
   const [attachedFile, setAttachedFile] = useState<any | undefined>();
   const [filename, setFilename] = useState<string>("");
@@ -51,7 +51,7 @@ const AddAttachmentModal = (props: AddAttachmentModalProps) => {
         );
 
         await api.post<MutationFileResponse>("/files", {
-          patientId: props.patientId,
+          patientId: patientId,
           filename: filename,
           fileUrl: upload.data.fileUrl,
           fileSize: attachedFile.fileSize,

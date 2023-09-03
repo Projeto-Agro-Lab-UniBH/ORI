@@ -11,28 +11,28 @@ type WarningToDeleteExamModalProps = {
   setLoading: Dispatch<SetStateAction<boolean>>;
 }
 
-const WarningToDeleteExamModal = (props: WarningToDeleteExamModalProps) => {
+const WarningToDeleteExamModal: React.FC<WarningToDeleteExamModalProps> = ({ id, modalIsOpen, setLoading }) => {
   const [open, setOpen] = useState<boolean>(false);
 
   const { isLoading, mutate } = useMutation({
     mutationKey: ["delete-exam-by-id"],
     mutationFn: async () => {
-      await api.delete(`/exams/${props.id}`)
+      await api.delete(`/exams/${id}`)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["list-all-exams"] });
       if (isLoading != true) {
         setOpen(false);
-        props.modalIsOpen(false);
+        modalIsOpen(false);
       }
     },
   });
 
   useEffect(() => {
     if (isLoading) {
-      props.setLoading(isLoading);
+      setLoading(isLoading);
     }
-  }, [props, isLoading]);
+  }, [setLoading, isLoading]);
 
   const acceptRemoveFile = (event: any) => {
     event.preventDefault();
@@ -42,9 +42,9 @@ const WarningToDeleteExamModal = (props: WarningToDeleteExamModalProps) => {
   
   return (
     <Dialog.Root onOpenChange={setOpen} open={open}>
-      <Dialog.Trigger className="border border-gray-200 px-[6px] py-[6px] rounded text-base text-brand-standard-black font-medium bg-white hover:bg-gray-50">
+      <Dialog.Trigger className="w-10 flex items-center justify-center border border-gray-200 rounded text-base text-brand-standard-black font-medium bg-white hover:border-red-500">
         <TrashIcon
-          color="#212529" 
+          color="#ef4444" 
           width={20} 
           height={20}
         />

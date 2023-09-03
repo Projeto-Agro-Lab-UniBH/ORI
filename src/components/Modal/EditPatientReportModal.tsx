@@ -1,19 +1,18 @@
 import Image from "next/image";
+import Load from "../Load/Load";
 import Select from "react-select";
-import { useMutation } from "react-query";
 import { api } from "../../providers/Api";
-import * as Dialog from "@radix-ui/react-dialog";
+import { z } from "zod";
 import { Document, Page } from "react-pdf";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { ChangeEvent, SetStateAction, useEffect, useState } from "react";
-import { useController, useForm } from "react-hook-form";
-import { Cross1Icon, DownloadIcon, Pencil2Icon, TrashIcon } from "@radix-ui/react-icons";
-import { editReportFormData, editReportFormSchema } from "../../schemas/editReportFormSchema";
-import WarningToDeleteReportModal from "./WarningToDeleteReportModal";
-import useGetPatientReport from "../../hooks/useGetPatientReport";
 import { formatFileSize } from "../../functions/formatBytes";
 import { queryClient } from "../../providers/QueryClient";
-import Load from "../Load/Load";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ChangeEvent, useEffect, useState } from "react";
+import { useController, useForm } from "react-hook-form";
+import { Cross1Icon, DownloadIcon, Pencil2Icon, TrashIcon } from "@radix-ui/react-icons";
+import { useMutation, useQuery } from "react-query";
+import * as Dialog from "@radix-ui/react-dialog";
+import WarningToDeleteReportModal from "./WarningToDeleteReportModal";
 
 type EditPatientReportModalProps = {
   id: string;
@@ -52,7 +51,27 @@ const turnOptions = [
   { label: "Noturno", value: "Noturno" },
 ];
 
-const EditPatientReportModal = (props: EditPatientReportModalProps) => {
+const editReportFormSchema = z.object({
+  shift: z.any(),
+  author: z
+    .string()
+    .nonempty("Preencha o seu nome completo.")
+    .transform((name) => {
+      return name
+        .trim()
+        .split(" ")
+        .map((word) => {
+          return word[0].toLocaleUpperCase().concat(word.substring(1));
+        })
+        .join(" ");
+    }),
+  title: z.string().nonempty("O relatório precisa ter um título."),
+  report_text: z.string().optional(),
+});
+
+type editReportFormData = z.infer<typeof editReportFormSchema>;
+
+const EditPatientReportModal: React.FC<EditPatientReportModalProps> = ({ id, patientId }) => {
   const {
     reset,
     register,
@@ -83,11 +102,15 @@ const EditPatientReportModal = (props: EditPatientReportModalProps) => {
     ...restSelectShift
   } = selectShift;
 
-  const { isLoading } = useGetPatientReport({
-    id: props.id,
-    callRequest: callRequest,
-    reset: reset,
-    setData: setData,
+  const { isLoading } = useQuery({
+    queryKey: ["get-report-by-id"],
+    queryFn: async () => {
+      await api.get<ReportResponse>(`/reports/${id}`).then((res) => {
+        reset(res.data);
+        setData(res.data);
+      });
+    },
+    enabled: callRequest,
   });
 
   const { isLoading: savingChanges, mutate } = useMutation({
@@ -102,20 +125,20 @@ const EditPatientReportModal = (props: EditPatientReportModalProps) => {
           formData
         );
 
-        await api.patch<ReportResponse>(`/reports/${props.id}`, {
+        await api.patch<ReportResponse>(`/reports/${id}`, {
           ...data,
           filename: filename,
           fileUrl: upload.data.fileUrl,
-          fileSize: attachedFile.size
+          fileSize: attachedFile.size,
         });
       }
       if (fecthedAttachment != "" && attachedFile === undefined) {
-        await api.patch<ReportResponse>(`/reports/${props.id}`, {
+        await api.patch<ReportResponse>(`/reports/${id}`, {
           ...data,
         });
       }
       if (fecthedAttachment === "" && attachedFile === undefined) {
-        await api.patch<ReportResponse>(`/reports/${props.id}`, {
+        await api.patch<ReportResponse>(`/reports/${id}`, {
           ...data,
           filename: "",
           fileUrl: "",
@@ -186,7 +209,7 @@ const EditPatientReportModal = (props: EditPatientReportModalProps) => {
   const downloadFile = (event: any) => {
     event.preventDefault();
     download.click();
-  }
+  };
 
   const removeFecthedAttachment = () => {
     setFetchedFilename("");
@@ -263,107 +286,91 @@ const EditPatientReportModal = (props: EditPatientReportModalProps) => {
               </div>
             </div>
           )}
-          <div id="modal-scroll" className="w-full h-[402px] overflow-y-scroll">
-            <div className="w-full px-6 py-6 flex flex-col gap-4">
-              <div className="w-full flex justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-base font-semibold text-brand-standard-black">
-                    ID:
-                  </span>
-                  <p className="text-base font-normal text-brand-standard-black">
-                    {data?.id}
-                  </p>
-                </div>
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-1">
-                    <span className="text-base font-semibold text-brand-standard-black">
-                      Data de criação:
-                    </span>
-                    <p className="text-base font-normal text-brand-standard-black">
-                      {data?.createdAt}
-                    </p>
+          <div
+            id="modal-scroll"
+            className="w-full h-[402px] px-6 py-6 overflow-y-scroll"
+          >
+            <form
+              onSubmit={handleSubmit(send)}
+              className="w-full flex flex-col h-360 gap-6"
+            >
+              <div className="w-full flex flex-col gap-6">
+                <div className="w-full flex flex-row gap-3">
+                  <div className="w-[184px] flex flex-col gap-3">
+                    <label
+                      htmlFor="shift"
+                      className="w-full text-sm font-normal text-brand-standard-black"
+                    >
+                      Turno
+                    </label>
+                    <Select
+                      styles={{
+                        control: (baseStyles, state) => ({
+                          ...baseStyles,
+                          width: 184,
+                          height: 40,
+                          borderColor: state.isFocused ? "#e2e8f0" : "#e2e8f0",
+                          whiteSpace: "nowrap",
+                          textOverflow: "ellipsis",
+                          fontFamily: "Inter",
+                          fontWeight: 400,
+                          fontSize: "0.875rem",
+                          lineHeight: "1.25rem",
+                        }),
+                      }}
+                      theme={(theme) => ({
+                        ...theme,
+                        borderRadius: 4,
+                        colors: {
+                          ...theme.colors,
+                          primary75: "#cbd5e1",
+                          primary50: "##e2e8f0",
+                          primary25: "#f8fafc",
+                          primary: "#212529",
+                        },
+                      })}
+                      placeholder="Selecione o turno"
+                      isSearchable={false}
+                      options={turnOptions}
+                      value={
+                        selectShiftValue
+                          ? turnOptions.find(
+                              (x) => x.value === selectShiftValue
+                            )
+                          : selectShiftValue
+                      }
+                      onChange={(option) =>
+                        selectShiftOnChange(option ? option.value : option)
+                      }
+                      {...restSelectShift}
+                    />
                   </div>
-                  <div className="flex items-center gap-1">
-                    <span className="text-base font-semibold text-brand-standard-black">
-                      Data da última edição:
-                    </span>
-                    <p className="text-base font-normal text-brand-standard-black">
-                      {data?.updatedAt}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <form
-                onSubmit={handleSubmit(send)}
-                className="w-full flex flex-col h-360 gap-6"
-              >
-                <div className="w-full flex flex-col gap-6">
-                  <div className="w-full flex flex-row gap-3">
-                    <div className="w-[184px] flex flex-col gap-3">
-                      <label
-                        htmlFor="shift"
-                        className="w-full text-sm font-normal text-brand-standard-black"
-                      >
-                        Turno
-                      </label>
-                      <Select
-                        styles={{
-                          control: (baseStyles, state) => ({
-                            ...baseStyles,
-                            width: 184,
-                            height: 40,
-                            borderColor: state.isFocused
-                              ? "#e2e8f0"
-                              : "#e2e8f0",
-                            whiteSpace: "nowrap",
-                            textOverflow: "ellipsis",
-                            fontFamily: "Inter",
-                            fontWeight: 400,
-                            fontSize: "0.875rem",
-                            lineHeight: "1.25rem",
-                          }),
-                        }}
-                        theme={(theme) => ({
-                          ...theme,
-                          borderRadius: 4,
-                          colors: {
-                            ...theme.colors,
-                            primary75: "#cbd5e1",
-                            primary50: "##e2e8f0",
-                            primary25: "#f8fafc",
-                            primary: "#212529",
-                          },
-                        })}
-                        placeholder="Selecione o turno"
-                        isSearchable={false}
-                        options={turnOptions}
-                        value={
-                          selectShiftValue
-                            ? turnOptions.find(
-                                (x) => x.value === selectShiftValue
-                              )
-                            : selectShiftValue
-                        }
-                        onChange={(option) =>
-                          selectShiftOnChange(option ? option.value : option)
-                        }
-                        {...restSelectShift}
-                      />
-                    </div>
+                  <div className="w-full flex flex-col gap-2">
                     <div className="w-full flex flex-col gap-3">
                       <label
                         htmlFor="author"
                         className="w-full text-sm font-normal text-brand-standard-black"
                       >
-                        Veterinário responsável
+                        Nome do responsável
                       </label>
                       <input
                         type="text"
-                        className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                        className={
+                          errors.author
+                            ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                            : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                        }
                         {...register("author")}
                       />
                     </div>
+                    {errors.author && (
+                      <span className="text-xs font-normal text-red-500">
+                        {errors.author.message}
+                      </span>
+                    )}
                   </div>
+                </div>
+                <div className="w-full flex flex-col gap-2">
                   <div className="w-full flex flex-col gap-3">
                     <label
                       htmlFor="author"
@@ -373,188 +380,190 @@ const EditPatientReportModal = (props: EditPatientReportModalProps) => {
                     </label>
                     <input
                       type="text"
-                      className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                      className={
+                        errors.title
+                          ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                          : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                      }
                       {...register("title")}
                     />
                   </div>
-                  <div className="w-full flex flex-col gap-3">
-                    <label
-                      htmlFor="report_text"
-                      className="w-full text-sm font-normal text-brand-standard-black"
-                    >
-                      Relatório
-                    </label>
-                    <div>
-                      <textarea
-                        cols={30}
-                        rows={10}
-                        className="w-full px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                        {...register("report_text")}
-                      ></textarea>
-                    </div>
-                  </div>
-                  {fecthedAttachment && (
-                    <div className="w-[552.8px] border rounded border-gray-200 overflow-hidden flex flex-col items-center">
-                      <div className="w-[552.8px] h-44 overflow-hidden">
-                        <Document
-                          file={fecthedAttachment}
-                          onLoadSuccess={onDocumentLoadSuccess}
-                        >
-                          <Page pageNumber={1} width={552.8} />
-                        </Document>
-                      </div>
-                      <div className="w-[552.8px] h-14 border-t-[1px] border-gray-200 flex items-center p-2 gap-2">
-                        <Image
-                          src="/pdf-svgrepo-com.svg"
-                          alt="pdf-icon"
-                          width={24}
-                          height={24}
-                        />
-                        <div className="w-80 flex flex-col items-center justify-center">
-                          <div className="w-80 whitespace-nowrap overflow-hidden text-ellipsis">
-                            <p className="max-w-80 whitespace-nowrap overflow-hidden text-ellipsis font-semibold text-[14.8px]">
-                              {fecthedFilename
-                                .split(".")
-                                .slice(0, -1)
-                                .join(".")}
-                            </p>
-                          </div>
-                          <div className="w-80 flex flex-row items-center text-center gap-1">
-                            <span className="text-[10px] font-light">
-                              {numPages} páginas
-                            </span>
-                            <span className="text-[10px] font-light">•</span>
-                            <span className="text-[10px] font-light">
-                              {fecthedFilename.split(".").pop()?.toUpperCase()}
-                            </span>
-                            <span className="text-[10px] font-light">•</span>
-                            <span className="text-[10px] font-light">
-                              {formatFileSize(data.fileSize)}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="w-[176.8px] flex justify-end">
-                          <div className="flex gap-2">
-                            <button
-                              onClick={downloadFile}
-                              className="w-7 h-7 flex justify-center items-center bg-white border rounded border-gray-200 overflow-hidden cursor-pointer"
-                            >
-                              <DownloadIcon
-                                color="#212529"
-                                width={16}
-                                height={16}
-                              />
-                            </button>
-                            <button
-                              onClick={removeFecthedAttachment}
-                              className="w-7 h-7 flex justify-center items-center bg-white border rounded border-gray-200 overflow-hidden cursor-pointer"
-                            >
-                              <TrashIcon
-                                color="#212529"
-                                width={16}
-                                height={16}
-                              />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                  {errors.title && (
+                    <span className="text-xs font-normal text-red-500">
+                      {errors.title.message}
+                    </span>
                   )}
-                  {attachedFile && (
-                    <div className="w-[552.8px] border rounded border-gray-200 overflow-hidden flex flex-col items-center">
-                      <div className="w-[552.8px] h-44 overflow-hidden">
-                        <Document
-                          file={attachedFile}
-                          onLoadSuccess={onDocumentLoadSuccess}
-                        >
-                          <Page pageNumber={1} width={552.8} />
-                        </Document>
-                      </div>
-                      <div className="w-[552.8px] h-14 border-t-[1px] border-gray-200 flex items-center p-2 gap-2">
-                        <Image
-                          src="/pdf-svgrepo-com.svg"
-                          alt="pdf-icon"
-                          width={24}
-                          height={24}
-                        />
-                        <div className="w-80 flex flex-col items-center justify-center">
-                          <div className="w-80 whitespace-nowrap overflow-hidden text-ellipsis">
-                            <p className="max-w-80 whitespace-nowrap overflow-hidden text-ellipsis font-semibold text-[14.8px]">
-                              {filename.split(".").slice(0, -1).join(".")}
-                            </p>
-                          </div>
-                          <div className="w-80 flex flex-row items-center text-center gap-1">
-                            <span className="text-[10px] font-light">
-                              {numPages} páginas
-                            </span>
-                            <span className="text-[10px] font-light">•</span>
-                            <span className="text-[10px] font-light">
-                              {filename.split(".").pop()?.toUpperCase()}
-                            </span>
-                            <span className="text-[10px] font-light">•</span>
-                            <span className="text-[10px] font-light">
-                              {formatFileSize(attachedFile.size)}
-                            </span>
-                          </div>
+                </div>
+                <div className="w-full flex flex-col gap-3">
+                  <label
+                    htmlFor="report_text"
+                    className="w-full text-sm font-normal text-brand-standard-black"
+                  >
+                    Descrição / Relatório
+                  </label>
+                  <div>
+                    <textarea
+                      cols={30}
+                      rows={10}
+                      className="w-full px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                      {...register("report_text")}
+                    ></textarea>
+                  </div>
+                </div>
+                {fecthedAttachment && (
+                  <div className="w-[552.8px] border rounded border-gray-200 overflow-hidden flex flex-col items-center">
+                    <div className="w-[552.8px] h-44 overflow-hidden">
+                      <Document
+                        file={fecthedAttachment}
+                        onLoadSuccess={onDocumentLoadSuccess}
+                      >
+                        <Page pageNumber={1} width={552.8} />
+                      </Document>
+                    </div>
+                    <div className="w-[552.8px] h-14 border-t-[1px] border-gray-200 flex items-center p-2 gap-2">
+                      <Image
+                        src="/pdf-svgrepo-com.svg"
+                        alt="pdf-icon"
+                        width={24}
+                        height={24}
+                      />
+                      <div className="w-80 flex flex-col items-center justify-center">
+                        <div className="w-80 whitespace-nowrap overflow-hidden text-ellipsis">
+                          <p className="max-w-80 whitespace-nowrap overflow-hidden text-ellipsis font-semibold text-[14.8px]">
+                            {fecthedFilename.split(".").slice(0, -1).join(".")}
+                          </p>
                         </div>
-                        <div className="w-[176.8px] flex justify-end">
+                        <div className="w-80 flex flex-row items-center text-center gap-1">
+                          <span className="text-[10px] font-light">
+                            {numPages} páginas
+                          </span>
+                          <span className="text-[10px] font-light">•</span>
+                          <span className="text-[10px] font-light">
+                            {fecthedFilename.split(".").pop()?.toUpperCase()}
+                          </span>
+                          <span className="text-[10px] font-light">•</span>
+                          <span className="text-[10px] font-light">
+                            {formatFileSize(data.fileSize)}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="w-[176.8px] flex justify-end">
+                        <div className="flex gap-2">
                           <button
-                            onClick={removeAttachment}
+                            onClick={downloadFile}
                             className="w-7 h-7 flex justify-center items-center bg-white border rounded border-gray-200 overflow-hidden cursor-pointer"
                           >
-                            <TrashIcon color="#212529" width={16} height={16} />
+                            <DownloadIcon
+                              color="#212529"
+                              width={16}
+                              height={16}
+                            />
+                          </button>
+                          <button
+                            onClick={removeFecthedAttachment}
+                            className="w-7 h-7 flex justify-center items-center bg-white border rounded border-gray-200 overflow-hidden cursor-pointer"
+                          >
+                            <TrashIcon color="#ef4444" width={16} height={16} />
                           </button>
                         </div>
                       </div>
                     </div>
-                  )}
-                </div>
-                <div className="w-full flex flex-col gap-3">
-                  <div className="w-full flex justify-between">
-                    {hasAttachment === true ? undefined : (
-                      <div className="w-full flex">
-                        <label
-                          htmlFor="attachfile"
-                          className="border border-gray-200 flex items-center px-3 py-[6px] gap-1 rounded text-base text-brand-standard-black font-medium bg-white hover:border-[#b3b3b3] cursor-pointer"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="#212529"
-                            className="w-5 h-5"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"
-                            />
-                          </svg>
-                          Adicionar um anexo
-                        </label>
-                        <input
-                          type="file"
-                          accept=".pdf"
-                          id="attachfile"
-                          className="hidden"
-                          onChange={handleFile}
-                        />
-                      </div>
-                    )}
-                    <div className="w-full flex justify-end gap-2">
-                      <WarningToDeleteReportModal
-                        id={props.id}
-                        modalIsOpen={setOpen} 
-                        setLoading={setIsRemovingRecord} 
+                  </div>
+                )}
+                {attachedFile && (
+                  <div className="w-[552.8px] border rounded border-gray-200 overflow-hidden flex flex-col items-center">
+                    <div className="w-[552.8px] h-44 overflow-hidden">
+                      <Document
+                        file={attachedFile}
+                        onLoadSuccess={onDocumentLoadSuccess}
+                      >
+                        <Page pageNumber={1} width={552.8} />
+                      </Document>
+                    </div>
+                    <div className="w-[552.8px] h-14 border-t-[1px] border-gray-200 flex items-center p-2 gap-2">
+                      <Image
+                        src="/pdf-svgrepo-com.svg"
+                        alt="pdf-icon"
+                        width={24}
+                        height={24}
                       />
-                      <button className="border border-gray-200 px-3 py-[6px] rounded text-base text-brand-standard-black font-medium bg-white hover:bg-gray-50">
-                        Salvar alterações
-                      </button>
+                      <div className="w-80 flex flex-col items-center justify-center">
+                        <div className="w-80 whitespace-nowrap overflow-hidden text-ellipsis">
+                          <p className="max-w-80 whitespace-nowrap overflow-hidden text-ellipsis font-semibold text-[14.8px]">
+                            {filename.split(".").slice(0, -1).join(".")}
+                          </p>
+                        </div>
+                        <div className="w-80 flex flex-row items-center text-center gap-1">
+                          <span className="text-[10px] font-light">
+                            {numPages} páginas
+                          </span>
+                          <span className="text-[10px] font-light">•</span>
+                          <span className="text-[10px] font-light">
+                            {filename.split(".").pop()?.toUpperCase()}
+                          </span>
+                          <span className="text-[10px] font-light">•</span>
+                          <span className="text-[10px] font-light">
+                            {formatFileSize(attachedFile.size)}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="w-[176.8px] flex justify-end">
+                        <button
+                          onClick={removeAttachment}
+                          className="w-7 h-7 flex justify-center items-center bg-white border rounded border-gray-200 overflow-hidden cursor-pointer"
+                        >
+                          <TrashIcon color="#ef4444" width={16} height={16} />
+                        </button>
+                      </div>
                     </div>
                   </div>
+                )}
+              </div>
+              <div className="w-full flex flex-col gap-3">
+                <div className="w-full flex justify-between">
+                  {hasAttachment === true ? undefined : (
+                    <div className="w-full flex">
+                      <label
+                        htmlFor="attachfile"
+                        className="border border-gray-200 flex items-center px-3 py-[6px] gap-1 rounded text-base text-brand-standard-black font-medium bg-white hover:border-[#b3b3b3] cursor-pointer"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="#212529"
+                          className="w-5 h-5"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"
+                          />
+                        </svg>
+                        Adicionar um anexo
+                      </label>
+                      <input
+                        type="file"
+                        accept=".pdf"
+                        id="attachfile"
+                        className="hidden"
+                        onChange={handleFile}
+                      />
+                    </div>
+                  )}
+                  <div className="w-full h-10 flex justify-end gap-2">
+                    <WarningToDeleteReportModal
+                      id={id}
+                      modalIsOpen={setOpen}
+                      setLoading={setIsRemovingRecord}
+                    />
+                    <button className="w-[152px] h-10 border border-gray-200 rounded font-medium text-base text-brand-standard-black bg-white hover:border-none hover:text-neutral-50 hover: hover:bg-blue-500">
+                      Salvar alterações
+                    </button>
+                  </div>
                 </div>
-              </form>
-            </div>
+              </div>
+            </form>
           </div>
         </Dialog.Content>
       </Dialog.Portal>

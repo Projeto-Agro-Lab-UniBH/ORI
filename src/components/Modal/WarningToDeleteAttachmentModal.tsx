@@ -9,13 +9,13 @@ type WarningToDeleteAttachmentModalProps = {
   id: string;
 }
 
-const WarningToDeleteAttachmentModal = (props: WarningToDeleteAttachmentModalProps) => {
+const WarningToDeleteAttachmentModal: React.FC<WarningToDeleteAttachmentModalProps> = ({ id }) => {
   const [open, setOpen] = useState<boolean>(false);
 
   const { isLoading, mutate } = useMutation({
     mutationKey: ['delete-attachment-by-id'],
     mutationFn: async () => {
-      return await api.delete(`/files/${props.id}`)
+      return await api.delete(`/files/${id}`)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["get-file-by-patientId"] });
@@ -34,7 +34,7 @@ const WarningToDeleteAttachmentModal = (props: WarningToDeleteAttachmentModalPro
     <Dialog.Root onOpenChange={setOpen} open={open}>
       <Dialog.Trigger className="w-[26px] h-[26px] flex justify-center items-center bg-white border rounded border-gray-200 overflow-hidden cursor-pointer">
         <TrashIcon 
-          color="#212529" 
+          color="#ef4444" 
           width={16} 
           height={16} 
         />
