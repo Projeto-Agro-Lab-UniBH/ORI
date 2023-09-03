@@ -806,8 +806,11 @@ const RegisterPatientModal = () => {
                   </div>
                 </div>
               </div>
-              <div className="w-full flex justify-end">
-                <button className="border border-gray-200 px-3 py-[6px] rounded text-base text-brand-standard-black font-medium bg-white hover:bg-gray-50">
+              <div className="w-full h-10 flex items-center justify-end">
+                <button 
+                  type="submit" 
+                  className="w-24 h-10 border border-gray-200 rounded font-medium text-base text-brand-standard-black bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500"
+                >
                   Cadastrar
                 </button>
               </div>

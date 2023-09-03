@@ -972,7 +972,7 @@ const EditPatientProfileModal: React.FC<EditPatientProfileModalProps> = ({ patie
                     <div className="w-full h-10 flex items-center justify-end">
                       <button
                         type="submit"
-                        className="w-[152px] h-10 border border-gray-200 rounded font-medium text-base text-brand-standard-black bg-white hover:border-none hover:text-neutral-50 hover: hover:bg-blue-500"
+                        className="w-[152px] h-10 border border-gray-200 rounded font-medium text-base text-brand-standard-black bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500"
                       >
                         Salvar alterações
                       </button>

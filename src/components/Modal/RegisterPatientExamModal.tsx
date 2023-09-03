@@ -150,7 +150,7 @@ const RegisterPatientExamModal: React.FC<RegisterPatientReportProps> = ({ patien
 
   return (
     <Dialog.Root onOpenChange={setOpen} open={open}>
-      <Dialog.Trigger className="w-[184px] h-10 border border-gray-200 rounded font-medium text-base text-brand-standard-black bg-white hover:border-none hover:text-neutral-50 hover: hover:bg-blue-500">
+      <Dialog.Trigger className="w-[184px] h-10 border border-gray-200 rounded font-medium text-base text-brand-standard-black bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500">
         Registrar novo exame
       </Dialog.Trigger>
       <Dialog.Portal>
@@ -358,7 +358,7 @@ const RegisterPatientExamModal: React.FC<RegisterPatientReportProps> = ({ patien
                     <div className="w-full h-10 flex justify-end">
                       <button
                         type="submit"
-                        className="w-[120px] border border-gray-200 rounded font-medium text-base text-brand-standard-black bg-white hover:border-none hover:text-neutral-50 hover: hover:bg-blue-500"
+                        className="w-[120px] border border-gray-200 rounded font-medium text-base text-brand-standard-black bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500"
                       >
                         Salvar exame
                       </button>

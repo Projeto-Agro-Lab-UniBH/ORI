@@ -557,7 +557,7 @@ const EditPatientReportModal: React.FC<EditPatientReportModalProps> = ({ id, pat
                       modalIsOpen={setOpen}
                       setLoading={setIsRemovingRecord}
                     />
-                    <button className="w-[152px] h-10 border border-gray-200 rounded font-medium text-base text-brand-standard-black bg-white hover:border-none hover:text-neutral-50 hover: hover:bg-blue-500">
+                    <button className="w-[152px] h-10 border border-gray-200 rounded font-medium text-base text-brand-standard-black bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500">
                       Salvar alterações
                     </button>
                   </div>

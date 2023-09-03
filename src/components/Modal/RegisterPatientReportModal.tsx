@@ -165,7 +165,7 @@ const RegisterPatientReportModal: React.FC<RegisterPatientReportProps> = ({ pati
 
   return (
     <Dialog.Root onOpenChange={setOpen} open={open}>
-      <Dialog.Trigger className="w-[164px] h-10 border border-gray-200 rounded font-medium text-base text-brand-standard-black bg-white hover:border-none hover:text-neutral-50 hover: hover:bg-blue-500">
+      <Dialog.Trigger className="w-[164px] h-10 border border-gray-200 rounded font-medium text-base text-brand-standard-black bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500">
         Criar novo relatório
       </Dialog.Trigger>
       <Dialog.Portal>
@@ -398,7 +398,7 @@ const RegisterPatientReportModal: React.FC<RegisterPatientReportProps> = ({ pati
                 <div className="w-full h-10 flex justify-end">
                   <button
                     type="submit"
-                    className="w-[132px] h-10 border border-gray-200 rounded font-medium text-base text-brand-standard-black bg-white hover:border-none hover:text-neutral-50 hover: hover:bg-blue-500"
+                    className="w-[132px] h-10 border border-gray-200 rounded font-medium text-base text-brand-standard-black bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500"
                   >
                     Salvar relatório
                   </button>
