@@ -1,16 +1,16 @@
-import * as Dialog from "@radix-ui/react-dialog";
 import Image from "next/image";
+import Load from "../Load/Load";
+import * as Dialog from "@radix-ui/react-dialog";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Cross1Icon, TrashIcon } from "@radix-ui/react-icons";
 import { useForm } from "react-hook-form";
-import { registerExamFormData, registerExamFormSchema } from "../../schemas/registerExamFormSchema";
 import { ChangeEvent, useEffect, useState } from "react";
 import { Document, Page } from "react-pdf";
 import { formatFileSize } from "../../functions/formatBytes";
 import { queryClient } from "../../providers/QueryClient";
 import { useMutation } from "react-query";
 import { api } from "../../providers/Api";
-import Load from "../Load/Load";
+import { z } from "zod";
 
 type RegisterPatientReportProps = {
   patientId: string | null;
@@ -34,7 +34,27 @@ type MutationExamResponse = {
   updatedAt: string;
 };
 
-const RegisterPatientExamModal = (props: RegisterPatientReportProps) => {
+const registerExamFormSchema = z.object({
+  date: z.string().nonempty("Selecione a data de realização do exame."),
+  type_of_exam: z.string().nonempty("O exame precisa ter um nome."),
+  author: z
+    .string()
+    .nonempty("Preencha o nome completo do responsável pelo exame.")
+    .transform((name) => {
+      return name
+        .trim()
+        .split(" ")
+        .map((word) => {
+          return word[0].toLocaleUpperCase().concat(word.substring(1));
+        })
+        .join(" ");
+    }),
+  annotations: z.string().optional(),
+});
+
+type registerExamFormData = z.infer<typeof registerExamFormSchema>;
+
+const RegisterPatientExamModal: React.FC<RegisterPatientReportProps> = ({ patientId }) => {
   const {
     reset,
     register,
@@ -64,7 +84,7 @@ const RegisterPatientExamModal = (props: RegisterPatientReportProps) => {
 
         await api.post<MutationExamResponse>("/exams", {
           ...data,
-          patientId: props.patientId,
+          patientId: patientId,
           filename: filename,
           fileUrl: upload.data.fileUrl,
           fileSize: attachedFile.size,
@@ -72,7 +92,7 @@ const RegisterPatientExamModal = (props: RegisterPatientReportProps) => {
       } else {
         await api.post<MutationExamResponse>("/exams", {
           ...data,
-          patientId: props.patientId,
+          patientId: patientId,
           filename: "",
           fileUrl: "",
           fileSize: 0,
@@ -130,7 +150,7 @@ const RegisterPatientExamModal = (props: RegisterPatientReportProps) => {
 
   return (
     <Dialog.Root onOpenChange={setOpen} open={open}>
-      <Dialog.Trigger className="border border-gray-200 px-3 py-[6px] rounded text-base text-brand-standard-black font-medium bg-white hover:bg-gray-50">
+      <Dialog.Trigger className="w-[184px] h-10 border border-gray-200 rounded font-medium text-base text-brand-standard-black bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500">
         Registrar novo exame
       </Dialog.Trigger>
       <Dialog.Portal>
@@ -165,25 +185,32 @@ const RegisterPatientExamModal = (props: RegisterPatientReportProps) => {
               className="w-full flex flex-col h-360"
             >
               <div className="w-full flex flex-col gap-6">
-                <div className="w-full flex flex-row gap-3">
-                  <div className="w-[224px]">
-                    <div className="w-[224px] flex flex-col gap-3">
-                      <label
-                        htmlFor="date"
-                        className="w-full text-sm font-normal text-brand-standard-black"
-                      >
-                        Data de realização
-                      </label>
-                      <input
-                        type="text"
-                        className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                        {...register("date")}
-                      />
-                    </div>
+                <div className="w-[324px] flex flex-col gap-2">
+                  <div className="w-[176px] flex flex-col gap-3">
+                    <label
+                      htmlFor="date"
+                      className="w-full text-sm font-normal text-brand-standard-black"
+                    >
+                      Data de realização
+                    </label>
+                    <input
+                      type="date"
+                      className={
+                        errors.date
+                          ? "w-[176px] h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                          : "w-[176px] h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                      }
+                      {...register("date")}
+                    />
                   </div>
+                  {errors.date && (
+                    <span className="text-xs font-normal text-red-500">
+                      {errors.date.message}
+                    </span>
+                  )}
                 </div>
                 <div className="w-full flex flex-row gap-3">
-                  <div className="w-[224px]">
+                  <div className="w-[224px] flex flex-col gap-2">
                     <div className="w-[224px] flex flex-col gap-3">
                       <label
                         htmlFor="type_of_exam"
@@ -193,12 +220,21 @@ const RegisterPatientExamModal = (props: RegisterPatientReportProps) => {
                       </label>
                       <input
                         type="text"
-                        className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                        className={
+                          errors.type_of_exam
+                            ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                            : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                        }
                         {...register("type_of_exam")}
                       />
                     </div>
+                    {errors.type_of_exam && (
+                      <span className="text-xs font-normal text-red-500">
+                        {errors.type_of_exam.message}
+                      </span>
+                    )}
                   </div>
-                  <div className="w-[316.8px]">
+                  <div className="w-[316.8px] flex flex-col gap-2">
                     <div className="w-[316.8px] flex flex-col gap-3">
                       <label
                         htmlFor="author"
@@ -208,10 +244,19 @@ const RegisterPatientExamModal = (props: RegisterPatientReportProps) => {
                       </label>
                       <input
                         type="text"
-                        className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                        className={
+                          errors.author
+                            ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                            : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                        }
                         {...register("author")}
                       />
                     </div>
+                    {errors.author && (
+                      <span className="text-xs font-normal text-red-500">
+                        {errors.author.message}
+                      </span>
+                    )}
                   </div>
                 </div>
                 <div className="w-full flex flex-col gap-3">
@@ -272,7 +317,7 @@ const RegisterPatientExamModal = (props: RegisterPatientReportProps) => {
                           onClick={removeAttachment}
                           className="w-7 h-7 flex justify-center items-center bg-white border rounded border-gray-200 overflow-hidden cursor-pointer"
                         >
-                          <TrashIcon color="#212529" width={16} height={16} />
+                          <TrashIcon color="#ef4444" width={16} height={16} />
                         </button>
                       </div>
                     </div>
@@ -310,12 +355,12 @@ const RegisterPatientExamModal = (props: RegisterPatientReportProps) => {
                         />
                       </div>
                     )}
-                    <div className="w-full flex justify-end">
+                    <div className="w-full h-10 flex justify-end">
                       <button
                         type="submit"
-                        className="border border-gray-200 px-3 py-[6px] rounded text-base text-brand-standard-black font-medium bg-white hover:bg-gray-50"
+                        className="w-[120px] border border-gray-200 rounded font-medium text-base text-brand-standard-black bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500"
                       >
-                        Salvar
+                        Salvar exame
                       </button>
                     </div>
                   </div>

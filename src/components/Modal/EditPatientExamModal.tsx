@@ -1,26 +1,22 @@
 import Image from "next/image";
-import { Document, Page } from "react-pdf";
+import Load from "../Load/Load";
+import WarningToDeleteExamModal from "./WarningToDeleteExamModal";
 import * as Dialog from "@radix-ui/react-dialog";
+import { Document, Page } from "react-pdf";
 import {
   Cross1Icon,
   DownloadIcon,
   Pencil2Icon,
   TrashIcon,
 } from "@radix-ui/react-icons";
-import { ChangeEvent, SetStateAction, useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import {
-  editExamFormData,
-  editExamFormSchema,
-} from "../../schemas/editExamFormSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import useGetPatientExam from "../../hooks/useGetPatientExam";
-import Load from "../Load/Load";
 import { queryClient } from "../../providers/QueryClient";
 import { api } from "../../providers/Api";
-import { useMutation } from "react-query";
+import { useMutation, useQuery } from "react-query";
 import { formatFileSize } from "../../functions/formatBytes";
-import WarningToDeleteExamModal from "./WarningToDeleteExamModal";
+import { z } from "zod";
 
 type EditPatientExamModalProps = {
   id: string;
@@ -54,7 +50,27 @@ type ExamResponse = {
   updatedAt: string;
 };
 
-const EditPatientExamModal = (props: EditPatientExamModalProps) => {
+const editExamFormSchema = z.object({
+  date: z.string().nonempty("Selecione a data de realização do exame."),
+  type_of_exam: z.string().nonempty("O exame precisa ter um nome."),
+  author: z
+    .string()
+    .nonempty("Preencha o nome completo do responsável pelo exame.")
+    .transform((name) => {
+      return name
+        .trim()
+        .split(" ")
+        .map((word) => {
+          return word[0].toLocaleUpperCase().concat(word.substring(1));
+        })
+        .join(" ");
+    }),
+  annotations: z.string().optional(),
+});
+
+type editExamFormData = z.infer<typeof editExamFormSchema>;
+
+const EditPatientExamModal: React.FC<EditPatientExamModalProps> = ({ id, patientId }) => {
   const {
     reset,
     register,
@@ -77,12 +93,16 @@ const EditPatientExamModal = (props: EditPatientExamModalProps) => {
   const [attachment, setAttachment] = useState<any | undefined>();
   const [isRemovingRecord, setIsRemovingRecord] = useState<boolean>(false);
 
-  const { isLoading } = useGetPatientExam({
-    id: props.id,
-    callRequest: callRequest,
-    reset: reset,
-    setData: setData,
-  });
+  const { isLoading } = useQuery({
+    queryKey: ["get-exam-by-id"],
+    queryFn: async () => {
+      await api.get<ExamResponse>(`/exams/${id}`).then((res) => {
+        reset(res.data);
+        setData(res.data);
+      });
+    },
+    enabled: callRequest,
+  })
 
   const { isLoading: savingChanges, mutate } = useMutation({
     mutationKey: ["update-patient-exam"],
@@ -96,20 +116,20 @@ const EditPatientExamModal = (props: EditPatientExamModalProps) => {
           formData
         );
 
-        await api.patch<ExamResponse>(`/exams/${props.id}`, {
+        await api.patch<ExamResponse>(`/exams/${id}`, {
           ...data,
           filename: filename,
           fileUrl: upload.data.fileUrl,
-          fileSize: attachedFile.size
+          fileSize: attachedFile.size,
         });
       }
       if (fecthedAttachment != "" && attachedFile === undefined) {
-        await api.patch<ExamResponse>(`/exams/${props.id}`, {
+        await api.patch<ExamResponse>(`/exams/${id}`, {
           ...data,
         });
       }
       if (fecthedAttachment === "" && attachedFile === undefined) {
-        await api.patch<ExamResponse>(`/exams/${props.id}`, {
+        await api.patch<ExamResponse>(`/exams/${id}`, {
           ...data,
           filename: "",
           fileUrl: "",
@@ -180,7 +200,7 @@ const EditPatientExamModal = (props: EditPatientExamModalProps) => {
   const downloadFile = (event: any) => {
     event.preventDefault();
     download.click();
-  }
+  };
 
   const removeFecthedAttachment = () => {
     setFetchedFilename("");
@@ -259,268 +279,257 @@ const EditPatientExamModal = (props: EditPatientExamModalProps) => {
           )}
           <div
             id="modal-scroll"
-            className="w-full h-[402px] overflow-y-scroll"
+            className="w-full h-[402px] px-6 py-6 overflow-y-scroll"
           >
-            <div className="w-full px-6 py-6 flex flex-col gap-4">
-              <div className="w-full flex justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-base font-semibold text-brand-standard-black">
-                    ID:
-                  </span>
-                  <p className="text-base font-normal text-brand-standard-black">
-                    {data?.id}
-                  </p>
-                </div>
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-1">
-                    <span className="text-base font-semibold text-brand-standard-black">
-                      Data de criação:
-                    </span>
-                    <p className="text-base font-normal text-brand-standard-black">
-                      {data?.createdAt}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span className="text-base font-semibold text-brand-standard-black">
-                      Data da última edição:
-                    </span>
-                    <p className="text-base font-normal text-brand-standard-black">
-                      {data?.updatedAt}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <form
-                onSubmit={handleSubmit(send)}
-                className="w-full flex flex-col h-360 gap-6"
-              >
-                <div className="w-full flex flex-col gap-6">
-                  <div className="w-full flex flex-row gap-3">
-                    <div className="w-[224px]">
-                      <div className="w-[224px] flex flex-col gap-3">
-                        <label
-                          htmlFor="date"
-                          className="w-full text-sm font-normal text-brand-standard-black"
-                        >
-                          Data de realização
-                        </label>
-                        <input
-                          type="text"
-                          className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                          {...register("date")}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="w-full flex flex-row gap-3">
-                    <div className="w-[224px]">
-                      <div className="w-[224px] flex flex-col gap-3">
-                        <label
-                          htmlFor="type_of_exam"
-                          className="w-full text-sm font-normal text-brand-standard-black"
-                        >
-                          Tipo de exame
-                        </label>
-                        <input
-                          type="text"
-                          className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                          {...register("type_of_exam")}
-                        />
-                      </div>
-                    </div>
-                    <div className="w-[316.8px]">
-                      <div className="w-[316.8px] flex flex-col gap-3">
-                        <label
-                          htmlFor="author"
-                          className="w-full text-sm font-normal text-brand-standard-black"
-                        >
-                          Nome do responsável
-                        </label>
-                        <input
-                          type="text"
-                          className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                          {...register("author")}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="w-full flex flex-col gap-3">
+            <form
+              onSubmit={handleSubmit(send)}
+              className="w-full flex flex-col h-360 gap-6"
+            >
+              <div className="w-full flex flex-col gap-6">
+                <div className="w-[324px] flex flex-col gap-2">
+                  <div className="w-[176px] flex flex-col gap-3">
                     <label
-                      htmlFor="annotations"
+                      htmlFor="date"
                       className="w-full text-sm font-normal text-brand-standard-black"
                     >
-                      Anotações
+                      Data de realização
                     </label>
-                    <div>
-                      <textarea
-                        cols={30}
-                        rows={6}
-                        className="w-full px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                        {...register("annotations")}
-                      ></textarea>
-                    </div>
+                    <input
+                      type="date"
+                      className={
+                        errors.date
+                          ? "w-[176px] h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                          : "w-[176px] h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                      }
+                      {...register("date")}
+                    />
                   </div>
-                  {fecthedAttachment && (
-                    <div className="w-[552.8px] border rounded border-gray-200 overflow-hidden flex flex-col items-center">
-                      <div className="w-[552.8px] h-44 overflow-hidden">
-                        <Document
-                          file={fecthedAttachment}
-                          onLoadSuccess={onDocumentLoadSuccess}
-                        >
-                          <Page pageNumber={1} width={552.8} />
-                        </Document>
-                      </div>
-                      <div className="w-[552.8px] h-14 border-t-[1px] border-gray-200 flex items-center p-2 gap-2">
-                        <Image
-                          src="/pdf-svgrepo-com.svg"
-                          alt="pdf-icon"
-                          width={24}
-                          height={24}
-                        />
-                        <div className="w-80 flex flex-col items-center justify-center">
-                          <div className="w-80 whitespace-nowrap overflow-hidden text-ellipsis">
-                            <p className="max-w-80 whitespace-nowrap overflow-hidden text-ellipsis font-semibold text-[14.8px]">
-                              {fecthedFilename
-                                .split(".")
-                                .slice(0, -1)
-                                .join(".")}
-                            </p>
-                          </div>
-                          <div className="w-80 flex flex-row items-center text-center gap-1">
-                            <span className="text-[10px] font-light">
-                              {numPages} páginas
-                            </span>
-                            <span className="text-[10px] font-light">•</span>
-                            <span className="text-[10px] font-light">
-                              {fecthedFilename.split(".").pop()?.toUpperCase()}
-                            </span>
-                            <span className="text-[10px] font-light">•</span>
-                            <span className="text-[10px] font-light">
-                              {formatFileSize(data.fileSize)}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="w-[176.8px] flex justify-end">
-                          <div className="flex gap-2">
-                            <button
-                              onClick={downloadFile}
-                              className="w-7 h-7 flex justify-center items-center bg-white border rounded border-gray-200 overflow-hidden cursor-pointer"
-                            >
-                              <DownloadIcon
-                                color="#212529"
-                                width={16}
-                                height={16}
-                              />
-                            </button>
-                            <button
-                              onClick={removeFecthedAttachment}
-                              className="w-7 h-7 flex justify-center items-center bg-white border rounded border-gray-200 overflow-hidden cursor-pointer"
-                            >
-                              <TrashIcon
-                                color="#212529"
-                                width={16}
-                                height={16}
-                              />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                  {errors.date && (
+                    <span className="text-xs font-normal text-red-500">
+                      {errors.date.message}
+                    </span>
                   )}
-                  {attachedFile && (
-                    <div className="w-[552.8px] border rounded border-gray-200 overflow-hidden flex flex-col items-center">
-                      <div className="w-[552.8px] h-44 overflow-hidden">
-                        <Document
-                          file={attachedFile}
-                          onLoadSuccess={onDocumentLoadSuccess}
-                        >
-                          <Page pageNumber={1} width={552.8} />
-                        </Document>
-                      </div>
-                      <div className="w-[552.8px] h-14 border-t-[1px] border-gray-200 flex items-center p-2 gap-2">
-                        <Image
-                          src="/pdf-svgrepo-com.svg"
-                          alt="pdf-icon"
-                          width={24}
-                          height={24}
-                        />
-                        <div className="w-80 flex flex-col items-center justify-center">
-                          <div className="w-80 whitespace-nowrap overflow-hidden text-ellipsis">
-                            <p className="max-w-80 whitespace-nowrap overflow-hidden text-ellipsis font-semibold text-[14.8px]">
-                              {filename.split(".").slice(0, -1).join(".")}
-                            </p>
-                          </div>
-                          <div className="w-80 flex flex-row items-center text-center gap-1">
-                            <span className="text-[10px] font-light">
-                              {numPages} páginas
-                            </span>
-                            <span className="text-[10px] font-light">•</span>
-                            <span className="text-[10px] font-light">
-                              {filename.split(".").pop()?.toUpperCase()}
-                            </span>
-                            <span className="text-[10px] font-light">•</span>
-                            <span className="text-[10px] font-light">
-                              {formatFileSize(attachedFile.size)}
-                            </span>
-                          </div>
+                </div>
+                <div className="w-full flex flex-row gap-3">
+                  <div className="w-[224px] flex flex-col gap-2">
+                    <div className="w-[224px] flex flex-col gap-3">
+                      <label
+                        htmlFor="type_of_exam"
+                        className="w-full text-sm font-normal text-brand-standard-black"
+                      >
+                        Tipo de exame
+                      </label>
+                      <input
+                        type="text"
+                        className={
+                          errors.type_of_exam
+                            ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                            : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                        }
+                        {...register("type_of_exam")}
+                      />
+                    </div>
+                    {errors.type_of_exam && (
+                      <span className="text-xs font-normal text-red-500">
+                        {errors.type_of_exam.message}
+                      </span>
+                    )}
+                  </div>
+                  <div className="w-[316.8px] flex flex-col gap-2">
+                    <div className="w-[316.8px] flex flex-col gap-3">
+                      <label
+                        htmlFor="author"
+                        className="w-full text-sm font-normal text-brand-standard-black"
+                      >
+                        Nome do responsável
+                      </label>
+                      <input
+                        type="text"
+                        className={
+                          errors.author
+                            ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                            : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                        }
+                        {...register("author")}
+                      />
+                    </div>
+                    {errors.author && (
+                      <span className="text-xs font-normal text-red-500">
+                        {errors.author.message}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="w-full flex flex-col gap-3">
+                  <label
+                    htmlFor="annotations"
+                    className="w-full text-sm font-normal text-brand-standard-black"
+                  >
+                    Anotações
+                  </label>
+                  <div>
+                    <textarea
+                      cols={30}
+                      rows={6}
+                      className="w-full px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                      {...register("annotations")}
+                    ></textarea>
+                  </div>
+                </div>
+                {fecthedAttachment && (
+                  <div className="w-[552.8px] border rounded border-gray-200 overflow-hidden flex flex-col items-center">
+                    <div className="w-[552.8px] h-44 overflow-hidden">
+                      <Document
+                        file={fecthedAttachment}
+                        onLoadSuccess={onDocumentLoadSuccess}
+                      >
+                        <Page pageNumber={1} width={552.8} />
+                      </Document>
+                    </div>
+                    <div className="w-[552.8px] h-14 border-t-[1px] border-gray-200 flex items-center p-2 gap-2">
+                      <Image
+                        src="/pdf-svgrepo-com.svg"
+                        alt="pdf-icon"
+                        width={24}
+                        height={24}
+                      />
+                      <div className="w-80 flex flex-col items-center justify-center">
+                        <div className="w-80 whitespace-nowrap overflow-hidden text-ellipsis">
+                          <p className="max-w-80 whitespace-nowrap overflow-hidden text-ellipsis font-semibold text-[14.8px]">
+                            {fecthedFilename.split(".").slice(0, -1).join(".")}
+                          </p>
                         </div>
-                        <div className="w-[176.8px] flex justify-end">
+                        <div className="w-80 flex flex-row items-center text-center gap-1">
+                          <span className="text-[10px] font-light">
+                            {numPages} páginas
+                          </span>
+                          <span className="text-[10px] font-light">•</span>
+                          <span className="text-[10px] font-light">
+                            {fecthedFilename.split(".").pop()?.toUpperCase()}
+                          </span>
+                          <span className="text-[10px] font-light">•</span>
+                          <span className="text-[10px] font-light">
+                            {formatFileSize(data.fileSize)}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="w-[176.8px] flex justify-end">
+                        <div className="flex gap-2">
                           <button
-                            onClick={removeAttachment}
+                            onClick={downloadFile}
                             className="w-7 h-7 flex justify-center items-center bg-white border rounded border-gray-200 overflow-hidden cursor-pointer"
                           >
-                            <TrashIcon color="#212529" width={16} height={16} />
+                            <DownloadIcon
+                              color="#212529"
+                              width={16}
+                              height={16}
+                            />
+                          </button>
+                          <button
+                            onClick={removeFecthedAttachment}
+                            className="w-7 h-7 flex justify-center items-center bg-white border rounded border-gray-200 overflow-hidden cursor-pointer"
+                          >
+                            <TrashIcon color="#ef4444" width={16} height={16} />
                           </button>
                         </div>
                       </div>
                     </div>
-                  )}
-                </div>
-                <div className="w-full flex flex-col gap-3">
-                  <div className="w-full flex justify-between">
-                    {hasAttachment === true ? undefined : (
-                      <div className="w-full flex">
-                        <label
-                          htmlFor="attachfile"
-                          className="border border-gray-200 flex items-center px-3 py-[6px] gap-1 rounded text-base text-brand-standard-black font-medium bg-white hover:border-[#b3b3b3] cursor-pointer"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="#212529"
-                            className="w-5 h-5"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"
-                            />
-                          </svg>
-                          Adicionar um anexo
-                        </label>
-                        <input
-                          type="file"
-                          accept=".pdf"
-                          id="attachfile"
-                          className="hidden"
-                          onChange={handleFile}
-                        />
+                  </div>
+                )}
+                {attachedFile && (
+                  <div className="w-[552.8px] border rounded border-gray-200 overflow-hidden flex flex-col items-center">
+                    <div className="w-[552.8px] h-44 overflow-hidden">
+                      <Document
+                        file={attachedFile}
+                        onLoadSuccess={onDocumentLoadSuccess}
+                      >
+                        <Page pageNumber={1} width={552.8} />
+                      </Document>
+                    </div>
+                    <div className="w-[552.8px] h-14 border-t-[1px] border-gray-200 flex items-center p-2 gap-2">
+                      <Image
+                        src="/pdf-svgrepo-com.svg"
+                        alt="pdf-icon"
+                        width={24}
+                        height={24}
+                      />
+                      <div className="w-80 flex flex-col items-center justify-center">
+                        <div className="w-80 whitespace-nowrap overflow-hidden text-ellipsis">
+                          <p className="max-w-80 whitespace-nowrap overflow-hidden text-ellipsis font-semibold text-[14.8px]">
+                            {filename.split(".").slice(0, -1).join(".")}
+                          </p>
+                        </div>
+                        <div className="w-80 flex flex-row items-center text-center gap-1">
+                          <span className="text-[10px] font-light">
+                            {numPages} páginas
+                          </span>
+                          <span className="text-[10px] font-light">•</span>
+                          <span className="text-[10px] font-light">
+                            {filename.split(".").pop()?.toUpperCase()}
+                          </span>
+                          <span className="text-[10px] font-light">•</span>
+                          <span className="text-[10px] font-light">
+                            {formatFileSize(attachedFile.size)}
+                          </span>
+                        </div>
                       </div>
-                    )}
-                    <div className="w-full flex justify-end gap-2">
-                      <WarningToDeleteExamModal 
-                        id={props.id}
-                        modalIsOpen={setOpen} 
-                        setLoading={setIsRemovingRecord}                      />
-                      <button className="border border-gray-200 px-3 py-[6px] rounded text-base text-brand-standard-black font-medium bg-white hover:bg-gray-50">
-                        Salvar alterações
-                      </button>
+                      <div className="w-[176.8px] flex justify-end">
+                        <button
+                          onClick={removeAttachment}
+                          className="w-7 h-7 flex justify-center items-center bg-white border rounded border-gray-200 overflow-hidden cursor-pointer"
+                        >
+                          <TrashIcon color="#ef4444" width={16} height={16} />
+                        </button>
+                      </div>
                     </div>
                   </div>
+                )}
+              </div>
+              <div className="w-full flex flex-col gap-3">
+                <div className="w-full flex justify-between">
+                  {hasAttachment === true ? undefined : (
+                    <div className="w-full flex">
+                      <label
+                        htmlFor="attachfile"
+                        className="border border-gray-200 flex items-center px-3 py-[6px] gap-1 rounded text-base text-brand-standard-black font-medium bg-white hover:border-[#b3b3b3] cursor-pointer"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="#212529"
+                          className="w-5 h-5"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"
+                          />
+                        </svg>
+                        Adicionar um anexo
+                      </label>
+                      <input
+                        type="file"
+                        accept=".pdf"
+                        id="attachfile"
+                        className="hidden"
+                        onChange={handleFile}
+                      />
+                    </div>
+                  )}
+                  <div className="w-full h-10 flex justify-end gap-2">
+                    <WarningToDeleteExamModal
+                      id={id}
+                      modalIsOpen={setOpen}
+                      setLoading={setIsRemovingRecord}
+                    />
+                    <button className="w-[120px] border border-gray-200 rounded font-medium text-base text-brand-standard-black bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500">
+                      Salvar alterações
+                    </button>
+                  </div>
                 </div>
-              </form>
-            </div>
+              </div>
+            </form>
           </div>
         </Dialog.Content>
       </Dialog.Portal>

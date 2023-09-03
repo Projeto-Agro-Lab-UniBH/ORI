@@ -1,4 +1,7 @@
 import { z } from "zod";
+import { api } from "../../providers/Api";
+import { useMutation, useQuery } from "react-query";
+import { queryClient } from "../../providers/QueryClient";
 import { FileCard } from "../Cards/FileCard";
 import { Option } from "../../interfaces/Option";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,8 +17,6 @@ import ExamCard from "../Cards/ExamCard";
 import ReportCard from "../Cards/ReportCard";
 import CreatableSelect from "react-select/creatable";
 import AddAttachmentModal from "./AddAttachmentModal";
-import useEditPatientProfile from "../../hooks/useEditPatientProfile";
-import useGetPatientProfile from "../../hooks/useGetPatientProfile";
 import RegisterPatientReportModal from "./RegisterPatientReportModal";
 import RegisterPatientExamModal from "./RegisterPatientExamModal";
 import useListPatientReports from "../../hooks/useListPatientReports";
@@ -25,6 +26,41 @@ import useListPatientExams from "../../hooks/useListPatientExams";
 type EditPatientProfileModalProps = {
   patientId: string;
   children: React.ReactNode;
+};
+
+type UploadImageResponse = {
+  imageUrl: string;
+};
+
+type GetPatientProfileResponse = {
+  profile_photo: string;
+  name: string;
+  owner: string;
+  specie: string;
+  race: string;
+  gender: string;
+  weight: string;
+  prognosis: string;
+  diagnosis: Option[];
+  physical_shape: string;
+  entry_date: string;
+  departure_date: string;
+};
+
+type EditedPatientResponse = {
+  id: string;
+  profile_photo: string;
+  name: string;
+  owner: string;
+  specie: string;
+  race: string;
+  gender: string;
+  weight: string;
+  prognosis: string;
+  diagnosis: Option[];
+  physical_shape: string;
+  entry_date: string;
+  departure_date: string;
 };
 
 const createOption = (label: string) => ({
@@ -137,23 +173,20 @@ const editPatientProfileFormSchema = z
     }
   });
 
-export type editPatientProfileFormData = z.infer<
+type editPatientProfileFormData = z.infer<
   typeof editPatientProfileFormSchema
 >;
 
 /**
- * 
+ *
  * Tarefas do componente:
- * 
- * [] Criar modal de edição de imagem de perfil do paciente 
+ *
+ * [] Criar modal de edição de imagem de perfil do paciente
  * [] Opção para poder remover a imagem
- *  
+ *
  */
 
-const EditPatientProfileModal: React.FC<EditPatientProfileModalProps> = ({
-  patientId,
-  children,
-}) => {
+const EditPatientProfileModal: React.FC<EditPatientProfileModalProps> = ({ patientId, children }) => {
   const {
     reset,
     register,
@@ -169,9 +202,7 @@ const EditPatientProfileModal: React.FC<EditPatientProfileModalProps> = ({
   const [open, setOpen] = useState<boolean>(false);
   const [callRequest, setCallRequest] = useState<boolean>(false);
   const [photo, setPhoto] = useState<string | null>(null);
-  const [selectedImage, setSelectedImage] = useState<any | undefined>(
-    undefined
-  );
+  const [selectedImage, setSelectedImage] = useState<any | undefined>(undefined);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [fetchedImage, setFetchedImage] = useState<string | null>(null);
   const [diagnosisInputValue, setDiagnosisInputValue] = useState("");
@@ -205,20 +236,47 @@ const EditPatientProfileModal: React.FC<EditPatientProfileModalProps> = ({
     ...restSelectPrognosis
   } = selectPrognosis;
 
-  const { isLoading: loadingPatientData } = useGetPatientProfile({
-    id: patientId,
-    reset: reset,
-    setValueDiagnosis: setValueDiagnosis,
-    setFetchedImage: setFetchedImage,
-    callRequest: callRequest,
+  const { isLoading: loadingPatientData } = useQuery({
+    queryKey: ["get-patient-by-id"],
+    queryFn: async () => {
+      await api
+        .get<GetPatientProfileResponse>(`/patient/${patientId}`)
+        .then((res) => {
+          if ((res.data as GetPatientProfileResponse).diagnosis.length > 0) {
+            setValueDiagnosis(
+              (res.data as GetPatientProfileResponse).diagnosis
+            );
+          }
+          reset(res.data);
+          setFetchedImage(res.data.profile_photo);
+        });
+    },
+    enabled: callRequest,
   });
 
-  const { isLoading: savingProfileDataChanges, mutate } = useEditPatientProfile(
-    {
-      id: patientId,
-      image: selectedImage,
-    }
-  );
+  const { isLoading: savingProfileDataChanges, mutate } = useMutation({
+    mutationKey: ["update-patient"],
+    mutationFn: async (data: editPatientProfileFormData) => {
+      const formData = new FormData();
+      formData.append('image', selectedImage)
+      
+      if (selectedImage != null || undefined) {
+        const upload = await api.post<UploadImageResponse>('uploads/image/', formData)
+        
+        await api.patch<EditedPatientResponse>(`/patient/${patientId}`, {
+          ...data,
+          profile_photo: upload.data.imageUrl,
+        });
+      } else {
+        await api.patch<EditedPatientResponse>(`/patient/${patientId}`, {
+          ...data,
+        });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["search"] });
+    },
+  });
 
   const { isLoading: loadingReports, data: patientReports } =
     useListPatientReports({
@@ -226,15 +284,17 @@ const EditPatientProfileModal: React.FC<EditPatientProfileModalProps> = ({
       callRequest: callRequest,
     });
 
-  const { isLoading: loadingExams, data: patientExams } = useListPatientExams({
-    patientId: patientId,
-    callRequest: callRequest,
-  });
+  const { isLoading: loadingExams, data: patientExams } = 
+    useListPatientExams({
+      patientId: patientId,
+      callRequest: callRequest,
+    });
 
-  const { isLoading: loadingFiles, data: patientFiles } = useListPatientFiles({
-    patientId: patientId,
-    callRequest: callRequest,
-  });
+  const { isLoading: loadingFiles, data: patientFiles } = 
+    useListPatientFiles({
+      patientId: patientId,
+      callRequest: callRequest,
+    });
 
   useEffect(() => {
     if (open != true) {
@@ -385,8 +445,15 @@ const EditPatientProfileModal: React.FC<EditPatientProfileModalProps> = ({
                                   src={photo as string | undefined}
                                   className="w-full h-full object-cover"
                                 />
-                                <Avatar.Fallback className="w-16 h-16 border border-gray-200 flex items-center justify-center rounded-full overflow-hidden" delayMs={600}>
-                                  <CameraIcon width={16} height={16} color="#e5e7eb" />    
+                                <Avatar.Fallback
+                                  className="w-16 h-16 border border-gray-200 flex items-center justify-center rounded-full overflow-hidden"
+                                  delayMs={600}
+                                >
+                                  <CameraIcon
+                                    width={16}
+                                    height={16}
+                                    color="#e5e7eb"
+                                  />
                                 </Avatar.Fallback>
                               </Avatar.Root>
                             </div>
@@ -561,18 +628,17 @@ const EditPatientProfileModal: React.FC<EditPatientProfileModalProps> = ({
                               >
                                 Espécie
                               </label>
-                              {watch("undefined_specie") == true && (
+                              {watch("undefined_specie") == true ? (
                                 <input
                                   type="text"
                                   className="w-full h-10 px-3 py-3 bg-gray-100 border border-gray-200 rounded cursor-not-allowed"
                                   disabled
                                 />
-                              )}
-                              {watch("undefined_specie") == false && (
+                              ) : (
                                 <input
                                   type="text"
                                   className={
-                                    errors.specie 
+                                    errors.specie
                                       ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
                                       : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                                   }
@@ -617,18 +683,17 @@ const EditPatientProfileModal: React.FC<EditPatientProfileModalProps> = ({
                               >
                                 Nome do tutor(a)
                               </label>
-                              {watch("ownerless_patient") == true && (
+                              {watch("ownerless_patient") == true ? (
                                 <input
                                   type="text"
                                   className="w-full h-10 px-3 py-3 bg-gray-100 border border-gray-200 rounded cursor-not-allowed"
                                   disabled
                                 />
-                              )}
-                              {watch("ownerless_patient") == false && (
+                              ) : (
                                 <input
                                   type="text"
                                   className={
-                                    errors.owner 
+                                    errors.owner
                                       ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
                                       : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                                   }
@@ -669,18 +734,17 @@ const EditPatientProfileModal: React.FC<EditPatientProfileModalProps> = ({
                               >
                                 Raça
                               </label>
-                              {watch("undefined_race") == true && (
+                              {watch("undefined_race") == true ? (
                                 <input
                                   type="text"
                                   className="w-full h-10 px-3 py-3 bg-gray-100 border border-gray-200 rounded cursor-not-allowed"
                                   disabled
                                 />
-                              )}
-                              {watch("undefined_race") == false && (
+                              ) : (
                                 <input
                                   type="text"
                                   className={
-                                    errors.race 
+                                    errors.race
                                       ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
                                       : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                                   }
@@ -905,10 +969,10 @@ const EditPatientProfileModal: React.FC<EditPatientProfileModalProps> = ({
                         </div>
                       </div>
                     </div>
-                    <div className="w-full h-11 flex items-center justify-end">
+                    <div className="w-full h-10 flex items-center justify-end">
                       <button
                         type="submit"
-                        className="w-[152px] border border-gray-200 px-2 py-2 rounded font-medium text-base text-brand-standard-black bg-white shadow-md hover:shadow-blue-500/50 hover:border-none hover:text-neutral-50 hover: hover:bg-blue-500"
+                        className="w-[152px] h-10 border border-gray-200 rounded font-medium text-base text-brand-standard-black bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500"
                       >
                         Salvar alterações
                       </button>
@@ -929,31 +993,33 @@ const EditPatientProfileModal: React.FC<EditPatientProfileModalProps> = ({
                     </div>
                   </div>
                 )}
-                <div
-                  id="modal-scroll"
-                  className="w-full h-[362px] px-6 py-6 overflow-y-scroll"
-                >
-                  <div className="w-full flex flex-col items-center gap-6">
-                    {patientReports &&
-                      patientReports?.map((data) => (
-                        <ReportCard
-                          key={data.id}
-                          id={data.id}
-                          patientId={data.patientId}
-                          shift={data.shift}
-                          author={data.author}
-                          title={data.title}
-                          report_text={data.report_text}
-                          filename={data.filename}
-                          fileUrl={data.fileUrl}
-                          createdAt={data.createdAt}
-                          updatedAt={data.updatedAt}
-                        />
-                      ))}
+                <div className="w-full flex flex-col pb-6 items-center gap-6">
+                  <div
+                    id="modal-scroll"
+                    className="w-full h-[362px] px-6 py-6 overflow-y-scroll"
+                  >
+                    <div className="w-full flex flex-col items-center gap-6">
+                      {patientReports &&
+                        patientReports?.map((data) => (
+                          <ReportCard
+                            key={data.id}
+                            id={data.id}
+                            patientId={data.patientId}
+                            shift={data.shift}
+                            author={data.author}
+                            title={data.title}
+                            report_text={data.report_text}
+                            filename={data.filename}
+                            fileUrl={data.fileUrl}
+                            createdAt={data.createdAt}
+                            updatedAt={data.updatedAt}
+                          />
+                        ))}
+                    </div>
                   </div>
-                </div>
-                <div className="w-full flex justify-end px-6 py-6">
-                  <RegisterPatientReportModal patientId={patientId} />
+                  <div className="w-full h-10 px-6 flex justify-end">
+                    <RegisterPatientReportModal patientId={patientId} />
+                  </div>
                 </div>
               </Tabs.Content>
               <Tabs.Content value="exams">
@@ -969,32 +1035,34 @@ const EditPatientProfileModal: React.FC<EditPatientProfileModalProps> = ({
                     </div>
                   </div>
                 )}
-                <div
-                  id="modal-scroll"
-                  className="w-full h-[362px] px-6 py-6 overflow-y-scroll"
-                >
-                  <div className="w-full flex flex-col items-center gap-6">
-                    {patientExams &&
-                      patientExams.map((data) => (
-                        <ExamCard
-                          key={data.id}
-                          id={data.id}
-                          patientId={data.patientId}
-                          date={data.date}
-                          author={data.author}
-                          type_of_exam={data.type_of_exam}
-                          annotations={data.annotations}
-                          filename={data.filename}
-                          fileUrl={data.fileUrl}
-                          fileSize={data.fileSize}
-                          createdAt={data.createdAt}
-                          updatedAt={data.updatedAt}
-                        />
-                      ))}
+                <div className="w-full flex flex-col pb-6 items-center gap-6">
+                  <div
+                    id="modal-scroll"
+                    className="w-full h-[362px] px-6 py-6 overflow-y-scroll"
+                  >
+                    <div className="w-full flex flex-col items-center gap-6">
+                      {patientExams &&
+                        patientExams.map((data) => (
+                          <ExamCard
+                            key={data.id}
+                            id={data.id}
+                            patientId={data.patientId}
+                            date={data.date}
+                            author={data.author}
+                            type_of_exam={data.type_of_exam}
+                            annotations={data.annotations}
+                            filename={data.filename}
+                            fileUrl={data.fileUrl}
+                            fileSize={data.fileSize}
+                            createdAt={data.createdAt}
+                            updatedAt={data.updatedAt}
+                          />
+                        ))}
+                    </div>
                   </div>
-                </div>
-                <div className="w-full flex justify-end px-6 py-6">
-                  <RegisterPatientExamModal patientId={patientId} />
+                  <div className="w-full h-10 px-6 flex justify-end">
+                    <RegisterPatientExamModal patientId={patientId} />
+                  </div>
                 </div>
               </Tabs.Content>
               <Tabs.Content value="attachments">
