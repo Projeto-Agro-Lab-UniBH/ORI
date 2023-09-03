@@ -52,9 +52,9 @@ const Header = (props: HeaderProps) => {
         <div className="w-14 flex justify-end items-center">
           <button
             onClick={() => props.logOut()}
-            className="w-8 h-8 rounded flex justify-center items-center hover:bg-slate-50"
+            className="w-10 h-10 rounded flex justify-center items-center hover:border hover:border-gray-200"
           >
-            <ExitIcon width={16} height={16} />
+            <ExitIcon color="#212529" width={16} height={16} />
           </button>
         </div>
       </div>
