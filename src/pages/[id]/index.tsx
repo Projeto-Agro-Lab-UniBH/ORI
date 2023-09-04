@@ -8,10 +8,10 @@ import { useAuthContext } from "../../contexts/AuthContext";
 import RegisterPatientModal from "../../components/Modal/RegisterPatientModal";
 import PatientCard from "../../components/Cards/PatientCard";
 import Pagination from "../../components/Pagination/Pagination";
-import { CardListLoadingLayout } from "../../components/Load/CardListLoadingLayout";
 import Header from "../../components/Header/Header";
 import { useSearchParams } from "next/navigation";
 import useSearch from "../../hooks/useSearch";
+import PatientCardSkeleton from "../../components/Skeletons/PatientCardSkeleton";
 
 type TSelect = {
   label: string;
@@ -255,7 +255,12 @@ export default function AppPage() {
           <div className={"w-[1280px] h-full flex flex-col gap-6"}>
             {isLoading ? (
               <>
-                <CardListLoadingLayout />
+                <PatientCardSkeleton />
+                <PatientCardSkeleton />
+                <PatientCardSkeleton />
+                <PatientCardSkeleton />
+                <PatientCardSkeleton />
+                <PatientCardSkeleton />
               </>
             ) : (
               data?.results.map((data) => (
