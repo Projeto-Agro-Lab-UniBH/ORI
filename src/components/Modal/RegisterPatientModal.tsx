@@ -1,20 +1,17 @@
 import * as Avatar from "@radix-ui/react-avatar";
 import * as Dialog from "@radix-ui/react-dialog";
-import { CameraIcon, Cross1Icon, PlusIcon } from "@radix-ui/react-icons";
+import Load from "../Load/Load";
 import Select from "react-select";
-import { Option } from "../../interfaces/Option";
 import CreatableSelect from "react-select/creatable";
+import { z } from "zod";
+import { api } from "../../providers/Api";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { queryClient } from "../../providers/QueryClient";
+import { CameraIcon, Cross1Icon, PlusIcon } from "@radix-ui/react-icons";
+import { Option } from "../../interfaces/Option";
 import { useController, useForm } from "react-hook-form";
 import { useState, KeyboardEventHandler, useEffect, ChangeEvent } from "react";
 import { useMutation } from "react-query";
-import { api } from "../../providers/Api";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  registerPatientFormData,
-  registerPatientFormSchema,
-} from "../../schemas/registerPatientFormSchema";
-import { queryClient } from "../../providers/QueryClient";
-import Load from "../Load/Load";
 
 type UploadImageResponse = {
   imageUrl: string;
@@ -47,8 +44,92 @@ const prognosisOptions = [
   { label: "Alto risco", value: "Alto risco" },
 ];
 
+const registerPatientFormSchema = z.object({
+  name: z
+    .string()
+    .nonempty({ message: "O paciente precisa de um nome" })
+    .transform((name) => {
+      return name
+        .trim()
+        .split(" ")
+        .map((word) => {
+          return word[0].toLocaleUpperCase().concat(word.substring(1));
+        })
+        .join(" ");
+    }),
+  owner: z.string().transform((name) => {
+    return name
+      .trim()
+      .split(" ")
+      .map((word) => {
+        return word[0].toLocaleUpperCase().concat(word.substring(1));
+      })
+      .join(" ");
+  }),
+  ownerless_patient: z.boolean(),
+  specie: z.string().transform((name) => {
+    return name
+      .trim()
+      .split(" ")
+      .map((word) => {
+        return word[0].toLocaleUpperCase().concat(word.substring(1));
+      })
+      .join(" ");
+  }),
+  undefined_specie: z.boolean(),
+  race: z.string().transform((name) => {
+    return name
+      .trim()
+      .split(" ")
+      .map((word) => {
+        return word[0].toLocaleUpperCase().concat(word.substring(1));
+      })
+      .join(" ");
+  }),
+  undefined_race: z.boolean(),
+  gender: z.any(),
+  weight: z.string(),
+  prognosis: z.any(),
+  diagnosis: z.any(),
+  physical_shape: z.any(),
+  entry_date: z.string().nonempty({ message: "Selecione a data de entrada" }),
+  departure_date: z.string().optional(),
+})
+.superRefine((field, ctx) => {
+  const addCustomIssue = (path: string[], message: string) => {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message,
+      path,
+    });
+  };
+
+  if (!field.owner && !field.ownerless_patient) {
+    addCustomIssue(
+      ["owner"],
+      "Se o paciente não tem o nome do tutor identificado selecione à caixinha abaixo"
+    );
+  }
+
+  if (!field.specie && !field.undefined_specie) {
+    addCustomIssue(
+      ["specie"],
+      "Se o paciente não possui espécie definiada selecione à caixinha abaixo"
+    );
+  }
+
+  if (!field.race && !field.undefined_race) {
+    addCustomIssue(
+      ["race"],
+      "Se o paciente não possui raça definiada selecione à caixinha abaixo"
+    );
+  }
+});
+
+type registerPatientFormData = z.infer<typeof registerPatientFormSchema>;
+
 const RegisterPatientModal = () => {
-  const { reset, register, setValue, control, handleSubmit } =
+  const { reset, register, watch, setValue, control, handleSubmit, formState: { errors }, } =
     useForm<registerPatientFormData>({
       resolver: zodResolver(registerPatientFormSchema),
     });
@@ -208,26 +289,14 @@ const RegisterPatientModal = () => {
                       </span>
                     </div>
                     <div className="w-full flex items-center justify-center">
-                      <Avatar.Root
-                        className={
-                          !previewImage
-                            ? "w-16 h-16 border border-gray-200 rounded-full flex items-center justify-center"
-                            : "w-16 h-16 rounded-full flex items-center justify-center overflow-hidden"
-                        }
-                      >
-                        {!previewImage ? (
-                          <div className="w-4 h-4">
-                            <CameraIcon
-                              className="w-full h-full object-cover"
-                              color="#e5e7eb"
-                            />
-                          </div>
-                        ) : (
-                          <Avatar.Image
-                            src={previewImage}
-                            className="w-full h-full object-cover"
-                          />
-                        )}
+                      <Avatar.Root className="w-16 h-16 flex items-center justify-center rounded-full overflow-hidden">
+                        <Avatar.Image
+                          src={previewImage as string | undefined}
+                          className="w-full h-full object-cover"
+                        />
+                        <Avatar.Fallback className="w-16 h-16 border border-gray-200 flex items-center justify-center rounded-full overflow-hidden" delayMs={600}>
+                          <CameraIcon width={16} height={16} color="#e5e7eb" />    
+                        </Avatar.Fallback>
                       </Avatar.Root>
                     </div>
                   </div>
@@ -262,7 +331,7 @@ const RegisterPatientModal = () => {
                 </div>
                 <div className="w-full flex flex-row gap-4">
                   <div className="w-44">
-                    <div className="w-44 flex flex-col gap-6">
+                    <div className="w-44 flex flex-col gap-2">
                       <div className="w-full flex flex-col gap-3">
                         <label
                           htmlFor="entry_date"
@@ -271,11 +340,20 @@ const RegisterPatientModal = () => {
                           Data de entrada
                         </label>
                         <input
-                          type="text"
-                          className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                          type="date"
+                          className={
+                            errors.entry_date
+                              ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                              : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                          }
                           {...register("entry_date")}
                         />
                       </div>
+                      {errors.entry_date && (
+                        <span className="text-xs font-normal text-red-500">
+                          {errors.entry_date.message}
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div className="w-44">
@@ -355,54 +433,142 @@ const RegisterPatientModal = () => {
                 </div>
                 <div className="w-full flex flex-row gap-4">
                   <div className="w-[368px]">
-                    <div className="w-[368px] flex flex-col gap-3">
-                      <label
-                        htmlFor="name"
-                        className="w-full text-sm font-normal text-brand-standard-black"
-                      >
-                        Nome do paciente
-                      </label>
-                      <input
-                        type="text"
-                        className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                        {...register("name")}
-                      />
+                    <div className="w-[368px] flex flex-col gap-2">
+                      <div className="w-[368px] flex flex-col gap-3">
+                        <label
+                          htmlFor="name"
+                          className="w-full text-sm font-normal text-brand-standard-black"
+                        >
+                          Nome do paciente
+                        </label>
+                        <input
+                          type="text"
+                          className={
+                            errors.name
+                              ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                              : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                          }
+                          {...register("name")}
+                        />
+                      </div>
+                      {errors.name && (
+                        <span
+                          className={"text-xs font-normal text-red-500"}
+                        >
+                          {errors.name.message}
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div className="w-full">
-                    <div className="w-full flex flex-col gap-3">
-                      <label
-                        htmlFor="specie"
-                        className="w-full text-sm font-normal text-brand-standard-black"
-                      >
-                        Espécie
-                      </label>
-                      <input
-                        type="text"
-                        className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                        {...register("specie")}
-                      />
+                    <div className="w-full flex flex-col gap-2">
+                      <div className="w-full flex flex-col gap-3">
+                        <label
+                          htmlFor="specie"
+                          className="w-full text-sm font-normal text-brand-standard-black"
+                        >
+                          Espécie
+                        </label>
+                        {watch("undefined_specie") == true ? (
+                          <input
+                            type="text"
+                            className="w-full h-10 px-3 py-3 bg-gray-100 border border-gray-200 rounded cursor-not-allowed"
+                            disabled
+                          />
+                        ) : (
+                          <input
+                            type="text"
+                            className={
+                              errors.specie 
+                                ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                                : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                            }
+                            {...register("specie")}
+                            />
+                          )
+                        }
+                      </div>
+                      {errors.specie && (
+                        <span
+                          className={
+                            watch("undefined_specie") == false
+                              ? "text-xs font-normal text-red-500"
+                              : "hidden text-xs font-normal text-red-500"
+                          }
+                        >
+                          {errors.specie.message}
+                        </span>
+                      )}
+                      <div className="w-full flex items-center gap-1">
+                        <input
+                          type="checkbox"
+                          id="checkbox2"
+                          {...register("undefined_specie")}
+                        ></input>
+                        <label
+                          htmlFor="checkbox2"
+                          className="text-xs font-normal text-gray-500"
+                        >
+                          Sem espécie definida.
+                        </label>
+                      </div>
                     </div>
                   </div>
                 </div>
                 <div className="w-full flex flex-row gap-4">
                   <div className="w-[368px]">
-                    <div className="w-[368px] flex flex-col gap-3">
-                      <label
-                        htmlFor="owner"
-                        className="w-full text-sm font-normal text-brand-standard-black"
-                      >
-                        Nome do tutor(a)
-                      </label>
-                      <input
-                        type="text"
-                        className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                        {...register("owner")}
-                      />
+                    <div className="w-[368px] flex flex-col gap-2">
+                      <div className="w-[368px] flex flex-col gap-3">
+                        <label
+                          htmlFor="owner"
+                          className="w-full text-sm font-normal text-brand-standard-black"
+                        >
+                          Nome do tutor(a)
+                        </label>
+                        {watch("ownerless_patient") == true ? (
+                          <input
+                            type="text"
+                            className="w-full h-10 px-3 py-3 bg-gray-100 border border-gray-200 rounded cursor-not-allowed"
+                            disabled
+                          />
+                        ) : (
+                          <input
+                            type="text"
+                            className={
+                              errors.owner 
+                                ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                                : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                            }
+                            {...register("owner")}
+                          />
+                        )}
+                      </div>
+                      {errors.owner && (
+                        <span
+                          className={
+                            watch("ownerless_patient") == false
+                              ? "text-xs font-normal text-red-500"
+                              : "hidden text-xs font-normal text-red-500"
+                          }
+                        ></span>
+                      )}
+                      <div className="w-full flex items-center gap-1">
+                        <input
+                          type="checkbox"
+                          id="checkbox3"
+                          {...register("ownerless_patient")}
+                        ></input>
+                        <label
+                          htmlFor="checkbox3"
+                          className="text-xs font-normal text-gray-500"
+                        >
+                          Não foi identificado o tutor do paciente.
+                        </label>
+                      </div>
                     </div>
                   </div>
                   <div className="w-full">
-                    <div className="w-full flex flex-col gap-6">
+                    <div className="w-full flex flex-col gap-2">
                       <div className="w-full flex flex-col gap-3">
                         <label
                           htmlFor="race"
@@ -410,11 +576,47 @@ const RegisterPatientModal = () => {
                         >
                           Raça
                         </label>
+                        {watch("undefined_race") == true ? (
+                          <input
+                            type="text"
+                            className="w-full h-10 px-3 py-3 bg-gray-100 border border-gray-200 rounded cursor-not-allowed"
+                            disabled
+                          />
+                        ) : (
+                          <input
+                            type="text"
+                            className={
+                              errors.race 
+                                ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                                : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                            }
+                            {...register("race")}
+                          />
+                        )}
+                      </div>
+                      {errors.race && (
+                        <span
+                          className={
+                            watch("undefined_race") == false
+                              ? "text-xs font-normal text-red-500"
+                              : "hidden text-xs font-normal text-red-500"
+                          }
+                        >
+                          {errors.race.message}
+                        </span>
+                      )}
+                      <div className="w-full flex items-center gap-1">
                         <input
-                          type="text"
-                          className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                          {...register("race")}
-                        />
+                          type="checkbox"
+                          id="checkbox4"
+                          {...register("undefined_race")}
+                        ></input>
+                        <label
+                          htmlFor="checkbox4"
+                          className="text-xs font-normal text-gray-500"
+                        >
+                          Sem raça definida.
+                        </label>
                       </div>
                     </div>
                   </div>
@@ -604,8 +806,11 @@ const RegisterPatientModal = () => {
                   </div>
                 </div>
               </div>
-              <div className="w-full flex justify-end">
-                <button className="border border-gray-200 px-3 py-[6px] rounded text-base text-brand-standard-black font-medium bg-white hover:bg-gray-50">
+              <div className="w-full h-10 flex items-center justify-end">
+                <button 
+                  type="submit" 
+                  className="w-24 h-10 border border-gray-200 rounded font-medium text-base text-brand-standard-black bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500"
+                >
                   Cadastrar
                 </button>
               </div>

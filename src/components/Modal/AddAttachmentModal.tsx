@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Load from "../Load/Load";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Cross1Icon, TrashIcon, UploadIcon } from "@radix-ui/react-icons";
 import { ChangeEvent, useEffect, useState } from "react";
@@ -7,7 +8,6 @@ import { useMutation } from "react-query";
 import { Document, Page } from "react-pdf";
 import { formatFileSize } from "../../functions/formatBytes";
 import { queryClient } from "../../providers/QueryClient";
-import Load from "../Load/Load";
 
 type AddAttachmentModalProps = {
   patientId: string | null;
@@ -25,7 +25,7 @@ type MutationFileResponse = {
   fileSize: number;
 };
 
-const AddAttachmentModal = (props: AddAttachmentModalProps) => {
+const AddAttachmentModal: React.FC<AddAttachmentModalProps> = ({ patientId }) => {
   const [open, setOpen] = useState<boolean>(false);
   const [attachedFile, setAttachedFile] = useState<any | undefined>();
   const [filename, setFilename] = useState<string>("");
@@ -51,7 +51,7 @@ const AddAttachmentModal = (props: AddAttachmentModalProps) => {
         );
 
         await api.post<MutationFileResponse>("/files", {
-          patientId: props.patientId,
+          patientId: patientId,
           filename: filename,
           fileUrl: upload.data.fileUrl,
           fileSize: attachedFile.fileSize,
@@ -193,19 +193,23 @@ const AddAttachmentModal = (props: AddAttachmentModalProps) => {
                         onClick={removeAttachment}
                         className="w-7 h-7 flex justify-center items-center bg-white border rounded border-gray-200 overflow-hidden cursor-pointer"
                       >
-                        <TrashIcon color="#212529" width={16} height={16} />
+                        <TrashIcon 
+                          color="#ef4444" 
+                          width={16} 
+                          height={16} 
+                        />
                       </button>
                     </div>
                   </div>
                 </div>
               )}
               <div className="w-full flex flex-col gap-3">
-                <div className="w-full flex justify-end">
+                <div className="w-full h-10 flex justify-end">
                   <button
                     onClick={(e) => send(e)}
-                    className="border border-gray-200 px-3 py-[6px] rounded text-base text-brand-standard-black font-medium bg-white hover:bg-gray-50"
+                    className="w-32 h-10 border border-gray-200 rounded font-medium text-base text-brand-standard-black bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500"
                   >
-                    Salvar
+                    Salvar arquivo
                   </button>
                 </div>
               </div>

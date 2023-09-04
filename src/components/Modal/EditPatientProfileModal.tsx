@@ -1,30 +1,66 @@
-import Select from "react-select";
-import ReportCard from "../Cards/ReportCard";
-import * as Tabs from "@radix-ui/react-tabs";
-import * as Avatar from "@radix-ui/react-avatar";
-import * as Dialog from "@radix-ui/react-dialog";
+import { z } from "zod";
+import { api } from "../../providers/Api";
+import { useMutation, useQuery } from "react-query";
+import { queryClient } from "../../providers/QueryClient";
+import { FileCard } from "../Cards/FileCard";
 import { Option } from "../../interfaces/Option";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useController } from "react-hook-form";
 import { CameraIcon, Cross1Icon } from "@radix-ui/react-icons";
 import { ChangeEvent, KeyboardEventHandler, useEffect, useState } from "react";
-import { editPatientProfileFormData, editPatientProfileFormSchema } from "../../schemas/editPatientProfileFormSchema";
-import useEditPatientProfile from "../../hooks/useEditPatientProfile";
-import useGetPatientProfile from "../../hooks/useGetPatientProfile";
-import RegisterPatientReportModal from "./RegisterPatientReportModal";
+import * as Tabs from "@radix-ui/react-tabs";
+import * as Avatar from "@radix-ui/react-avatar";
+import * as Dialog from "@radix-ui/react-dialog";
+import Load from "../Load/Load";
+import Select from "react-select";
+import ExamCard from "../Cards/ExamCard";
+import ReportCard from "../Cards/ReportCard";
 import CreatableSelect from "react-select/creatable";
 import AddAttachmentModal from "./AddAttachmentModal";
+import RegisterPatientReportModal from "./RegisterPatientReportModal";
 import RegisterPatientExamModal from "./RegisterPatientExamModal";
 import useListPatientReports from "../../hooks/useListPatientReports";
-import { FileCard } from "../Cards/FileCard";
-import ExamCard from "../Cards/ExamCard";
 import useListPatientFiles from "../../hooks/useListPatientFiles";
 import useListPatientExams from "../../hooks/useListPatientExams";
-import Load from "../Load/Load";
 
 type EditPatientProfileModalProps = {
   patientId: string;
   children: React.ReactNode;
+};
+
+type UploadImageResponse = {
+  imageUrl: string;
+};
+
+type GetPatientProfileResponse = {
+  profile_photo: string;
+  name: string;
+  owner: string;
+  specie: string;
+  race: string;
+  gender: string;
+  weight: string;
+  prognosis: string;
+  diagnosis: Option[];
+  physical_shape: string;
+  entry_date: string;
+  departure_date: string;
+};
+
+type EditedPatientResponse = {
+  id: string;
+  profile_photo: string;
+  name: string;
+  owner: string;
+  specie: string;
+  race: string;
+  gender: string;
+  weight: string;
+  prognosis: string;
+  diagnosis: Option[];
+  physical_shape: string;
+  entry_date: string;
+  departure_date: string;
 };
 
 const createOption = (label: string) => ({
@@ -54,26 +90,121 @@ const prognosisOptions = [
   { label: "Alto risco", value: "Alto risco" },
 ];
 
-const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
-  const [open, setOpen] = useState<boolean>(false);
-  const [callRequest, setCallRequest] = useState<boolean>(false);
+const editPatientProfileFormSchema = z
+  .object({
+    name: z
+      .string()
+      .nonempty({ message: "O paciente precisa de um nome" })
+      .transform((name) => {
+        return name
+          .trim()
+          .split(" ")
+          .map((word) => {
+            return word[0].toLocaleUpperCase().concat(word.substring(1));
+          })
+          .join(" ");
+      }),
+    owner: z.string().transform((name) => {
+      return name
+        .trim()
+        .split(" ")
+        .map((word) => {
+          return word[0].toLocaleUpperCase().concat(word.substring(1));
+        })
+        .join(" ");
+    }),
+    ownerless_patient: z.boolean(),
+    specie: z.string().transform((name) => {
+      return name
+        .trim()
+        .split(" ")
+        .map((word) => {
+          return word[0].toLocaleUpperCase().concat(word.substring(1));
+        })
+        .join(" ");
+    }),
+    undefined_specie: z.boolean(),
+    race: z.string().transform((name) => {
+      return name
+        .trim()
+        .split(" ")
+        .map((word) => {
+          return word[0].toLocaleUpperCase().concat(word.substring(1));
+        })
+        .join(" ");
+    }),
+    undefined_race: z.boolean(),
+    gender: z.any(),
+    weight: z.string(),
+    prognosis: z.any(),
+    diagnosis: z.any(),
+    physical_shape: z.any(),
+    entry_date: z.string().nonempty({ message: "Selecione a data de entrada" }),
+    departure_date: z.string().optional(),
+  })
+  .superRefine((field, ctx) => {
+    const addCustomIssue = (path: string[], message: string) => {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message,
+        path,
+      });
+    };
+
+    if (!field.owner && !field.ownerless_patient) {
+      addCustomIssue(
+        ["owner"],
+        "Se o paciente não tem o nome do tutor identificado selecione à caixinha abaixo"
+      );
+    }
+
+    if (!field.specie && !field.undefined_specie) {
+      addCustomIssue(
+        ["specie"],
+        "Se o paciente não possui espécie definiada selecione à caixinha abaixo"
+      );
+    }
+
+    if (!field.race && !field.undefined_race) {
+      addCustomIssue(
+        ["race"],
+        "Se o paciente não possui raça definiada selecione à caixinha abaixo"
+      );
+    }
+  });
+
+type editPatientProfileFormData = z.infer<
+  typeof editPatientProfileFormSchema
+>;
+
+/**
+ *
+ * Tarefas do componente:
+ *
+ * [] Criar modal de edição de imagem de perfil do paciente
+ * [] Opção para poder remover a imagem
+ *
+ */
+
+const EditPatientProfileModal: React.FC<EditPatientProfileModalProps> = ({ patientId, children }) => {
   const {
     reset,
     register,
+    watch,
+    setValue,
+    handleSubmit,
     control,
     formState: { errors },
-    handleSubmit,
-    setValue,
   } = useForm<editPatientProfileFormData>({
     resolver: zodResolver(editPatientProfileFormSchema),
   });
 
-  const [selectedImage, setSelectedImage] = useState<File | undefined>(
-    undefined
-  );
+  const [open, setOpen] = useState<boolean>(false);
+  const [callRequest, setCallRequest] = useState<boolean>(false);
+  const [photo, setPhoto] = useState<string | null>(null);
+  const [selectedImage, setSelectedImage] = useState<any | undefined>(undefined);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [fetchedImage, setFetchedImage] = useState<string | null>(null);
-  const [photo, setPhoto] = useState<string | null>(null);
   const [diagnosisInputValue, setDiagnosisInputValue] = useState("");
   const [valueDiagnosis, setValueDiagnosis] = useState<readonly Option[]>([]);
 
@@ -105,28 +236,65 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
     ...restSelectPrognosis
   } = selectPrognosis;
 
-  const { isLoading: loadingPatientData } = useGetPatientProfile({
-    id: props.patientId,
-    reset: reset,
-    setValueDiagnosis: setValueDiagnosis,
-    setFetchedImage: setFetchedImage,
-    callRequest: callRequest,
+  const { isLoading: loadingPatientData } = useQuery({
+    queryKey: ["get-patient-by-id"],
+    queryFn: async () => {
+      await api
+        .get<GetPatientProfileResponse>(`/patient/${patientId}`)
+        .then((res) => {
+          if ((res.data as GetPatientProfileResponse).diagnosis.length > 0) {
+            setValueDiagnosis(
+              (res.data as GetPatientProfileResponse).diagnosis
+            );
+          }
+          reset(res.data);
+          setFetchedImage(res.data.profile_photo);
+        });
+    },
+    enabled: callRequest,
   });
 
-  const { isLoading: loadingReports, data: patientReports } = useListPatientReports({
-    patientId: props.patientId,
-    callRequest: callRequest,
+  const { isLoading: savingProfileDataChanges, mutate } = useMutation({
+    mutationKey: ["update-patient"],
+    mutationFn: async (data: editPatientProfileFormData) => {
+      const formData = new FormData();
+      formData.append('image', selectedImage)
+      
+      if (selectedImage != null || undefined) {
+        const upload = await api.post<UploadImageResponse>('uploads/image/', formData)
+        
+        await api.patch<EditedPatientResponse>(`/patient/${patientId}`, {
+          ...data,
+          profile_photo: upload.data.imageUrl,
+        });
+      } else {
+        await api.patch<EditedPatientResponse>(`/patient/${patientId}`, {
+          ...data,
+        });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["search"] });
+    },
   });
 
-  const { isLoading: loadingExams, data: patientExams } = useListPatientExams({
-    patientId: props.patientId,
-    callRequest: callRequest,
-  })
+  const { isLoading: loadingReports, data: patientReports } =
+    useListPatientReports({
+      patientId: patientId,
+      callRequest: callRequest,
+    });
 
-  const { isLoading: loadingFiles, data: patientFiles } = useListPatientFiles({
-    patientId: props.patientId,
-    callRequest: callRequest,
-  });
+  const { isLoading: loadingExams, data: patientExams } = 
+    useListPatientExams({
+      patientId: patientId,
+      callRequest: callRequest,
+    });
+
+  const { isLoading: loadingFiles, data: patientFiles } = 
+    useListPatientFiles({
+      patientId: patientId,
+      callRequest: callRequest,
+    });
 
   useEffect(() => {
     if (open != true) {
@@ -174,13 +342,6 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
     }
   };
 
-  const { isLoading: savingProfileDataChanges, mutate } = useEditPatientProfile(
-    {
-      id: props.patientId,
-      image: selectedImage,
-    }
-  );
-
   const send = (data: editPatientProfileFormData) => {
     const request = {
       ...data,
@@ -192,7 +353,7 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
     <Tabs.Root defaultValue="profile">
       <Dialog.Root onOpenChange={setOpen} open={open}>
         <Dialog.Trigger className="w-full flex items-center hover:cursor-pointer gap-4">
-          {props.children}
+          {children}
         </Dialog.Trigger>
         <Dialog.Portal>
           <Dialog.Overlay className="bg-black/60 inset-0 fixed z-10" />
@@ -274,31 +435,26 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                         <div className="w-full flex items-center gap-4">
                           <div className="w-[72px] flex items-center flex-col gap-2">
                             <div className="w-full flex items-center justify-center">
-                              <span className="text-sm font-semibold text-brand-standard-black">
+                              <span className="text-sm font-normal text-brand-standard-black">
                                 Foto
                               </span>
                             </div>
                             <div className="w-full flex items-center justify-center">
-                              <Avatar.Root
-                                className={
-                                  !photo
-                                    ? "w-16 h-16 border border-gray-200 rounded-full flex items-center justify-center overflow-hidden"
-                                    : "w-16 h-16 rounded-full flex items-center justify-center overflow-hidden"
-                                }
-                              >
-                                {!photo ? (
-                                  <div className="w-4 h-4">
-                                    <CameraIcon
-                                      className="w-full h-full object-cover"
-                                      color="#e5e7eb"
-                                    />
-                                  </div>
-                                ) : (
-                                  <Avatar.Image
-                                    className="w-full h-full object-cover"
-                                    src={photo}
+                              <Avatar.Root className="w-16 h-16 flex items-center justify-center rounded-full overflow-hidden">
+                                <Avatar.Image
+                                  src={photo as string | undefined}
+                                  className="w-full h-full object-cover"
+                                />
+                                <Avatar.Fallback
+                                  className="w-16 h-16 border border-gray-200 flex items-center justify-center rounded-full overflow-hidden"
+                                  delayMs={600}
+                                >
+                                  <CameraIcon
+                                    width={16}
+                                    height={16}
+                                    color="#e5e7eb"
                                   />
-                                )}
+                                </Avatar.Fallback>
                               </Avatar.Root>
                             </div>
                           </div>
@@ -306,7 +462,7 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                             <div className="w-full flex justify-center flex-col gap-1">
                               <label
                                 htmlFor="patient-photo-file"
-                                className="w-[156px] text-base font-normal text-[#4573D2] cursor-pointer"
+                                className="w-[156px] text-base font-normal text-blue-500 cursor-pointer"
                               >
                                 Selecionar uma foto
                               </label>
@@ -319,7 +475,7 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                               />
                               <div className="w-full">
                                 <div className="w-[516px] flex flex-col">
-                                  <p className="w-16 text-brand-standard-black font-semibold text-sm">
+                                  <p className="w-16 text-sm font-normal text-brand-standard-black ">
                                     Dica:
                                   </p>
                                   <p className="w-[500px] text-gray-500 font-normal text-sm whitespace-nowrap">
@@ -334,7 +490,7 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                       </div>
                       <div className="w-full flex flex-row gap-4">
                         <div className="w-44">
-                          <div className="w-44 flex flex-col gap-6">
+                          <div className="w-44 flex flex-col gap-2">
                             <div className="w-full flex flex-col gap-3">
                               <label
                                 htmlFor="entry_date"
@@ -343,15 +499,24 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                                 Data de entrada
                               </label>
                               <input
-                                type="text"
-                                className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                                type="date"
+                                className={
+                                  errors.entry_date
+                                    ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                                    : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                                }
                                 {...register("entry_date")}
                               />
                             </div>
+                            {errors.entry_date && (
+                              <span className="text-xs font-normal text-red-500">
+                                {errors.entry_date.message}
+                              </span>
+                            )}
                           </div>
                         </div>
                         <div className="w-44">
-                          <div className="w-44 flex flex-col gap-6">
+                          <div className="w-44 flex flex-col gap-2">
                             <div className="w-full flex flex-col gap-3">
                               <label
                                 htmlFor="departure_date"
@@ -360,7 +525,7 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                                 Data de saída
                               </label>
                               <input
-                                type="text"
+                                type="date"
                                 className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                                 {...register("departure_date")}
                               />
@@ -368,7 +533,7 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                           </div>
                         </div>
                         <div className="w-full">
-                          <div className="w-full flex flex-col gap-6">
+                          <div className="w-full flex flex-col gap-2">
                             <div className="w-full flex flex-col gap-3">
                               <label
                                 htmlFor="prognosis"
@@ -427,54 +592,141 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                       </div>
                       <div className="w-full flex flex-row gap-4">
                         <div className="w-[368px]">
-                          <div className="w-[368px] flex flex-col gap-3">
-                            <label
-                              htmlFor="name"
-                              className="w-full text-sm font-normal text-brand-standard-black"
-                            >
-                              Nome do paciente
-                            </label>
-                            <input
-                              type="text"
-                              className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                              {...register("name")}
-                            />
+                          <div className="w-[368px] flex flex-col gap-2">
+                            <div className="w-[368px] flex flex-col gap-3">
+                              <label
+                                htmlFor="name"
+                                className="w-full text-sm font-normal text-brand-standard-black"
+                              >
+                                Nome do paciente
+                              </label>
+                              <input
+                                type="text"
+                                className={
+                                  errors.name
+                                    ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                                    : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                                }
+                                {...register("name")}
+                              />
+                            </div>
+                            {errors.name && (
+                              <span
+                                className={"text-xs font-normal text-red-500"}
+                              >
+                                {errors.name.message}
+                              </span>
+                            )}
                           </div>
                         </div>
                         <div className="w-full">
-                          <div className="w-full flex flex-col gap-3">
-                            <label
-                              htmlFor="specie"
-                              className="w-full text-sm font-normal text-brand-standard-black"
-                            >
-                              Espécie
-                            </label>
-                            <input
-                              type="text"
-                              className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                              {...register("specie")}
-                            />
+                          <div className="w-full flex flex-col gap-2">
+                            <div className="w-full flex flex-col gap-3">
+                              <label
+                                htmlFor="specie"
+                                className="w-full text-sm font-normal text-brand-standard-black"
+                              >
+                                Espécie
+                              </label>
+                              {watch("undefined_specie") == true ? (
+                                <input
+                                  type="text"
+                                  className="w-full h-10 px-3 py-3 bg-gray-100 border border-gray-200 rounded cursor-not-allowed"
+                                  disabled
+                                />
+                              ) : (
+                                <input
+                                  type="text"
+                                  className={
+                                    errors.specie
+                                      ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                                      : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                                  }
+                                  {...register("specie")}
+                                />
+                              )}
+                            </div>
+                            {errors.specie && (
+                              <span
+                                className={
+                                  watch("undefined_specie") == false
+                                    ? "text-xs font-normal text-red-500"
+                                    : "hidden text-xs font-normal text-red-500"
+                                }
+                              >
+                                {errors.specie.message}
+                              </span>
+                            )}
+                            <div className="w-full flex items-center gap-1">
+                              <input
+                                type="checkbox"
+                                id="checkbox2"
+                                {...register("undefined_specie")}
+                              ></input>
+                              <label
+                                htmlFor="checkbox2"
+                                className="text-xs font-normal text-gray-500"
+                              >
+                                Sem espécie definida.
+                              </label>
+                            </div>
                           </div>
                         </div>
                       </div>
                       <div className="w-full flex flex-row gap-4">
                         <div className="w-[368px]">
-                          <div className="w-[368px] flex flex-col gap-3">
-                            <label
-                              htmlFor="owner"
-                              className="w-full text-sm font-normal text-brand-standard-black"
-                            >
-                              Nome do tutor(a)
-                            </label>
-                            <input
-                              type="text"
-                              className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                              {...register("owner")}
-                            />
+                          <div className="w-[368px] flex flex-col gap-2">
+                            <div className="w-[368px] flex flex-col gap-3">
+                              <label
+                                htmlFor="owner"
+                                className="w-full text-sm font-normal text-brand-standard-black"
+                              >
+                                Nome do tutor(a)
+                              </label>
+                              {watch("ownerless_patient") == true ? (
+                                <input
+                                  type="text"
+                                  className="w-full h-10 px-3 py-3 bg-gray-100 border border-gray-200 rounded cursor-not-allowed"
+                                  disabled
+                                />
+                              ) : (
+                                <input
+                                  type="text"
+                                  className={
+                                    errors.owner
+                                      ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                                      : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                                  }
+                                  {...register("owner")}
+                                />
+                              )}
+                            </div>
+                            {errors.owner && (
+                              <span
+                                className={
+                                  watch("ownerless_patient") == false
+                                    ? "text-xs font-normal text-red-500"
+                                    : "hidden text-xs font-normal text-red-500"
+                                }
+                              ></span>
+                            )}
+                            <div className="w-full flex items-center gap-1">
+                              <input
+                                type="checkbox"
+                                id="checkbox3"
+                                {...register("ownerless_patient")}
+                              ></input>
+                              <label
+                                htmlFor="checkbox3"
+                                className="text-xs font-normal text-gray-500"
+                              >
+                                Não foi identificado o tutor do paciente.
+                              </label>
+                            </div>
                           </div>
                         </div>
                         <div className="w-full">
-                          <div className="w-full flex flex-col gap-6">
+                          <div className="w-full flex flex-col gap-2">
                             <div className="w-full flex flex-col gap-3">
                               <label
                                 htmlFor="race"
@@ -482,11 +734,47 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                               >
                                 Raça
                               </label>
+                              {watch("undefined_race") == true ? (
+                                <input
+                                  type="text"
+                                  className="w-full h-10 px-3 py-3 bg-gray-100 border border-gray-200 rounded cursor-not-allowed"
+                                  disabled
+                                />
+                              ) : (
+                                <input
+                                  type="text"
+                                  className={
+                                    errors.race
+                                      ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                                      : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                                  }
+                                  {...register("race")}
+                                />
+                              )}
+                            </div>
+                            {errors.race && (
+                              <span
+                                className={
+                                  watch("undefined_race") == false
+                                    ? "text-xs font-normal text-red-500"
+                                    : "hidden text-xs font-normal text-red-500"
+                                }
+                              >
+                                {errors.race.message}
+                              </span>
+                            )}
+                            <div className="w-full flex items-center gap-1">
                               <input
-                                type="text"
-                                className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                                {...register("race")}
-                              />
+                                type="checkbox"
+                                id="checkbox4"
+                                {...register("undefined_race")}
+                              ></input>
+                              <label
+                                htmlFor="checkbox4"
+                                className="text-xs font-normal text-gray-500"
+                              >
+                                Sem raça definida.
+                              </label>
                             </div>
                           </div>
                         </div>
@@ -632,7 +920,7 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                               htmlFor="diagnosis"
                               className="w-full text-sm font-normal text-brand-standard-black"
                             >
-                              Diagnóstico/Suspeita Clínica
+                              Diagnóstico / Suspeita Clínica
                             </label>
                             <CreatableSelect
                               styles={{
@@ -681,10 +969,10 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                         </div>
                       </div>
                     </div>
-                    <div className="w-full flex justify-end">
+                    <div className="w-full h-10 flex items-center justify-end">
                       <button
                         type="submit"
-                        className="border border-gray-200 px-3 py-[6px] rounded text-base text-brand-standard-black font-medium bg-white hover:bg-gray-50"
+                        className="w-[152px] h-10 border border-gray-200 rounded font-medium text-base text-brand-standard-black bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500"
                       >
                         Salvar alterações
                       </button>
@@ -705,31 +993,33 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                     </div>
                   </div>
                 )}
-                <div
-                  id="modal-scroll"
-                  className="w-full h-[362px] px-6 py-6 overflow-y-scroll"
-                >
-                  <div className="w-full flex flex-col items-center gap-6">
-                    {patientReports &&
-                      patientReports?.map((data) => (
-                        <ReportCard
-                          key={data.id}
-                          id={data.id}
-                          patientId={data.patientId}
-                          shift={data.shift}
-                          author={data.author}
-                          title={data.title}
-                          report_text={data.report_text}
-                          filename={data.filename}
-                          fileUrl={data.fileUrl}
-                          createdAt={data.createdAt}
-                          updatedAt={data.updatedAt}
-                        />
-                      ))}
+                <div className="w-full flex flex-col pb-6 items-center gap-6">
+                  <div
+                    id="modal-scroll"
+                    className="w-full h-[362px] px-6 py-6 overflow-y-scroll"
+                  >
+                    <div className="w-full flex flex-col items-center gap-6">
+                      {patientReports &&
+                        patientReports?.map((data) => (
+                          <ReportCard
+                            key={data.id}
+                            id={data.id}
+                            patientId={data.patientId}
+                            shift={data.shift}
+                            author={data.author}
+                            title={data.title}
+                            report_text={data.report_text}
+                            filename={data.filename}
+                            fileUrl={data.fileUrl}
+                            createdAt={data.createdAt}
+                            updatedAt={data.updatedAt}
+                          />
+                        ))}
+                    </div>
                   </div>
-                </div>
-                <div className="w-full flex justify-end px-6 py-6">
-                  <RegisterPatientReportModal patientId={props.patientId} />
+                  <div className="w-full h-10 px-6 flex justify-end">
+                    <RegisterPatientReportModal patientId={patientId} />
+                  </div>
                 </div>
               </Tabs.Content>
               <Tabs.Content value="exams">
@@ -745,33 +1035,34 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                     </div>
                   </div>
                 )}
-                <div
-                  id="modal-scroll"
-                  className="w-full h-[362px] px-6 py-6 overflow-y-scroll"
-                >
-                  <div className="w-full flex flex-col items-center gap-6">
-                    {patientExams && 
-                      patientExams.map((data) => (
-                        <ExamCard 
-                          key={data.id}
-                          id={data.id} 
-                          patientId={data.patientId} 
-                          date={data.date} 
-                          author={data.author} 
-                          type_of_exam={data.type_of_exam} 
-                          annotations={data.annotations} 
-                          filename={data.filename} 
-                          fileUrl={data.fileUrl} 
-                          fileSize={data.fileSize} 
-                          createdAt={data.createdAt} 
-                          updatedAt={data.updatedAt} 
-                        />
-                      )
-                    )}
+                <div className="w-full flex flex-col pb-6 items-center gap-6">
+                  <div
+                    id="modal-scroll"
+                    className="w-full h-[362px] px-6 py-6 overflow-y-scroll"
+                  >
+                    <div className="w-full flex flex-col items-center gap-6">
+                      {patientExams &&
+                        patientExams.map((data) => (
+                          <ExamCard
+                            key={data.id}
+                            id={data.id}
+                            patientId={data.patientId}
+                            date={data.date}
+                            author={data.author}
+                            type_of_exam={data.type_of_exam}
+                            annotations={data.annotations}
+                            filename={data.filename}
+                            fileUrl={data.fileUrl}
+                            fileSize={data.fileSize}
+                            createdAt={data.createdAt}
+                            updatedAt={data.updatedAt}
+                          />
+                        ))}
+                    </div>
                   </div>
-                </div>
-                <div className="w-full flex justify-end px-6 py-6">
-                  <RegisterPatientExamModal patientId={props.patientId} />
+                  <div className="w-full h-10 px-6 flex justify-end">
+                    <RegisterPatientExamModal patientId={patientId} />
+                  </div>
                 </div>
               </Tabs.Content>
               <Tabs.Content value="attachments">
@@ -793,7 +1084,7 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                 >
                   <div className="w-full flex flex-col items-center gap-6">
                     <div className="w-full flex justify-start">
-                      <AddAttachmentModal patientId={props.patientId} />
+                      <AddAttachmentModal patientId={patientId} />
                     </div>
                     <div className="w-full grid grid-cols-3 gap-[28px]">
                       {patientFiles &&
@@ -805,8 +1096,7 @@ const EditPatientProfileModal = (props: EditPatientProfileModalProps) => {
                             fileUrl={data.fileUrl}
                             fileSize={data.fileSize}
                           />
-                        )
-                      )}
+                        ))}
                     </div>
                   </div>
                 </div>
