@@ -366,7 +366,7 @@ const RegisterPatientModal = () => {
                           Data de saída
                         </label>
                         <input
-                          type="text"
+                          type="date"
                           className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                           {...register("departure_date")}
                         />

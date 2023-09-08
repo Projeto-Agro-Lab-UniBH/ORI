@@ -98,7 +98,7 @@ export default function AppPage() {
   }, [searchParams, setSelectPhysicalShape]);
 
   return (  
-    <div className="w-full h-auto flex flex-col items-center justify-center my-4 gap-6">
+    <div className="w-full flex flex-col items-center justify-center my-4 gap-6">
       <Header user={user} logOut={logOut} />
       <div className="w-[1280px] h-24 flex items-center flex-col">
         <div className="w-[1280px] h-24 flex items-center gap-3 z-10">
@@ -248,8 +248,8 @@ export default function AppPage() {
           </div>
         </div>
       </div>
-      <div className="w-[1280px] h-full flex flex-col gap-6">
-        <div className="w-[1280px] h-full flex flex-col gap-6">
+      <div className="w-[1280px] flex flex-col gap-6">
+        <div className="w-[1280px] flex flex-col gap-6">
           {isLoading ? (
             <>
               <PatientCardSkeleton />
