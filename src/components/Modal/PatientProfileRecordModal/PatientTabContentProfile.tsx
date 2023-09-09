@@ -49,6 +49,11 @@ type PatchPatientResponse = {
   departure_date: string;
 };
 
+const createOption = (label: string) => ({ 
+  label, 
+  value: label 
+});
+
 const editPatientProfileFormSchema = z
   .object({
     name: z
@@ -73,25 +78,9 @@ const editPatientProfileFormSchema = z
         .join(" ");
     }),
     ownerless_patient: z.boolean(),
-    specie: z.string().transform((name) => {
-      return name
-        .trim()
-        .split(" ")
-        .map((word) => {
-          return word[0].toLocaleUpperCase().concat(word.substring(1));
-        })
-        .join(" ");
-    }),
+    specie: z.string().optional(),
     undefined_specie: z.boolean(),
-    race: z.string().transform((name) => {
-      return name
-        .trim()
-        .split(" ")
-        .map((word) => {
-          return word[0].toLocaleUpperCase().concat(word.substring(1));
-        })
-        .join(" ");
-    }),
+    race: z.string().optional(),
     undefined_race: z.boolean(),
     gender: z.any(),
     weight: z.string(),
@@ -133,6 +122,28 @@ const editPatientProfileFormSchema = z
   });
 
 type editPatientProfileFormData = z.infer<typeof editPatientProfileFormSchema>;
+  
+const genderOptions: Option[] = [
+  { label: "Macho", value: "Macho" },
+  { label: "Fêmea", value: "Fêmea" },
+];
+
+const physicalShapeOptions: Option[] = [
+  { label: "Grande porte", value: "Grande porte" },
+  { label: "Médio porte", value: "Médio porte" },
+  { label: "Pequeno porte", value: "Pequeno porte" },
+];
+
+const prognosisOptions: Option[] = [
+  { label: "Alta", value: "Alta" },
+  { label: "Aguardando alta médica", value: "Aguardando alta médica" },
+  { label: "Obscuro", value: "Obscuro" },
+  { label: "Desfávoravel", value: "Desfávoravel" },
+  { label: "Reservado", value: "Reservado" },
+  { label: "Favorável", value: "Favorável" },
+  { label: "Risco", value: "Risco" },
+  { label: "Alto risco", value: "Alto risco" },
+];
 
 const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, modalIsOpen }) => {
   const {
@@ -154,30 +165,6 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, modalI
   const [selectedImage, setSelectedImage] = useState<File | undefined>(undefined);
   const [diagnosisInputValue, setDiagnosisInputValue] = useState("");
   const [valueDiagnosis, setValueDiagnosis] = useState<readonly Option[]>([]);
-
-  const createOption = (label: string) => ({ label, value: label });
-  
-  const genderOptions: Option[] = [
-    { label: "Macho", value: "Macho" },
-    { label: "Fêmea", value: "Fêmea" },
-  ];
-  
-  const physicalShapeOptions: Option[] = [
-    { label: "Grande porte", value: "Grande porte" },
-    { label: "Médio porte", value: "Médio porte" },
-    { label: "Pequeno porte", value: "Pequeno porte" },
-  ];
-  
-  const prognosisOptions: Option[] = [
-    { label: "Alta", value: "Alta" },
-    { label: "Aguardando alta médica", value: "Aguardando alta médica" },
-    { label: "Obscuro", value: "Obscuro" },
-    { label: "Desfávoravel", value: "Desfávoravel" },
-    { label: "Reservado", value: "Reservado" },
-    { label: "Favorável", value: "Favorável" },
-    { label: "Risco", value: "Risco" },
-    { label: "Alto risco", value: "Alto risco" },
-  ];
 
   const { field: selectPhysicalShape } = useController({ name: "physical_shape", control });
   const { value: selectPhysicalShapeValue, onChange: selectPhysicalShapeOnChange, ...restSelectPhysicalShape } = selectPhysicalShape;
@@ -222,8 +209,8 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, modalI
       gender: data.gender,
       physical_shape: data,
       weight: data.weight,
-      prognosis: data,
-      diagnosis: data,
+      prognosis: data.prognosis,
+      diagnosis: data.diagnosis,
       entry_date: data.entry_date,
       departure_date: data.departure_date,
     });

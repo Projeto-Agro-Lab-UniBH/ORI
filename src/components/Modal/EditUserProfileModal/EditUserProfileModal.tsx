@@ -1,17 +1,17 @@
+import * as Avatar from "@radix-ui/react-avatar";
+import * as Dialog from "@radix-ui/react-dialog";
 import Load from "../../Load/Load";
 import { api } from "../../../providers/Api";
 import { useForm } from "react-hook-form";
-import * as Avatar from "@radix-ui/react-avatar";
-import * as Dialog from "@radix-ui/react-dialog";
 import { Cross1Icon } from "@radix-ui/react-icons";
 import { PersonIcon } from "@radix-ui/react-icons";
 import { useMutation, useQuery } from "react-query"
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, { ChangeEvent, useEffect, useState } from "react";
-import { editUserProfileFormData, editUserProfileFormSchema } from "../../../schemas/editUserProfileFormSchema";
 import { useRouter } from "next/router";
+import { z } from "zod";
 
-type Response = {
+type GetUserResponse = {
   profile_photo: string;
   username: string;
   email: string;
@@ -21,27 +21,62 @@ type UploadImageResponse = {
   imageUrl: string;
 };
 
-type IEditUserProfileModal = {
+type EditUserProfileModalProps = {
   id: string | undefined | null;
   children: React.ReactNode;
 };
 
-const EditUserProfileModal = (props: IEditUserProfileModal) => {
+export const editUserProfileFormSchema = z.object({
+  username: z.string().transform((name) => {
+    return name
+      .trim()
+      .split(" ")
+      .map((word) => {
+        return word[0].toLocaleUpperCase().concat(word.substring(1));
+      })
+      .join(" ");
+  }),
+  email: z.string(),
+});
+
+export type editUserProfileFormData = z.infer<typeof editUserProfileFormSchema>;
+
+const EditUserProfileModal: React.FC<EditUserProfileModalProps> = ({ id, children }) => {
   const router = useRouter();
-  const { reset, register, handleSubmit } = useForm<editUserProfileFormData>({
+  const { 
+    reset, 
+    register, 
+    handleSubmit 
+  } = useForm<editUserProfileFormData>({
     resolver: zodResolver(editUserProfileFormSchema),
   });
+
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [photo, setPhoto] = useState<string | null>(null);
-  const [selectedImage, setSelectedImage] = useState<any | undefined>(undefined);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [fetchedImage, setFetchedImage] = useState<string | null>(null);
+  const [selectedImage, setSelectedImage] = useState<File | undefined>(undefined);
   const [callRequest, setCallRequest] = useState<boolean>(false);
+
+  const handleImage = (event: ChangeEvent<HTMLInputElement>) => {
+    if (event?.target?.files?.[0]) {
+      const file = event.target.files[0];
+      setSelectedImage(file);
+      setPreviewImage(URL.createObjectURL(file))
+    }  
+  };
+
+  const send = async (data: editUserProfileFormData) => {
+    mutate({
+      username: data.username,
+      email: data.email,
+    });
+  };
 
   const { isLoading } = useQuery({
     queryKey: ["get-user-account-by-id"],
     queryFn: async () => {
-      await api.get<Response>(`/user/${props.id}`).then((res) => {
+      await api.get<GetUserResponse>(`/user/${id}`).then((res) => {
         reset(res.data);
         setFetchedImage(res.data.profile_photo);
       });
@@ -49,27 +84,27 @@ const EditUserProfileModal = (props: IEditUserProfileModal) => {
     enabled: callRequest,
   });
 
-  const { isLoading: savingChanges, mutate } = useMutation({
+  const { isLoading: updating, mutate } = useMutation({
     mutationKey: ["update-account-data"],
     mutationFn: async (data: editUserProfileFormData) => {
-      const formData = new FormData();
-      formData.append('image', selectedImage);
+      if (selectedImage != undefined) {
+        const formData = new FormData();
+        formData.append('image', selectedImage);
 
-      if (selectedImage != null || undefined) {
         const upload = await api.post<UploadImageResponse>('uploads/image/', formData);
 
-        await api.patch<Response>(`/user/${props.id}`, {
+        await api.patch<GetUserResponse>(`/user/${id}`, {
           ...data,
           profile_photo: upload.data.imageUrl,  
         });
       } else {
-        await api.patch<Response>(`/user/${props.id}`, {
+        await api.patch<GetUserResponse>(`/user/${id}`, {
           ...data,
         });
       }
     },
     onSuccess: () => {
-      if (savingChanges != true) {
+      if (updating != true) {
         reset();
         setIsOpen(false);
         router.reload();
@@ -98,26 +133,11 @@ const EditUserProfileModal = (props: IEditUserProfileModal) => {
     }
   }, [photo, setPhoto, fetchedImage, previewImage]);
 
-  const handleImage = (event: ChangeEvent<HTMLInputElement>) => {
-    if (event?.target?.files?.[0]) {
-      const file = event.target.files[0];
-      setSelectedImage(file);
-      setPreviewImage(URL.createObjectURL(file))
-    }  
-  };
-
-  const send = async (data: editUserProfileFormData) => {
-    const request = {
-      ...data,
-    };
-    mutate(request);
-  };
-
   return (
     <Dialog.Root onOpenChange={setIsOpen} open={isOpen}>
       <div className="w-12 h-14 flex items-center justify-center">
         <Dialog.Trigger className="w-14 h-14">
-          {props.children}
+          {children}
         </Dialog.Trigger>
       </div>
       <Dialog.Portal>
@@ -143,7 +163,7 @@ const EditUserProfileModal = (props: IEditUserProfileModal) => {
               </div>
             </div>
           }
-          {savingChanges && 
+          {updating && 
             <div className="w-full h-full absolute z-20">
               <div className="w-full h-full bg-[#f9fafb8b]">
                 <Load
