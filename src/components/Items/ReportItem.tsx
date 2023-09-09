@@ -2,7 +2,7 @@ import EditPatientReportModal from "../Modal/EditPatientReportModal";
 import { DownloadIcon } from "@radix-ui/react-icons";
 import { useEffect, useState } from "react";
 
-type ReportCardProps = {
+type ReportItemProps = {
   id: string;
   patientId: string;
   shift: string;
@@ -15,16 +15,27 @@ type ReportCardProps = {
   updatedAt: string;
 };
 
-const ReportCard = (props: ReportCardProps) => {
+const ReportItem: React.FC<ReportItemProps> = ({ 
+  id,
+  patientId,
+  shift,
+  author,
+  title,
+  report_text,
+  filename,
+  fileUrl,
+  createdAt,
+  updatedAt 
+}) => {
   const [download, setDownload] = useState<any>({} as any);
 
   useEffect(() => {
-    if (props.fileUrl) {
+    if (fileUrl) {
       const downloadLink = document.createElement("a");
-      downloadLink.href = `${props.fileUrl}`;
+      downloadLink.href = `${fileUrl}`;
       setDownload(downloadLink);
     }
-  }, [props]);
+  }, [fileUrl]);
 
   const downloadFile = (event: any) => {
     event.preventDefault();
@@ -38,18 +49,18 @@ const ReportCard = (props: ReportCardProps) => {
           <div className="w-full flex flex-row items-center justify-between">
             <div className="w-[504px] items-center flex">
               <span className="w-[504px] whitespace-nowrap text-2xl text-brand-standard-black font-semibold overflow-hidden text-ellipsis">
-                {props.title}
+                {title}
               </span>
             </div>
             <div className="flex items-center gap-4">
               <EditPatientReportModal
-                id={props.id}
-                patientId={props.patientId}
+                id={id}
+                patientId={patientId}
               />
             </div>
           </div>
           <div className="w-full font-light text-brand-standard-black">
-            {props.author}
+            {author}
           </div>
           <div className="w-full flex-row flex justify-between items-center">
             <div className="w-full flex-row flex items-center gap-5">
@@ -58,7 +69,7 @@ const ReportCard = (props: ReportCardProps) => {
                   Turno:
                 </span>
                 <p className="text-base font-normal text-brand-standard-black">
-                  {props.shift}
+                  {shift}
                 </p>
               </div>
               <div className="flex items-center gap-1">
@@ -66,7 +77,7 @@ const ReportCard = (props: ReportCardProps) => {
                   Data de criação:
                 </span>
                 <p className="text-base font-normal text-brand-standard-black">
-                  {props.createdAt}
+                  {createdAt}
                 </p>
               </div>
               <div className="flex items-center gap-1">
@@ -74,12 +85,12 @@ const ReportCard = (props: ReportCardProps) => {
                   Data da última edição:
                 </span>
                 <p className="text-base font-normal text-brand-standard-black">
-                  {props.updatedAt}
+                  {updatedAt}
                 </p>
               </div>
             </div>
           </div>
-          {props.fileUrl && (
+          {fileUrl && (
             <div className="w-full flex gap-2 items-center">
               <button
                 onClick={downloadFile}
@@ -92,7 +103,7 @@ const ReportCard = (props: ReportCardProps) => {
         </div>
         <div className="w-full">
           <p className="text-base font-normal text-brand-standard-black">
-            {props.report_text}
+            {report_text}
           </p>
         </div>
       </div>
@@ -100,4 +111,4 @@ const ReportCard = (props: ReportCardProps) => {
   );
 };
 
-export default ReportCard;
+export default ReportItem;

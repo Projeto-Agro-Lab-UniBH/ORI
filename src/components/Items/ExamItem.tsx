@@ -3,7 +3,7 @@ import EditPatientExamModal from "../Modal/EditPatientExamModal";
 import { Document, Page } from "react-pdf";
 import { useEffect, useState } from "react";
 
-type ExamCardProps = {
+type ExamItemProps = {
   id: string;
   patientId: string;
   date: string;
@@ -15,31 +15,45 @@ type ExamCardProps = {
   fileSize: number;
   createdAt: string;
   updatedAt: string;
-}
+};
 
-const ExamCard = (props: ExamCardProps) => {
+const ExamItem: React.FC<ExamItemProps> = ({
+  id,
+  patientId,
+  date,
+  author,
+  type_of_exam,
+  annotations,
+  filename,
+  fileUrl,
+  fileSize,
+  createdAt,
+  updatedAt,
+}) => {
   const [numPages, setNumPages] = useState<number | undefined>(undefined);
-  const [attachedFile, setAttachedFile] = useState<string | undefined>(undefined)
-  const [textNotes, setTextNotes] = useState<string | undefined>(undefined)
+  const [attachedFile, setAttachedFile] = useState<string | undefined>(
+    undefined
+  );
+  const [textNotes, setTextNotes] = useState<string | undefined>(undefined);
   const [download, setDownload] = useState<any>({} as any);
 
   useEffect(() => {
-    if (props.fileUrl != null) {
-      setAttachedFile(props.fileUrl);
+    if (fileUrl != null) {
+      setAttachedFile(fileUrl);
     }
 
-    if (props.annotations != null) {
-      setTextNotes(props.annotations);
+    if (annotations != null) {
+      setTextNotes(annotations);
     }
-  }, [props, setAttachedFile, setTextNotes])
+  }, [annotations, fileUrl, setAttachedFile, setTextNotes]);
 
   useEffect(() => {
-    if (props.fileUrl) {
+    if (fileUrl) {
       const downloadLink = document.createElement("a");
-      downloadLink.href = `${props.fileUrl}`;
+      downloadLink.href = `${fileUrl}`;
       setDownload(downloadLink);
     }
-  }, [props]);
+  }, [fileUrl]);
 
   const onDocumentLoadSuccess = ({ numPages }: any) => {
     setNumPages(numPages);
@@ -52,16 +66,13 @@ const ExamCard = (props: ExamCardProps) => {
           <div className="w-full flex flex-row items-center justify-between">
             <div className="w-[504px] items-center flex">
               <span className="w-[504px] whitespace-nowrap text-2xl text-brand-standard-black font-semibold overflow-hidden text-ellipsis">
-                {props.type_of_exam}
+                {type_of_exam}
               </span>
             </div>
-            <EditPatientExamModal 
-              id={props.id} 
-              patientId={props.patientId} 
-            />
+            <EditPatientExamModal id={id} patientId={patientId} />
           </div>
           <div className="w-full font-light text-brand-standard-black">
-            {props.author}
+            {author}
           </div>
           <div className="w-full flex-row flex items-center gap-5">
             <div className="flex items-center gap-1">
@@ -69,11 +80,11 @@ const ExamCard = (props: ExamCardProps) => {
                 Data de realização do exame:
               </span>
               <p className="text-base font-normal text-brand-standard-black">
-                {props.date}
+                {date}
               </p>
             </div>
           </div>
-          {attachedFile && 
+          {attachedFile && (
             <div className="w-[664.8px] border rounded border-gray-200 overflow-hidden flex flex-col items-center">
               <div className="w-[664.8px] h-44 overflow-hidden">
                 <div className="w-[664.8px] h-44 flex px-2 py-2 rounded justify-end absolute z-10">
@@ -82,11 +93,7 @@ const ExamCard = (props: ExamCardProps) => {
                       onClick={() => download.click()}
                       className="w-[26px] h-[26px] flex justify-center items-center bg-white border rounded border-gray-200 overflow-hidden cursor-pointer"
                     >
-                      <DownloadIcon 
-                        color="#212529" 
-                        width={16} 
-                        height={16} 
-                      />
+                      <DownloadIcon color="#212529" width={16} height={16} />
                     </button>
                   </div>
                 </div>
@@ -98,18 +105,18 @@ const ExamCard = (props: ExamCardProps) => {
                 </Document>
               </div>
             </div>
-          }
-          {textNotes &&
+          )}
+          {textNotes && (
             <div className="w-full">
               <p className="text-base font-normal text-brand-standard-black">
                 {textNotes}
               </p>
             </div>
-          }
+          )}
         </div>
       </div>
     </div>
   );
 };
 
-export default ExamCard;
+export default ExamItem;
