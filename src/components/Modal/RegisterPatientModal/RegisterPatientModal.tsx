@@ -57,35 +57,11 @@ const registerPatientFormSchema = z.object({
         })
         .join(" ");
     }),
-  owner: z.string().transform((name) => {
-    return name
-      .trim()
-      .split(" ")
-      .map((word) => {
-        return word[0].toLocaleUpperCase().concat(word.substring(1));
-      })
-      .join(" ");
-  }),
+  owner: z.string(),
   ownerless_patient: z.boolean(),
-  specie: z.string().transform((name) => {
-    return name
-      .trim()
-      .split(" ")
-      .map((word) => {
-        return word[0].toLocaleUpperCase().concat(word.substring(1));
-      })
-      .join(" ");
-  }),
+  specie: z.string(),
   undefined_specie: z.boolean(),
-  race: z.string().transform((name) => {
-    return name
-      .trim()
-      .split(" ")
-      .map((word) => {
-        return word[0].toLocaleUpperCase().concat(word.substring(1));
-      })
-      .join(" ");
-  }),
+  race: z.string(),
   undefined_race: z.boolean(),
   gender: z.any(),
   weight: z.string(),
@@ -135,41 +111,20 @@ const RegisterPatientModal = () => {
     });
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [selectedImage, setSelectedImage] = useState<any | undefined>(
-    undefined
-  );
+  const [selectedImage, setSelectedImage] = useState<File | undefined>(undefined);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [diagnosisInputValue, setDiagnosisInputValue] = useState<string>("");
   const [valueDiagnosis, setValueDiagnosis] = useState<readonly Option[]>([]);
 
-  const { field: selectGender } = useController({ name: "gender", control });
-  const { field: selectPhysicalShape } = useController({
-    name: "physical_shape",
-    control,
-  });
+  const { field: selectPhysicalShape } = useController({ name: "physical_shape", control });
+  const { value: selectPhysicalShapeValue, onChange: selectPhysicalShapeOnChange, ...restSelectPhysicalShape } = selectPhysicalShape;
   
-  const { field: selectPrognosis } = useController({
-    name: "prognosis",
-    control,
-  });
+  const { field: selectGender } = useController({ name: "gender", control });
+  const { value: selectGenderValue, onChange: selectGenderOnChange, ...restSelectGender } = selectGender;
+  
+  const { field: selectPrognosis } = useController({ name: "prognosis", control });
+  const { value: selectPrognosisValue, onChange: selectPrognosisOnChange, ...restSelectPrognosis } = selectPrognosis;
 
-  const {
-    value: selectPhysicalShapeValue,
-    onChange: selectPhysicalShapeOnChange,
-    ...restSelectPhysicalShape
-  } = selectPhysicalShape;
-
-  const {
-    value: selectGenderValue,
-    onChange: selectGenderOnChange,
-    ...restSelectGender
-  } = selectGender;
-
-  const {
-    value: selectPrognosisValue,
-    onChange: selectPrognosisOnChange,
-    ...restSelectPrognosis
-  } = selectPrognosis;
 
   const handleKeyDown: KeyboardEventHandler = (event) => {
     if (!diagnosisInputValue) return;
@@ -196,10 +151,10 @@ const RegisterPatientModal = () => {
   const { isLoading, mutate } = useMutation({
     mutationKey: ["create-patient"],
     mutationFn: async (data: registerPatientFormData) => {
-      const formData = new FormData();
-      formData.append("image", selectedImage);
+      if (selectedImage != undefined) {
+        const formData = new FormData();
+        formData.append("image", selectedImage);
 
-      if (selectedImage != null || undefined) {
         const upload = await api.post<UploadImageResponse>(
           "uploads/image/",
           formData
@@ -224,9 +179,12 @@ const RegisterPatientModal = () => {
     },
   });
 
-  useEffect(() => {
-    setValue("diagnosis", valueDiagnosis);
-  }, [setValue, valueDiagnosis, valueDiagnosis?.length]);
+  const send = (data: registerPatientFormData) => {
+    const request = {
+      ...data,
+    };
+    mutate(request);
+  };
 
   useEffect(() => {
     if (isOpen != true) {
@@ -237,12 +195,9 @@ const RegisterPatientModal = () => {
     }
   }, [isOpen, setPreviewImage, setValueDiagnosis, reset]);
 
-  const send = (data: registerPatientFormData) => {
-    const request = {
-      ...data,
-    };
-    mutate(request);
-  };
+  useEffect(() => {
+    setValue("diagnosis", valueDiagnosis);
+  }, [setValue, valueDiagnosis, valueDiagnosis?.length]);
 
   return (
     <Dialog.Root onOpenChange={setIsOpen} open={isOpen}>
@@ -550,7 +505,9 @@ const RegisterPatientModal = () => {
                               ? "text-xs font-normal text-red-500"
                               : "hidden text-xs font-normal text-red-500"
                           }
-                        ></span>
+                        >
+                          {errors.owner.message}
+                        </span>
                       )}
                       <div className="w-full flex items-center gap-1">
                         <input
