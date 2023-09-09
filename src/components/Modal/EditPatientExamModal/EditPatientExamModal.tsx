@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Load from "../../Load/Load";
-import WarningToDeleteExamModal from "./WarningToDeleteExamModal";
+import WarningToDeleteExamModal from "../WarningToDeleteExamModal/WarningToDeleteExamModal";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Document, Page } from "react-pdf";
 import {

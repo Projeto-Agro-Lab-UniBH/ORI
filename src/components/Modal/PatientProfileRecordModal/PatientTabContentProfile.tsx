@@ -1,17 +1,17 @@
+import * as Tabs from "@radix-ui/react-tabs";
+import * as Avatar from "@radix-ui/react-avatar";
+import Select from "react-select";
 import Load from "../../Load/Load";
+import CreatableSelect from "react-select/creatable";
 import { Option } from "../../../interfaces/Option";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as Avatar from "@radix-ui/react-avatar";
 import { CameraIcon } from "@radix-ui/react-icons";
 import { useState, ChangeEvent, KeyboardEventHandler, useEffect } from "react";
 import { useForm, useController } from "react-hook-form";
 import { useQuery, useMutation } from "react-query";
-import CreatableSelect from "react-select/creatable";
-import Select from "react-select";
 import { z } from "zod";
 import { api } from "../../../providers/Api";
 import { queryClient } from "../../../providers/QueryClient";
-import * as Tabs from "@radix-ui/react-tabs";
 import { TabContentProps } from "./PatientRecordContent";
 
 type UploadImageResponse = {

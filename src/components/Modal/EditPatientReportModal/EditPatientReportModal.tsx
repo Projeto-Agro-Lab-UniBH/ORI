@@ -12,7 +12,7 @@ import { useController, useForm } from "react-hook-form";
 import { Cross1Icon, DownloadIcon, Pencil2Icon, TrashIcon } from "@radix-ui/react-icons";
 import { useMutation, useQuery } from "react-query";
 import * as Dialog from "@radix-ui/react-dialog";
-import WarningToDeleteReportModal from "./WarningToDeleteReportModal";
+import WarningToDeleteReportModal from "../WarningToDeleteReportModal/WarningToDeleteReportModal";
 
 type EditPatientReportModalProps = {
   id: string;
