@@ -49,26 +49,12 @@ type PatchPatientResponse = {
   departure_date: string;
 };
 
-const createOption = (label: string) => ({ 
-  label, 
-  value: label 
-});
-
 const editPatientProfileFormSchema = z
   .object({
     name: z
-      .string()
-      .nonempty({ message: "O paciente precisa de um nome" })
-      .transform((name) => {
-        return name
-          .trim()
-          .split(" ")
-          .map((word) => {
-            return word[0].toLocaleUpperCase().concat(word.substring(1));
-          })
-          .join(" ");
-      }),
-    owner: z.string().transform((name) => {
+    .string()
+    .nonempty({ message: "O paciente precisa de um nome" })
+    .transform((name) => {
       return name
         .trim()
         .split(" ")
@@ -77,10 +63,11 @@ const editPatientProfileFormSchema = z
         })
         .join(" ");
     }),
+    owner: z.string(),
     ownerless_patient: z.boolean(),
-    specie: z.string().optional(),
+    specie: z.string(),
     undefined_specie: z.boolean(),
-    race: z.string().optional(),
+    race: z.string(),
     undefined_race: z.boolean(),
     gender: z.any(),
     weight: z.string(),
@@ -122,7 +109,12 @@ const editPatientProfileFormSchema = z
   });
 
 type editPatientProfileFormData = z.infer<typeof editPatientProfileFormSchema>;
-  
+
+const createOption = (label: string) => ({ 
+  label, 
+  value: label 
+});
+
 const genderOptions: Option[] = [
   { label: "Macho", value: "Macho" },
   { label: "Fêmea", value: "Fêmea" },
@@ -197,25 +189,6 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, modalI
     }
   };
 
-  const send = (data: editPatientProfileFormData) => {
-    mutate({
-      name: data.name,
-      owner: data.owner,
-      ownerless_patient: data.ownerless_patient,
-      specie: data.specie,
-      undefined_specie: data.undefined_specie,
-      race: data.race,
-      undefined_race: data.undefined_race,
-      gender: data.gender,
-      physical_shape: data,
-      weight: data.weight,
-      prognosis: data.prognosis,
-      diagnosis: data.diagnosis,
-      entry_date: data.entry_date,
-      departure_date: data.departure_date,
-    });
-  };
-
   const { isLoading } = useQuery({
     queryKey: ["get-patient-by-id"],
     queryFn: async () => {
@@ -257,6 +230,13 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, modalI
       queryClient.invalidateQueries({ queryKey: ["search"] });
     },
   });
+
+  const send = (data: editPatientProfileFormData) => {
+    const request = {
+      ...data,
+    };
+    mutate(request);
+  };
 
   useEffect(() => {
     if (modalIsOpen != true) {
@@ -594,7 +574,9 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, modalI
                           ? "text-xs font-normal text-red-500"
                           : "hidden text-xs font-normal text-red-500"
                       }
-                    ></span>
+                    >
+                      {errors.owner.message}
+                    </span>
                   )}
                   <div className="w-full flex items-center gap-1">
                     <input
