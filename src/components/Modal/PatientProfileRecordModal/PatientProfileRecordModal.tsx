@@ -1,5 +1,5 @@
 import * as Dialog from "@radix-ui/react-dialog";
-import PatientRecordModalContent from "./PatientRecordContent/PatientRecordContent";
+import PatientRecordModalContent from "./PatientRecordContent";
 import { Cross1Icon } from "@radix-ui/react-icons";
 import { useState } from "react";
 

@@ -1,14 +1,14 @@
 import * as Avatar from "@radix-ui/react-avatar";
 import * as Dialog from "@radix-ui/react-dialog";
-import Load from "../Load/Load";
+import Load from "../../Load/Load";
 import Select from "react-select";
 import CreatableSelect from "react-select/creatable";
 import { z } from "zod";
-import { api } from "../../providers/Api";
+import { api } from "../../../providers/Api";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { queryClient } from "../../providers/QueryClient";
+import { queryClient } from "../../../providers/QueryClient";
 import { CameraIcon, Cross1Icon, PlusIcon } from "@radix-ui/react-icons";
-import { Option } from "../../interfaces/Option";
+import { Option } from "../../../interfaces/Option";
 import { useController, useForm } from "react-hook-form";
 import { useState, KeyboardEventHandler, useEffect, ChangeEvent } from "react";
 import { useMutation } from "react-query";

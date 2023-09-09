@@ -1,9 +1,9 @@
 import * as Tabs from "@radix-ui/react-tabs";
-import PatientTabHeader from "./PatientTabHeader/PatientTabHeader";
-import PatientTabContentProfile from "./PatientTabContentProfile/PatientTabContentProfile";
-import PatientTabContentRecords from "./PatientTabContentRecords/PatientTabContentRecords";
-import PatientTabContentExam from "./PatientTabContentExam/PatientTabContentExam";
-import PatientTabContentAttachment from "./PatientTabContentAttachment/PatientTabContentAttachment";
+import PatientTabHeader from "./PatientTabHeader";
+import PatientTabContentProfile from "./PatientTabContentProfile";
+import PatientTabContentRecords from "./PatientTabContentRecords";
+import PatientTabContentExam from "./PatientTabContentExam";
+import PatientTabContentAttachment from "./PatientTabContentAttachment";
 
 export type TabContentProps = {
   patientId: string;

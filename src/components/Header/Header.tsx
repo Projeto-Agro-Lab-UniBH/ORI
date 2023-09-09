@@ -1,5 +1,5 @@
 import * as Avatar from "@radix-ui/react-avatar";
-import EditUserProfileModal from "../Modal/EditUserProfileModal";
+import EditUserProfileModal from "../Modal/EditUserProfileModal/EditUserProfileModal";
 import { ExitIcon, PersonIcon } from "@radix-ui/react-icons";
 import UserProfileSkeleton from "../Skeletons/UserProfileSkeleton";
 

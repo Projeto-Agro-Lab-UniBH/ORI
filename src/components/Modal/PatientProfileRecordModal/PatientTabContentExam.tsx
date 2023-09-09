@@ -1,10 +1,10 @@
 import * as Tabs from "@radix-ui/react-tabs";
-import Load from "../../../../Load/Load";
-import ExamItem from "../../../../Items/ExamItem";
-import RegisterPatientExamModal from "../../../RegisterPatientExamModal";
-import { TabContentProps } from "../PatientRecordContent";
+import Load from "../../Load/Load";
+import ExamItem from "../../Items/ExamItem";
+import RegisterPatientExamModal from "../RegisterPatientExamModal/RegisterPatientExamModal";
+import { TabContentProps } from "./PatientRecordContent";
 import { useEffect, useState } from "react";
-import { api } from "../../../../../providers/Api";
+import { api } from "../../../providers/Api";
 import { useQuery } from "react-query";
 
 type ListExamsResponse = {

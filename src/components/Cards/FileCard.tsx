@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Document, Page } from 'react-pdf'; 
 import { DownloadIcon } from '@radix-ui/react-icons';
 import { formatFileSize } from "../../functions/formatBytes";
-import WarningToDeleteAttachmentModal from "../Modal/WarningToDeleteAttachmentModal";
+import WarningToDeleteAttachmentModal from "../Modal/WarningToDeleteAttachmentModal/WarningToDeleteAttachmentModal";
 
 type FileCardProps = {
   id: string;

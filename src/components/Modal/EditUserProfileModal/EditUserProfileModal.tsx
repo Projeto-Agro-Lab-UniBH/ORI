@@ -1,5 +1,5 @@
-import Load from "../Load/Load";
-import { api } from "../../providers/Api";
+import Load from "../../Load/Load";
+import { api } from "../../../providers/Api";
 import { useForm } from "react-hook-form";
 import * as Avatar from "@radix-ui/react-avatar";
 import * as Dialog from "@radix-ui/react-dialog";
@@ -8,7 +8,7 @@ import { PersonIcon } from "@radix-ui/react-icons";
 import { useMutation, useQuery } from "react-query"
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, { ChangeEvent, useEffect, useState } from "react";
-import { editUserProfileFormData, editUserProfileFormSchema } from "../../schemas/editUserProfileFormSchema";
+import { editUserProfileFormData, editUserProfileFormSchema } from "../../../schemas/editUserProfileFormSchema";
 import { useRouter } from "next/router";
 
 type Response = {

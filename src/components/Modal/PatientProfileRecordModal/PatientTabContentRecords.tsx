@@ -1,11 +1,11 @@
 import * as Tabs from "@radix-ui/react-tabs";
 import { useEffect, useState } from "react";
-import { TabContentProps } from "../PatientRecordContent";
+import { TabContentProps } from "./PatientRecordContent";
 import { useQuery } from "react-query";
-import { api } from "../../../../../providers/Api";
-import Load from "../../../../Load/Load";
-import ReportItem from "../../../../Items/ReportItem";
-import RegisterPatientReportModal from "../../../RegisterPatientReportModal";
+import { api } from "../../../providers/Api";
+import Load from "../../Load/Load";
+import ReportItem from "../../Items/ReportItem";
+import RegisterPatientReportModal from "../RegisterPatientReportModal/RegisterPatientReportModal";
 
 type ListReportsResponse = {
 	id: string;

@@ -1,13 +1,13 @@
 import Image from "next/image";
-import Load from "../Load/Load";
+import Load from "../../Load/Load";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Cross1Icon, TrashIcon, UploadIcon } from "@radix-ui/react-icons";
 import { ChangeEvent, useEffect, useState } from "react";
-import { api } from "../../providers/Api";
+import { api } from "../../../providers/Api";
 import { useMutation } from "react-query";
 import { Document, Page } from "react-pdf";
-import { formatFileSize } from "../../functions/formatBytes";
-import { queryClient } from "../../providers/QueryClient";
+import { formatFileSize } from "../../../functions/formatBytes";
+import { queryClient } from "../../../providers/QueryClient";
 
 type AddAttachmentModalProps = {
   patientId: string | null;

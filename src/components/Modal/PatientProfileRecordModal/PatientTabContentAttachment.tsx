@@ -1,11 +1,11 @@
 import * as Tabs from "@radix-ui/react-tabs";
 import { useEffect, useState } from "react";
-import { TabContentProps } from "../PatientRecordContent";
-import Load from "../../../../Load/Load";
-import AddAttachmentModal from "../../../AddAttachmentModal";
-import { FileCard } from "../../../../Cards/FileCard";
+import { TabContentProps } from "./PatientRecordContent";
+import Load from "../../Load/Load";
+import AddAttachmentModal from "../AddAttachmentModal/AddAttachmentModal";
+import { FileCard } from "../../Cards/FileCard";
 import { useQuery } from "react-query";
-import { api } from "../../../../../providers/Api";
+import { api } from "../../../providers/Api";
 
 type ListFilesResponse = {
   id: string;

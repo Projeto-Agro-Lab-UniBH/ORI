@@ -1,5 +1,5 @@
 import { DownloadIcon } from "@radix-ui/react-icons";
-import EditPatientExamModal from "../Modal/EditPatientExamModal";
+import EditPatientExamModal from "../Modal/EditPatientExamModal/EditPatientExamModal";
 import { Document, Page } from "react-pdf";
 import { useEffect, useState } from "react";
 

@@ -5,7 +5,7 @@ import { useRouter } from "next/router";
 import { useEffect, useId } from "react";
 import { GetServerSideProps } from "next";
 import { useAuthContext } from "../../contexts/AuthContext";
-import RegisterPatientModal from "../../components/Modal/RegisterPatientModal";
+import RegisterPatientModal from "../../components/Modal/RegisterPatientModal/RegisterPatientModal";
 import PatientCard from "../../components/Cards/PatientCard";
 import Pagination from "../../components/Pagination/Pagination";
 import Header from "../../components/Header/Header";
@@ -13,7 +13,7 @@ import { useSearchParams } from "next/navigation";
 import useSearch from "../../hooks/useSearch";
 import PatientCardSkeleton from "../../components/Skeletons/PatientCardSkeleton";
 
-type TSelect = {
+type SelectSchema = {
   label: string;
   value: string;
 };
@@ -24,9 +24,9 @@ export default function AppPage() {
   const { user, logOut } = useAuthContext();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchInput, setSearchInput] = useState<string>("");
-  const [selectPrognosis, setSelectPrognosis] = useState<TSelect | undefined>(undefined);
-  const [selectPhysicalShape, setSelectPhysicalShape] = useState<TSelect | undefined>(undefined);
-  const [selectGender, setSelectGender] = useState<TSelect | undefined>(undefined);
+  const [selectPrognosis, setSelectPrognosis] = useState<SelectSchema | undefined>(undefined);
+  const [selectPhysicalShape, setSelectPhysicalShape] = useState<SelectSchema | undefined>(undefined);
+  const [selectGender, setSelectGender] = useState<SelectSchema | undefined>(undefined);
 
   const handleSearchInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchInput(event.target.value);

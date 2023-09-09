@@ -1,26 +1,26 @@
-import * as Dialog from '@radix-ui/react-dialog';
-import { ExclamationTriangleIcon, TrashIcon } from '@radix-ui/react-icons';
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import { useMutation } from 'react-query';
-import { api } from '../../providers/Api';
-import { queryClient } from '../../providers/QueryClient';
+import * as Dialog from "@radix-ui/react-dialog";
+import { api } from "../../../providers/Api";
+import { useMutation } from "react-query";
+import { queryClient } from "../../../providers/QueryClient";
+import { ExclamationTriangleIcon, TrashIcon } from "@radix-ui/react-icons";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
-type WarningToDeleteExamModalProps = {
+type WarningToDeleteReportModalProps = {
   id: string;
-  modalIsOpen: Dispatch<SetStateAction<boolean>>;
   setLoading: Dispatch<SetStateAction<boolean>>;
-}
+  modalIsOpen: Dispatch<SetStateAction<boolean>>;
+};
 
-const WarningToDeleteExamModal: React.FC<WarningToDeleteExamModalProps> = ({ id, modalIsOpen, setLoading }) => {
+const WarningToDeleteReportModal: React.FC<WarningToDeleteReportModalProps> = ({ id, modalIsOpen, setLoading }) => {
   const [open, setOpen] = useState<boolean>(false);
 
   const { isLoading, mutate } = useMutation({
-    mutationKey: ["delete-exam-by-id"],
+    mutationKey: ["delete-report-by-id"],
     mutationFn: async () => {
-      await api.delete(`/exams/${id}`)
+      await api.delete(`/reports/${id}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["list-all-exams"] });
+      queryClient.invalidateQueries({ queryKey: ["list-all-reports"] });
       if (isLoading != true) {
         setOpen(false);
         modalIsOpen(false);
@@ -38,16 +38,12 @@ const WarningToDeleteExamModal: React.FC<WarningToDeleteExamModalProps> = ({ id,
     event.preventDefault();
     mutate();
     setOpen(false);
-  }
-  
+  };
+
   return (
     <Dialog.Root onOpenChange={setOpen} open={open}>
       <Dialog.Trigger className="w-10 flex items-center justify-center border border-gray-200 rounded text-base text-brand-standard-black font-medium bg-white hover:border-red-500">
-        <TrashIcon
-          color="#ef4444" 
-          width={20} 
-          height={20}
-        />
+        <TrashIcon color="#ef4444" width={20} height={20} />
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className="bg-black/60 inset-0 fixed z-20" />
@@ -62,10 +58,10 @@ const WarningToDeleteExamModal: React.FC<WarningToDeleteExamModalProps> = ({ id,
             <span>Tem certeza que você quer remover este registro?</span>
             <div className="flex justify-center gap-6">
               <Dialog.Close className="w-[124px] px-3 py-[6px] border rounded font-medium text-base text-slate-900 shadow-md hover:shadow-blue-500/50 hover:border-none hover:text-neutral-50 hover: hover:bg-blue-500">
-                Não  
+                Não
               </Dialog.Close>
               <button
-                onClick={(e) => acceptRemoveFile(e)} 
+                onClick={(e) => acceptRemoveFile(e)}
                 className="w-[124px] px-3 py-[6px] border rounded font-medium text-base text-slate-900 shadow-md hover:shadow-blue-500/50 hover:border-none hover:text-neutral-50 hover: hover:bg-blue-500"
               >
                 Sim
@@ -75,7 +71,7 @@ const WarningToDeleteExamModal: React.FC<WarningToDeleteExamModalProps> = ({ id,
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
-  )
-}
+  );
+};
 
-export default WarningToDeleteExamModal;
+export default WarningToDeleteReportModal;

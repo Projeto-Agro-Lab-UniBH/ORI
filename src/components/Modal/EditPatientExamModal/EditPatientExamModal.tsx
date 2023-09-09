@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Load from "../Load/Load";
+import Load from "../../Load/Load";
 import WarningToDeleteExamModal from "./WarningToDeleteExamModal";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Document, Page } from "react-pdf";
@@ -12,10 +12,10 @@ import {
 import { ChangeEvent, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { queryClient } from "../../providers/QueryClient";
-import { api } from "../../providers/Api";
+import { queryClient } from "../../../providers/QueryClient";
+import { api } from "../../../providers/Api";
 import { useMutation, useQuery } from "react-query";
-import { formatFileSize } from "../../functions/formatBytes";
+import { formatFileSize } from "../../../functions/formatBytes";
 import { z } from "zod";
 
 type EditPatientExamModalProps = {

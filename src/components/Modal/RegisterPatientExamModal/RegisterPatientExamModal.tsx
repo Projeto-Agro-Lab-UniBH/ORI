@@ -1,15 +1,15 @@
 import Image from "next/image";
-import Load from "../Load/Load";
+import Load from "../../Load/Load";
 import * as Dialog from "@radix-ui/react-dialog";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Cross1Icon, TrashIcon } from "@radix-ui/react-icons";
 import { useForm } from "react-hook-form";
 import { ChangeEvent, useEffect, useState } from "react";
 import { Document, Page } from "react-pdf";
-import { formatFileSize } from "../../functions/formatBytes";
-import { queryClient } from "../../providers/QueryClient";
+import { formatFileSize } from "../../../functions/formatBytes";
+import { queryClient } from "../../../providers/QueryClient";
 import { useMutation } from "react-query";
-import { api } from "../../providers/Api";
+import { api } from "../../../providers/Api";
 import { z } from "zod";
 
 type RegisterPatientReportProps = {

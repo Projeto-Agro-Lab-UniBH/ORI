@@ -2,8 +2,8 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { ExclamationTriangleIcon, TrashIcon } from '@radix-ui/react-icons';
 import { useState } from 'react';
 import { useMutation } from "react-query";
-import { api } from '../../providers/Api';
-import { queryClient } from '../../providers/QueryClient';
+import { api } from '../../../providers/Api';
+import { queryClient } from '../../../providers/QueryClient';
 
 type WarningToDeleteAttachmentModalProps = {
   id: string;
