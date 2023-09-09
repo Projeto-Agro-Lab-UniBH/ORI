@@ -104,35 +104,11 @@ const editPatientProfileFormSchema = z
           })
           .join(" ");
       }),
-    owner: z.string().transform((name) => {
-      return name
-        .trim()
-        .split(" ")
-        .map((word) => {
-          return word[0].toLocaleUpperCase().concat(word.substring(1));
-        })
-        .join(" ");
-    }),
+    owner: z.string(),
     ownerless_patient: z.boolean(),
-    specie: z.string().transform((name) => {
-      return name
-        .trim()
-        .split(" ")
-        .map((word) => {
-          return word[0].toLocaleUpperCase().concat(word.substring(1));
-        })
-        .join(" ");
-    }),
+    specie: z.string(),
     undefined_specie: z.boolean(),
-    race: z.string().transform((name) => {
-      return name
-        .trim()
-        .split(" ")
-        .map((word) => {
-          return word[0].toLocaleUpperCase().concat(word.substring(1));
-        })
-        .join(" ");
-    }),
+    race: z.string(),
     undefined_race: z.boolean(),
     gender: z.any(),
     weight: z.string(),
@@ -260,7 +236,7 @@ const EditPatientProfileModal: React.FC<EditPatientProfileModalProps> = ({ patie
       const formData = new FormData();
       formData.append('image', selectedImage)
       
-      if (selectedImage != null || undefined) {
+      if (selectedImage != undefined) {
         const upload = await api.post<UploadImageResponse>('uploads/image/', formData)
         
         await api.patch<EditedPatientResponse>(`/patient/${patientId}`, {
