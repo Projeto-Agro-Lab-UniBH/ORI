@@ -497,7 +497,7 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, modalI
                     {watch("undefined_specie") == true ? (
                       <input
                         type="text"
-                        className="w-full h-10 px-3 py-3 bg-gray-100 border border-gray-200 rounded cursor-not-allowed"
+                        className="w-full h-10 px-3 py-3 text-gray-100 bg-gray-100 border border-gray-200 rounded cursor-not-allowed"
                         disabled
                       />
                     ) : (
@@ -552,7 +552,7 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, modalI
                     {watch("ownerless_patient") == true ? (
                       <input
                         type="text"
-                        className="w-full h-10 px-3 py-3 bg-gray-100 border border-gray-200 rounded cursor-not-allowed"
+                        className="w-full h-10 px-3 py-3 text-gray-100 bg-gray-100 border border-gray-200 rounded cursor-not-allowed"
                         disabled
                       />
                     ) : (
@@ -605,7 +605,7 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, modalI
                     {watch("undefined_race") == true ? (
                       <input
                         type="text"
-                        className="w-full h-10 px-3 py-3 bg-gray-100 border border-gray-200 rounded cursor-not-allowed"
+                        className="w-full h-10 px-3 py-3 text-gray-100 bg-gray-100 border border-gray-200 rounded cursor-not-allowed"
                         disabled
                       />
                     ) : (
