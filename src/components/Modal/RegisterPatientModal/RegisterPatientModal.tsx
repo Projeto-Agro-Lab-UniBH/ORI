@@ -22,18 +22,18 @@ const createOption = (label: string) => ({
   value: label,
 });
 
-const genderOptions = [
+const genderOptions: Option[] = [
   { label: "Macho", value: "Macho" },
   { label: "Fêmea", value: "Fêmea" },
 ];
 
-const physicalShapeOptions = [
+const physicalShapeOptions: Option[] = [
   { value: "Grande porte", label: "Grande porte" },
   { value: "Médio porte", label: "Médio porte" },
   { value: "Pequeno porte", label: "Pequeno porte" },
 ];
 
-const prognosisOptions = [
+const prognosisOptions: Option[] = [
   { label: "Alta", value: "Alta" },
   { label: "Aguardando alta médica", value: "Aguardando alta médica" },
   { label: "Obscuro", value: "Obscuro" },
@@ -105,10 +105,17 @@ const registerPatientFormSchema = z.object({
 type registerPatientFormData = z.infer<typeof registerPatientFormSchema>;
 
 const RegisterPatientModal = () => {
-  const { reset, register, watch, setValue, control, handleSubmit, formState: { errors }, } =
-    useForm<registerPatientFormData>({
-      resolver: zodResolver(registerPatientFormSchema),
-    });
+  const {
+    reset,
+    register,
+    watch,
+    setValue,
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm<registerPatientFormData>({
+    resolver: zodResolver(registerPatientFormSchema),
+  });
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [selectedImage, setSelectedImage] = useState<File | undefined>(undefined);
@@ -124,7 +131,6 @@ const RegisterPatientModal = () => {
   
   const { field: selectPrognosis } = useController({ name: "prognosis", control });
   const { value: selectPrognosisValue, onChange: selectPrognosisOnChange, ...restSelectPrognosis } = selectPrognosis;
-
 
   const handleKeyDown: KeyboardEventHandler = (event) => {
     if (!diagnosisInputValue) return;
@@ -211,7 +217,7 @@ const RegisterPatientModal = () => {
             <Dialog.Title className="font-semibold text-2xl">
               Cadastrar paciente
             </Dialog.Title>
-            <Dialog.Close className="w-[32px] h-[32px] flex justify-center items-center">
+            <Dialog.Close className="w-8 h-w-8 flex justify-center items-center">
               <Cross1Icon width={24} height={24} />
             </Dialog.Close>
           </div>
@@ -250,7 +256,11 @@ const RegisterPatientModal = () => {
                           className="w-full h-full object-cover"
                         />
                         <Avatar.Fallback className="w-16 h-16 border border-gray-200 flex items-center justify-center rounded-full overflow-hidden" delayMs={600}>
-                          <CameraIcon width={16} height={16} color="#e5e7eb" />    
+                          <CameraIcon 
+                            width={16} 
+                            height={16} 
+                            color="#e5e7eb" 
+                          />    
                         </Avatar.Fallback>
                       </Avatar.Root>
                     </div>

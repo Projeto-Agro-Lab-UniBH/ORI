@@ -3,13 +3,13 @@ import * as Avatar from "@radix-ui/react-avatar";
 import Select from "react-select";
 import Load from "../../Load/Load";
 import CreatableSelect from "react-select/creatable";
-import { Option } from "../../../interfaces/Option";
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Option } from "../../../interfaces/Option";
 import { CameraIcon } from "@radix-ui/react-icons";
 import { useState, ChangeEvent, KeyboardEventHandler, useEffect } from "react";
 import { useForm, useController } from "react-hook-form";
 import { useQuery, useMutation } from "react-query";
-import { z } from "zod";
 import { api } from "../../../providers/Api";
 import { queryClient } from "../../../providers/QueryClient";
 import { TabContentProps } from "./PatientRecordContent";
@@ -207,7 +207,7 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, modalI
     enabled: callRequest,
   });
 
-  const { isLoading: updating, mutate } = useMutation({
+  const { isLoading: isUpdating, mutate } = useMutation({
     mutationKey: ["update-patient"],
     mutationFn: async (data: editPatientProfileFormData) => {
       if (selectedImage != undefined) {
@@ -276,7 +276,7 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, modalI
           </div>
         </div>
       )}
-      {updating && (
+      {isUpdating && (
         <div className="w-full h-full absolute z-20">
           <div className="w-full h-full bg-[#f9fafb8b]">
             <Load

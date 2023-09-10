@@ -66,7 +66,7 @@ const EditUserProfileModal: React.FC<EditUserProfileModalProps> = ({ id, childre
     }  
   };
 
-  const send = async (data: editUserProfileFormData) => {
+  const send = (data: editUserProfileFormData) => {
     mutate({
       username: data.username,
       email: data.email,

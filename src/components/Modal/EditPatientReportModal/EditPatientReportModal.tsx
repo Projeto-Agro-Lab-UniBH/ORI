@@ -91,8 +91,8 @@ const EditPatientReportModal: React.FC<EditPatientReportModalProps> = ({ id, pat
   const [filename, setFilename] = useState<string>("");
   const [fecthedFilename, setFetchedFilename] = useState<string>("");
   const [fecthedAttachment, setFecthedAttachment] = useState<string>("");
-  const [attachedFile, setAttachedFile] = useState<any | undefined>();
-  const [attachment, setAttachment] = useState<any | undefined>();
+  const [attachedFile, setAttachedFile] = useState<File | undefined>();
+  const [attachment, setAttachment] = useState<File | undefined>();
   const [isRemovingRecord, setIsRemovingRecord] = useState<boolean>(false);
 
   const { field: selectShift } = useController({ name: "shift", control });
@@ -116,10 +116,10 @@ const EditPatientReportModal: React.FC<EditPatientReportModalProps> = ({ id, pat
   const { isLoading: savingChanges, mutate } = useMutation({
     mutationKey: ["update-patient-report"],
     mutationFn: async (data: editReportFormData) => {
-      const formData = new FormData();
-      formData.append("file", attachedFile);
-
       if (attachedFile != undefined && fecthedAttachment === "") {
+        const formData = new FormData();
+        formData.append("file", attachedFile);
+
         const upload = await api.post<UploadFileResponse>(
           "uploads/file/",
           formData

@@ -20,7 +20,7 @@ type UploadFileResponse = {
   fileUrl: string;
 };
 
-type MutationExamResponse = {
+type PostExamResponse = {
   id: string;
   patientId: string;
   date: string;
@@ -35,8 +35,30 @@ type MutationExamResponse = {
 };
 
 const registerExamFormSchema = z.object({
-  date: z.string().nonempty("Selecione a data de realização do exame."),
-  type_of_exam: z.string().nonempty("O exame precisa ter um nome."),
+  date: z
+    .string()
+    .nonempty("Selecione a data de realização do exame.")
+    .transform((name) => {
+      return name
+        .trim()
+        .split(" ")
+        .map((word) => {
+          return word[0].toLocaleUpperCase().concat(word.substring(1));
+        })
+        .join(" ");
+    }),
+  type_of_exam: z
+    .string()
+    .nonempty("O exame precisa ter um nome.")
+    .transform((name) => {
+      return name
+        .trim()
+        .split(" ")
+        .map((word) => {
+          return word[0].toLocaleUpperCase().concat(word.substring(1));
+        })
+        .join(" ");
+    }),
   author: z
     .string()
     .nonempty("Preencha o nome completo do responsável pelo exame.")
@@ -82,7 +104,7 @@ const RegisterPatientExamModal: React.FC<RegisterPatientReportProps> = ({ patien
           formData
         );
 
-        await api.post<MutationExamResponse>("/exams", {
+        await api.post<PostExamResponse>("/exams", {
           ...data,
           patientId: patientId,
           filename: filename,
@@ -90,7 +112,7 @@ const RegisterPatientExamModal: React.FC<RegisterPatientReportProps> = ({ patien
           fileSize: attachedFile.size,
         });
       } else {
-        await api.post<MutationExamResponse>("/exams", {
+        await api.post<PostExamResponse>("/exams", {
           ...data,
           patientId: patientId,
           filename: "",

@@ -75,7 +75,7 @@ const RegisterPatientReportModal: React.FC<RegisterPatientReportProps> = ({ pati
   const [open, setOpen] = useState<boolean>(false);
   const [hasAttachment, setHasAttachment] = useState<boolean>(false);
   const [numPages, setNumPages] = useState<number | undefined>(undefined);
-  const [attachedFile, setAttachedFile] = useState<any | undefined>();
+  const [attachedFile, setAttachedFile] = useState<File | undefined>();
   const [filename, setFilename] = useState<string>("");
 
   const { field: selectShift } = useController({ name: "shift", control });
@@ -88,10 +88,10 @@ const RegisterPatientReportModal: React.FC<RegisterPatientReportProps> = ({ pati
   const { isLoading, mutate } = useMutation({
     mutationKey: ["create-report"],
     mutationFn: async (data: registerReportFormData) => {
-      const formData = new FormData();
-      formData.append("file", attachedFile);
-
       if (attachedFile != undefined) {
+        const formData = new FormData();
+        formData.append("file", attachedFile);
+
         const upload = await api.post<UploadFileResponse>(
           "uploads/file/",
           formData

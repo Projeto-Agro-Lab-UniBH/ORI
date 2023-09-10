@@ -3,12 +3,7 @@ import Load from "../../Load/Load";
 import WarningToDeleteExamModal from "../WarningToDeleteExamModal/WarningToDeleteExamModal";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Document, Page } from "react-pdf";
-import {
-  Cross1Icon,
-  DownloadIcon,
-  Pencil2Icon,
-  TrashIcon,
-} from "@radix-ui/react-icons";
+import { Cross1Icon, DownloadIcon, Pencil2Icon, TrashIcon } from "@radix-ui/react-icons";
 import { ChangeEvent, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -89,8 +84,8 @@ const EditPatientExamModal: React.FC<EditPatientExamModalProps> = ({ id, patient
   const [filename, setFilename] = useState<string>("");
   const [fecthedFilename, setFetchedFilename] = useState<string>("");
   const [fecthedAttachment, setFecthedAttachment] = useState<string>("");
-  const [attachedFile, setAttachedFile] = useState<any | undefined>();
-  const [attachment, setAttachment] = useState<any | undefined>();
+  const [attachedFile, setAttachedFile] = useState<File | undefined>();
+  const [attachment, setAttachment] = useState<File | undefined>();
   const [isRemovingRecord, setIsRemovingRecord] = useState<boolean>(false);
 
   const { isLoading } = useQuery({
@@ -107,10 +102,10 @@ const EditPatientExamModal: React.FC<EditPatientExamModalProps> = ({ id, patient
   const { isLoading: savingChanges, mutate } = useMutation({
     mutationKey: ["update-patient-exam"],
     mutationFn: async (data: editExamFormData) => {
-      const formData = new FormData();
-      formData.append("file", attachedFile);
-
       if (attachedFile != undefined && fecthedAttachment === "") {
+        const formData = new FormData();
+        formData.append("file", attachedFile);
+
         const upload = await api.post<UploadFileResponse>(
           "uploads/file/",
           formData
