@@ -1,10 +1,11 @@
 import * as Avatar from "@radix-ui/react-avatar";
-import { CopyIcon, CameraIcon } from "@radix-ui/react-icons";
-import { useEffect, useState } from "react";
-import { CopyToClipboard } from "react-copy-to-clipboard";
+import * as Collapsible from '@radix-ui/react-collapsible';
 import PatientProfileRecordModal from "../Modal/PatientProfileRecordModal/PatientProfileRecordModal";
 import { Badges } from "../Badges/Badges";
+import { useEffect, useState } from "react";
 import { Option } from "../../interfaces/Option";
+import { CopyToClipboard } from "react-copy-to-clipboard";
+import { CopyIcon, CameraIcon, PlusIcon, DashIcon } from "@radix-ui/react-icons";
 
 type PatientCardProps = {
   id: string;
@@ -20,53 +21,64 @@ type PatientCardProps = {
   exams: Array<string>;
 };
 
-const PatientCard = (props: PatientCardProps) => {
+const PatientCard: React.FC<PatientCardProps> = ({
+  id,
+  profile_photo,
+  name,
+  race,
+  specie,
+  gender,
+  weight,
+  prognosis,
+  diagnosis,
+  physical_shape,
+  exams,
+}) => {
   const [open, setOpen] = useState<boolean>(false);
   const [copyArea, setCopyArea] = useState<string>("");
 
   useEffect(() => {
-    setCopyArea(props.id);
-  }, [props.id]);
+    setCopyArea(id);
+  }, [id]);
 
   return (
-    <div className="w-full h-[104px] px-4 pt-2 pb-2 flex items-center bg-white border border-gray-200 rounded-lg">
+    <div className="w-[1280px] h-[104px] px-4 py-2 flex items-center bg-white border border-gray-200 rounded-lg">
       <div
         id="animal-patient-card-scroll"
         className="w-full flex items-center border-none rounded-lg overflow-x-scroll"
       >
         <div className="h-20 flex items-center p-2 gap-[24px]">
           <div className="w-[344px] flex gap-4">
-            <div className="w-[88px] flex items-center flex-col">
-              <span className="w-[88px] mb-2 text-lg font-semibold text-brand-standard-black">
+            <div className="flex items-center flex-col gap-2">
+              <span className="w-[88px] text-lg font-semibold text-brand-standard-black">
                 ID:
               </span>
-              <div className="w-[88px] h-full flex items-center gap-2">
-                <div className="w-[64px] h-6 bg-brand-standard-black border-none rounded flex items-center px-2">
+              <div className="h-full flex items-center gap-2">
+                <div className="w-[64px] h-6 px-2 bg-brand-standard-black border-none rounded flex items-center">
                   <span className="whitespace-nowrap text-sm font-normal text-white overflow-hidden overflow-ellipsis">
                     {copyArea}
                   </span>
                 </div>
                 <CopyToClipboard text={copyArea}>
-                  <button className="w-6 h-6 flex items-center justify-center border-none rounded bg-none hover:bg-slate-50">
-                    <CopyIcon color="#212529" />
+                  <button className="w-6 h-6 flex items-center justify-center hover:border hover:rounded hover:border-gray-200 cursor-pointer">
+                    <CopyIcon color="#212529" width={15} height={15} />
                   </button>
                 </CopyToClipboard>
               </div>
             </div>
             <div className="w-[238.6px] h-full flex items-center">
-              <PatientProfileRecordModal patientId={props.id}>
+              <PatientProfileRecordModal patientId={id}>
                 <div className="w-16 h-16 flex items-center">
                   <Avatar.Root className="w-16 h-16 flex items-center justify-center rounded-full overflow-hidden">
                     <Avatar.Image
-                      src={props.profile_photo}
+                      src={profile_photo}
                       className="w-full h-full object-cover"
-                    /> 
-                    <Avatar.Fallback className="w-16 h-16 flex items-center justify-center border border-gray-200 rounded-full overflow-hidden" delayMs={600}>
-                      <CameraIcon 
-                        width={16} 
-                        height={16} 
-                        color="#e5e7eb" 
-                      />    
+                    />
+                    <Avatar.Fallback
+                      className="w-16 h-16 flex items-center justify-center border border-gray-200 rounded-full overflow-hidden"
+                      delayMs={600}
+                    >
+                      <CameraIcon width={16} height={16} color="#e5e7eb" />
                     </Avatar.Fallback>
                   </Avatar.Root>
                 </div>
@@ -74,12 +86,12 @@ const PatientCard = (props: PatientCardProps) => {
                   <div className="w-[158.6px] flex items-center flex-col">
                     <div className="w-[158.6px] flex">
                       <span className="whitespace-nowrap overflow-hidden text-ellipsis text-xl font-semibold text-brand-standard-black">
-                        {!props.name ? "Sem nome" : props.name}
+                        {!name ? "Sem nome" : name}
                       </span>
                     </div>
                     <div className="w-[158.6px] flex">
                       <span className="whitespace-nowrap overflow-hidden text-ellipsis text-lg font-light text-brand-standard-black">
-                        {!props.specie ? props.race : props.specie}
+                        {!specie ? race : specie}
                       </span>
                     </div>
                   </div>
@@ -93,20 +105,20 @@ const PatientCard = (props: PatientCardProps) => {
                 Dados do paciente:
               </span>
               <div className="w-full flex items-center flex-row gap-2">
-                {!props.gender ? (
+                {!gender ? (
                   <Badges data={"Não registrado"} />
                 ) : (
-                  <Badges data={props.gender} />
+                  <Badges data={gender} />
                 )}
-                {!props.physical_shape ? (
+                {!physical_shape ? (
                   <Badges data={"Não registrado"} />
                 ) : (
-                  <Badges data={props.physical_shape} />
+                  <Badges data={physical_shape} />
                 )}
-                {!props.weight ? (
+                {!weight ? (
                   <Badges data={"Não registrado"} />
                 ) : (
-                  <Badges data={props.weight} />
+                  <Badges data={weight} />
                 )}
               </div>
             </div>
@@ -115,35 +127,71 @@ const PatientCard = (props: PatientCardProps) => {
                 Prognóstico:
               </span>
               <div className="w-full flex flex-row gap-2">
-                <span className="whitespace-nowrap px-2 py-[2px] rounded text-sm font-normal text-white bg-brand-standard-black border-none">
-                  {!props.prognosis ? "Não registrado" : props.prognosis}
-                </span>
+                {!prognosis ? (
+                  <Badges data={"Não registrado"} />
+                ) : (
+                  <Badges data={prognosis} />
+                )}
               </div>
             </div>
             <div className="flex items-center flex-col gap-2">
               <span className="w-full whitespace-nowrap text-lg font-semibold text-brand-standard-black">
                 Diagnóstico / Suspeita Clínica:
               </span>
-              <div className="w-full flex flex-row items-center gap-2">
-                {props.diagnosis.length == 0 ? (
-                  <Badges data={"Não identificado"} />
+              <Collapsible.Root
+                className="w-full flex flex-row items-center"
+                open={open}
+                onOpenChange={setOpen}
+              >
+                {diagnosis.length >= 4 ? (
+                  <div className="w-full flex flex-row items-center gap-2">
+                    {diagnosis.map((data, index) => {
+                      if (index <= 2) {
+                        return <Badges key={data.label} data={data.value} />;
+                      }
+                      return null;
+                    })}
+                    <Collapsible.Content className="flex flex-row items-center gap-2">
+                      {diagnosis.map((data, index) => {
+                        if (index >= 3) {
+                          return <Badges key={data.label} data={data.value} />;
+                        }
+                        return null;
+                      })}
+                    </Collapsible.Content>
+                    <Collapsible.Trigger asChild>
+                      <button className="w-6 h-6 flex items-center justify-center hover:border hover:rounded hover:border-gray-200 cursor-pointer">
+                        {open ? (
+                          <DashIcon color="#212529" width={15} height={15} />
+                        ) : (
+                          <PlusIcon color="#212529" width={15} height={15} />
+                        )}
+                      </button>
+                    </Collapsible.Trigger>
+                  </div>
                 ) : (
-                  props.diagnosis.map((data) => (
-                    <Badges key={data.label} data={data.value} />
-                  ))
+                  <div className="w-full flex flex-row items-center gap-2">
+                    {diagnosis.length == 0 ? (
+                      <Badges data={"Não identificado"} />
+                    ) : (
+                      diagnosis.map((data) => (
+                        <Badges key={data.label} data={data.value} />
+                      ))
+                    )}
+                  </div>
                 )}
-              </div>
+              </Collapsible.Root>
             </div>
-            <div className="w-full flex items-center flex-col">
-              <span className="whitespace-nowrap w-full text-lg font-semibold text-brand-standard-black mb-2">
+            <div className="w-full flex items-center flex-col gap-2">
+              <span className="whitespace-nowrap w-full text-lg font-semibold text-brand-standard-black">
                 Exames:
               </span>
               <div className="w-full flex items-center flex-row gap-2">
-                {props.exams.map((data) =>
+                {exams.map((data) =>
                   !data ? (
                     <Badges data={"Não registrado"} />
                   ) : (
-                    <Badges key={props.id} data={data} />
+                    <Badges key={id} data={data} />
                   )
                 )}
               </div>
