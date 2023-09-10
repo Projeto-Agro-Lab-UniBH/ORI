@@ -21,7 +21,8 @@ type PatientCardProps = {
 };
 
 const PatientCard = (props: PatientCardProps) => {
-  const [copyArea, setCopyArea] = useState("");
+  const [open, setOpen] = useState<boolean>(false);
+  const [copyArea, setCopyArea] = useState<string>("");
 
   useEffect(() => {
     setCopyArea(props.id);
@@ -61,21 +62,25 @@ const PatientCard = (props: PatientCardProps) => {
                       className="w-full h-full object-cover"
                     /> 
                     <Avatar.Fallback className="w-16 h-16 flex items-center justify-center border border-gray-200 rounded-full overflow-hidden" delayMs={600}>
-                      <CameraIcon width={16} height={16} color="#e5e7eb" />    
+                      <CameraIcon 
+                        width={16} 
+                        height={16} 
+                        color="#e5e7eb" 
+                      />    
                     </Avatar.Fallback>
                   </Avatar.Root>
                 </div>
                 <div className="w-[158.6px] flex items-center">
                   <div className="w-[158.6px] flex items-center flex-col">
                     <div className="w-[158.6px] flex">
-                      <p className="whitespace-nowrap overflow-hidden text-ellipsis text-xl font-semibold text-brand-standard-black">
+                      <span className="whitespace-nowrap overflow-hidden text-ellipsis text-xl font-semibold text-brand-standard-black">
                         {!props.name ? "Sem nome" : props.name}
-                      </p>
+                      </span>
                     </div>
                     <div className="w-[158.6px] flex">
-                      <p className="whitespace-nowrap overflow-hidden text-ellipsis text-lg font-light text-brand-standard-black">
+                      <span className="whitespace-nowrap overflow-hidden text-ellipsis text-lg font-light text-brand-standard-black">
                         {!props.specie ? props.race : props.specie}
-                      </p>
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -83,8 +88,8 @@ const PatientCard = (props: PatientCardProps) => {
             </div>
           </div>
           <div className="flex gap-10">
-            <div className="w-[256px] flex items-center flex-col">
-              <span className="w-[256px] whitespace-nowrap text-lg font-semibold text-brand-standard-black mb-2">
+            <div className="flex flex-col gap-2">
+              <span className="w-[256px] whitespace-nowrap text-lg font-semibold text-brand-standard-black">
                 Dados do paciente:
               </span>
               <div className="w-full flex items-center flex-row gap-2">
@@ -105,21 +110,21 @@ const PatientCard = (props: PatientCardProps) => {
                 )}
               </div>
             </div>
-            <div className="w-[124px] flex items-center flex-col">
-              <span className="w-[124px] whitespace-nowrap text-lg font-semibold text-brand-standard-black mb-2">
+            <div className="flex flex-col gap-2">
+              <span className="w-[124px] whitespace-nowrap text-lg font-semibold text-brand-standard-black">
                 Prognóstico:
               </span>
-              <div className="w-full flex items-center flex-row gap-2">
-                <Badges
-                  data={!props.prognosis ? "Não registrado" : props.prognosis}
-                />
+              <div className="w-full flex flex-row gap-2">
+                <span className="whitespace-nowrap px-2 py-[2px] rounded text-sm font-normal text-white bg-brand-standard-black border-none">
+                  {!props.prognosis ? "Não registrado" : props.prognosis}
+                </span>
               </div>
             </div>
-            <div className="w-full flex items-center flex-col">
-              <span className="whitespace-nowrap w-full text-lg font-semibold text-brand-standard-black mb-2">
+            <div className="flex items-center flex-col gap-2">
+              <span className="w-full whitespace-nowrap text-lg font-semibold text-brand-standard-black">
                 Diagnóstico / Suspeita Clínica:
               </span>
-              <div className="w-full flex items-center flex-row gap-2">
+              <div className="w-full flex flex-row items-center gap-2">
                 {props.diagnosis.length == 0 ? (
                   <Badges data={"Não identificado"} />
                 ) : (
