@@ -1,22 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { parseCookies } from "nookies";
 import { useRouter } from "next/router";
-import { useEffect, useId } from "react";
 import { GetServerSideProps } from "next";
 import { useAuthContext } from "../../contexts/AuthContext";
 import { useSearchParams } from "next/navigation";
-import Select from "react-select";
+import { SelectSchema } from "../../@types/SelectSchema";
 import RegisterPatientModal from "../../components/Modal/RegisterPatientModal/RegisterPatientModal";
 import PatientCard from "../../components/Cards/PatientCard";
 import Pagination from "../../components/Pagination/Pagination";
 import Header from "../../components/Header/Header";
 import useSearch from "../../hooks/useSearch";
 import PatientCardSkeleton from "../../components/Skeletons/PatientCardSkeleton";
-
-type SelectSchema = {
-  label: string;
-  value: string;
-};
+import SelectFilter from "../../components/SelectFilter";
 
 export default function AppPage() {
   const router = useRouter();
@@ -24,210 +19,120 @@ export default function AppPage() {
   const { user, logOut } = useAuthContext();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchInput, setSearchInput] = useState<string>("");
-  const [selectPrognosis, setSelectPrognosis] = useState<SelectSchema | undefined>(undefined);
-  const [selectPhysicalShape, setSelectPhysicalShape] = useState<SelectSchema | undefined>(undefined);
-  const [selectGender, setSelectGender] = useState<SelectSchema | undefined>(undefined);
+  const [selectPrognosis, setSelectPrognosis] = useState<SelectSchema | null>(null);
+  const [selectPhysicalShape, setSelectPhysicalShape] = useState<SelectSchema | null>(null);
+  const [selectGender, setSelectGender] = useState<SelectSchema | null>(null);
 
   const handleSearchInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchInput(event.target.value);
   };
 
-  const handleSelectPrognosis = async (value: any) => {
-    router.query.prognosis = value
-    router.query.page = '1'
-    setCurrentPage(Number(router.query.page))  
+  const handleSelect = async (field: string, value: any) => {
+    const query = { ...router.query, [field]: value, page: "1" };
+    setCurrentPage(1);
 
     await router.push({
       pathname: router.pathname,
-      query: router.query,
+      query,
     });
 
-    router.reload()
+    router.reload();
   };
-
-  const handleSelectGender = async (value: any) => {
-    router.query.gender = value
-    router.query.page = '1'
-    setCurrentPage(Number(router.query.page))
-
-    await router.push({
-      pathname: router.pathname,
-      query: router.query,
-    });
-
-    router.reload()
-  };
-
-  const handleSelectPhysicalShape = async (value: any) => {
-    router.query.physical_shape = value
-    router.query.page = '1'
-    setCurrentPage(Number(router.query.page))
-
-    await router.push({
-      pathname: router.pathname,
-      query: router.query
-    });
-
-    router.reload()
-  };
-
-  const { data, isLoading } = useSearch({ currentPage: currentPage, router: router });
 
   useEffect(() => {
-    if (searchParams.get('prognosis') != '' && searchParams.has('prognosis') == true) {
-      setSelectPrognosis({
-        value: String(searchParams.get('prognosis')),
-        label: String(searchParams.get('prognosis')), 
-      });
-    } else { setSelectPrognosis(undefined) }
+    const setSelectedValue = (field: string) => {
+      const value = searchParams.get(field);
+      if (value) {
+        const option = { value, label: value };
+        switch (field) {
+          case "prognosis":
+            setSelectPrognosis(option);
+            break;
+          case "physical_shape":
+            setSelectPhysicalShape(option);
+            break;
+          case "gender":
+            setSelectGender(option);
+            break;
+          default:
+            break;
+        }
+      } else {
+        switch (field) {
+          case "prognosis":
+            setSelectPrognosis(null);
+            break;
+          case "physical_shape":
+            setSelectPhysicalShape(null);
+            break;
+          case "gender":
+            setSelectGender(null);
+            break;
+          default:
+            break;
+        }
+      }
+    };
 
-    if (searchParams.get('physical_shape') != '' && searchParams.has('physical_shape') == true) {
-      setSelectPhysicalShape({
-        value: String(searchParams.get('physical_shape')),
-        label: String(searchParams.get('physical_shape')),
-      });
-    } else { setSelectPhysicalShape(undefined) }
-  
-    if (searchParams.get('gender') != '' && searchParams.has('gender') == true) {
-      setSelectGender({
-        value: String(searchParams.get('gender')),
-        label: String(searchParams.get('gender')),
-      });
-    } else { setSelectGender(undefined) }
+    setSelectedValue("prognosis");
+    setSelectedValue("physical_shape");
+    setSelectedValue("gender");
+  }, [
+    searchParams,
+    setSelectPrognosis,
+    setSelectPhysicalShape,
+    setSelectGender,
+  ]);
 
-  }, [searchParams, setSelectPhysicalShape]);
+  const { data, isLoading } = useSearch({ currentPage, router });
 
-  return (  
+  return (
     <div className="w-full flex items-center justify-center my-4">
       <div className="w-[1280px] flex flex-col items-center justify-center gap-6">
         <Header user={user} logOut={logOut} />
         <div className="w-[1280px] h-24 flex items-center flex-col">
           <div className="w-[1280px] h-24 flex items-center gap-3 z-10">
-            <div className="w-[200px] h-24 flex items-center">
-              <Select
-                instanceId={useId()}
-                styles={{
-                  control: (baseStyles, state) => ({
-                    ...baseStyles,
-                    width: 200,
-                    height: 40,
-                    borderColor: state.isFocused ? "#e2e8f0" : "#e2e8f0",
-                    borderRadius: 4,
-                    whiteSpace: "nowrap",
-                    textOverflow: "ellipsis",
-                    fontFamily: "Inter",
-                    fontWeight: 400,
-                    fontSize: "0.875rem",
-                    lineHeight: "1.25rem",
-                  }),
-                }}
-                theme={(theme) => ({
-                  ...theme,
-                  colors: {
-                    ...theme.colors,
-                    primary75: "#cbd5e1",
-                    primary50: "#e2e8f0",
-                    primary25: "#f8fafc",
-                    primary: "#212529",
-                  },
-                })}
-                isClearable
-                isSearchable={false}
-                value={selectPrognosis}
-                placeholder="Filtrar prognóstico"
-                options={[
-                  { value: "Alta", label: "Alta" },
-                  { value: "Aguardando alta médica", label: "Aguardando alta médica" },
-                  { value: "Obscuro", label: "Obscuro" },
-                  { value: "Desfávoravel", label: "Desfávoravel" },
-                  { value: "Reservado", label: "Reservado" },
-                  { value: "Favorável", label: "Favorável" },
-                  { value: "Risco", label: "Risco" },
-                  { value: "Alto risco", label: "Alto risco" },
-                ]}
-                onChange={(option) => handleSelectPrognosis(option?.value)}
-              />
-            </div>
-            <div className="w-[200px] h-24 flex items-center">
-              <Select
-                instanceId={useId()}
-                styles={{
-                  control: (baseStyles, state) => ({
-                    ...baseStyles,
-                    width: 200,
-                    height: 40,
-                    zIndex: 10,
-                    borderColor: state.isFocused ? "#e2e8f0" : "#e2e8f0",
-                    borderRadius: 4,
-                    whiteSpace: "nowrap",
-                    textOverflow: "ellipsis",
-                    fontFamily: "Inter",
-                    fontWeight: 400,
-                    fontSize: "0.875rem",
-                    lineHeight: "1.25rem",
-                  }),
-                }}
-                theme={(theme) => ({
-                  ...theme,
-                  colors: {
-                    ...theme.colors,
-                    primary75: "#cbd5e1",
-                    primary50: "#e2e8f0",
-                    primary25: "#f8fafc",
-                    primary: "#212529",
-                  },
-                })}
-                isClearable
-                isSearchable={false}
-                value={selectPhysicalShape}
-                placeholder="Filtrar porte físico"
-                options={[
-                  { value: "Grande porte", label: "Grande porte" },
-                  { value: "Médio porte", label: "Médio porte" },
-                  { value: "Pequeno porte", label: "Pequeno porte" },
-                ]}
-                onChange={(option) => handleSelectPhysicalShape(option?.value)}
-              />
-            </div>
-            <div className="w-[178px] h-24 flex items-center">
-              <Select
-                instanceId={useId()}
-                styles={{
-                  control: (baseStyles, state) => ({
-                    ...baseStyles,
-                    width: 178,
-                    height: 40,
-                    borderColor: state.isFocused ? "#e2e8f0" : "#e2e8f0",
-                    borderRadius: 4,
-                    whiteSpace: "nowrap",
-                    textOverflow: "ellipsis",
-                    fontFamily: "Inter",
-                    fontWeight: 400,
-                    fontSize: "0.875rem",
-                    lineHeight: "1.25rem",
-                  }),
-                }}
-                theme={(theme) => ({
-                  ...theme,
-                  colors: {
-                    ...theme.colors,
-                    primary75: "#cbd5e1",
-                    primary50: "#e2e8f0",
-                    primary25: "#f8fafc",
-                    primary: "#212529",
-                  },
-                })}
-                isClearable
-                isSearchable={false}
-                value={selectGender}
-                placeholder="Filtrar por gênero"
-                options={[
-                  { value: "Macho", label: "Macho" },
-                  { value: "Fêmea", label: "Fêmea" },
-                ]}
-                onChange={(option) => handleSelectGender(option?.value)}
-              />
-            </div>
+            {/* Select components */}
+            <SelectFilter
+              field="prognosis"
+              value={selectPrognosis}
+              placeholder="Filtrar prognóstico"
+              options={[
+                { value: "Alta", label: "Alta" },
+                { value: "Aguardando alta médica", label: "Aguardando alta médica" },
+                { value: "Obscuro", label: "Obscuro" },
+                { value: "Desfávoravel", label: "Desfávoravel" },
+                { value: "Reservado", label: "Reservado" },
+                { value: "Favorável", label: "Favorável" },
+                { value: "Risco", label: "Risco" },
+                { value: "Alto risco", label: "Alto risco" },
+              ]}
+              onChange={(option) => handleSelect("prognosis", option?.value)}
+            />
+            <SelectFilter
+              field="physical_shape"
+              value={selectPhysicalShape}
+              placeholder="Filtrar porte físico"
+              options={[
+                { value: "Grande porte", label: "Grande porte" },
+                { value: "Médio porte", label: "Médio porte" },
+                { value: "Pequeno porte", label: "Pequeno porte" },
+              ]}
+              onChange={(option) =>
+                handleSelect("physical_shape", option?.value)
+              }
+            />
+            <SelectFilter
+              field="gender"
+              value={selectGender}
+              placeholder="Filtrar por gênero"
+              options={[
+                { value: "Macho", label: "Macho" },
+                { value: "Fêmea", label: "Fêmea" },
+              ]}
+              onChange={(option) => handleSelect("gender", option?.value)}
+            />
+            {/* Search input */}
             <div className="w-full h-24 flex items-center">
               <input
                 type="text"
@@ -238,47 +143,37 @@ export default function AppPage() {
                 onChange={handleSearchInput}
               />
             </div>
-            <div className="w-24">
+            {/* Search button */}
+            <div className="w-24 h-24 flex items-center">
               <button className="w-24 h-10 bg-brand-standard-black rounded font-medium text-white hover:border hover:bg-white hover:border-[#b3b3b3] hover:text-brand-standard-black">
                 Buscar
               </button>
             </div>
+            {/* RegisterPatientModal component */}
             <div className="w-10 h-24 flex items-center">
               <RegisterPatientModal />
             </div>
           </div>
         </div>
         <div className="w-[1280px] flex flex-col gap-6">
+          {/* Patient cards */}
           <div className="w-[1280px] flex flex-col gap-6">
             {isLoading ? (
               <>
-                <PatientCardSkeleton />
-                <PatientCardSkeleton />
-                <PatientCardSkeleton />
-                <PatientCardSkeleton />
-                <PatientCardSkeleton />
-                <PatientCardSkeleton />
+                {/* Skeleton loading */}
+                {[1, 2, 3, 4, 5, 6].map((index) => (
+                  <PatientCardSkeleton key={index} />
+                ))}
               </>
             ) : (
+              // Render patient cards
               data?.results.map((data) => (
-                <PatientCard
-                  key={data.id}
-                  id={data.id}
-                  name={data.name}
-                  race={data.race}
-                  specie={data.specie}
-                  profile_photo={data.profile_photo}
-                  prognosis={data.prognosis}
-                  physical_shape={data.physical_shape}
-                  gender={data.gender}
-                  weight={data.weight}
-                  diagnosis={data.diagnosis}
-                  exams={data.exams}
-                />
+                <PatientCard key={data.id} {...data} />
               ))
             )}
           </div>
-          {isLoading ? null : Number(data?.info.length) < 6 ? null : (
+          {/* Pagination */}
+          {!isLoading && data?.info && data.info.length >= 6 && (
             <div className="w-[1280px] h-12 flex items-center justify-center">
               {data?.info && (
                 <Pagination
