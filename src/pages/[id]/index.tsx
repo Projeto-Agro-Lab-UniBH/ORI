@@ -71,7 +71,7 @@ export default function AppPage() {
     router.reload()
   };
 
-  const { data, isLoading } = useSearch({ currentPage: currentPage, router: router});
+  const { data, isLoading } = useSearch({ currentPage: currentPage, router: router });
 
   useEffect(() => {
     if (searchParams.get('prognosis') != '' && searchParams.has('prognosis') == true) {
@@ -273,7 +273,7 @@ export default function AppPage() {
                   gender={data.gender}
                   weight={data.weight}
                   diagnosis={data.diagnosis}
-                  exams={["Hemograma"]}
+                  exams={data.exams}
                 />
               ))
             )}

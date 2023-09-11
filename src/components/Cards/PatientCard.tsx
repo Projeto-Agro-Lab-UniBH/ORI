@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Option } from "../../interfaces/Option";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { CopyIcon, CameraIcon, PlusIcon, DashIcon } from "@radix-ui/react-icons";
+import { Exams } from "../../@types/exams";
 
 type PatientCardProps = {
   id: string;
@@ -18,7 +19,7 @@ type PatientCardProps = {
   prognosis: string;
   diagnosis: Option[];
   physical_shape: string;
-  exams: Array<string>;
+  exams: Exams[];
 };
 
 const PatientCard: React.FC<PatientCardProps> = ({
@@ -34,8 +35,13 @@ const PatientCard: React.FC<PatientCardProps> = ({
   physical_shape,
   exams,
 }) => {
-  const [open, setOpen] = useState<boolean>(false);
+  const [openMoreDiagnosis, setOpenMoreDiagnosis] = useState<boolean>(false);
+  const [openMoreExams, setOpenMoreExams] = useState<boolean>(false);
   const [copyArea, setCopyArea] = useState<string>("");
+
+  const uniqueExams: Exams[] = exams.filter((exam, index, self) =>
+    index === self.findIndex((e) => e.type_of_exam === exam.type_of_exam)
+  );
 
   useEffect(() => {
     setCopyArea(id);
@@ -99,7 +105,7 @@ const PatientCard: React.FC<PatientCardProps> = ({
               </PatientProfileRecordModal>
             </div>
           </div>
-          <div className="flex gap-10">
+          <div className="flex gap-9">
             <div className="flex flex-col gap-2">
               <span className="w-[256px] whitespace-nowrap text-lg font-semibold text-brand-standard-black">
                 Dados do paciente:
@@ -123,7 +129,7 @@ const PatientCard: React.FC<PatientCardProps> = ({
               </div>
             </div>
             <div className="flex flex-col gap-2">
-              <span className="w-[124px] whitespace-nowrap text-lg font-semibold text-brand-standard-black">
+              <span className="whitespace-nowrap text-lg font-semibold text-brand-standard-black">
                 Prognóstico:
               </span>
               <div className="w-full flex flex-row gap-2">
@@ -139,9 +145,9 @@ const PatientCard: React.FC<PatientCardProps> = ({
                 Diagnóstico / Suspeita Clínica:
               </span>
               <Collapsible.Root
+                open={openMoreDiagnosis}
+                onOpenChange={setOpenMoreDiagnosis}
                 className="w-full flex flex-row items-center"
-                open={open}
-                onOpenChange={setOpen}
               >
                 {diagnosis.length >= 4 ? (
                   <div className="w-full flex flex-row items-center gap-2">
@@ -161,7 +167,7 @@ const PatientCard: React.FC<PatientCardProps> = ({
                     </Collapsible.Content>
                     <Collapsible.Trigger asChild>
                       <button className="w-6 h-6 flex items-center justify-center hover:border hover:rounded hover:border-gray-200 cursor-pointer">
-                        {open ? (
+                        {openMoreDiagnosis ? (
                           <DashIcon color="#212529" width={15} height={15} />
                         ) : (
                           <PlusIcon color="#212529" width={15} height={15} />
@@ -186,15 +192,53 @@ const PatientCard: React.FC<PatientCardProps> = ({
               <span className="whitespace-nowrap w-full text-lg font-semibold text-brand-standard-black">
                 Exames:
               </span>
-              <div className="w-full flex items-center flex-row gap-2">
-                {exams.map((data) =>
-                  !data ? (
-                    <Badges data={"Não registrado"} />
-                  ) : (
-                    <Badges key={id} data={data} />
-                  )
+              <Collapsible.Root
+                open={openMoreExams}
+                onOpenChange={setOpenMoreExams}
+                className="w-full flex flex-row items-center"
+              >
+                {exams.length >= 2 ? (
+                  <div className="w-full flex flex-row items-center gap-2">
+                    {exams.map((data, index) => {
+                      if (index == 0) {
+                        return (
+                          <Badges key={data.id} data={data.type_of_exam} />
+                        );
+                      }
+                      return null;
+                    })}
+                    <Collapsible.Content className="flex flex-row items-center gap-2">
+                      {exams.map((data, index) => {
+                        if (index >= 0) {
+                          return (
+                            <Badges key={data.id} data={data.type_of_exam} />
+                          );
+                        }
+                        return null;
+                      })}
+                    </Collapsible.Content>
+                    <Collapsible.Trigger asChild>
+                      <button className="w-6 h-6 flex items-center justify-center hover:border hover:rounded hover:border-gray-200 cursor-pointer">
+                        {openMoreDiagnosis ? (
+                          <DashIcon color="#212529" width={15} height={15} />
+                        ) : (
+                          <PlusIcon color="#212529" width={15} height={15} />
+                        )}
+                      </button>
+                    </Collapsible.Trigger>
+                  </div>
+                ) : (
+                  <div className="w-full flex flex-row items-center gap-2">
+                    {exams.length == 0 ? (
+                      <Badges data={"Não cadastrado"} />
+                    ) : (
+                      uniqueExams.map((data) => (
+                        <Badges key={data.id} data={data.type_of_exam} />
+                      ))
+                    )}
+                  </div>
                 )}
-              </div>
+              </Collapsible.Root>
             </div>
           </div>
         </div>

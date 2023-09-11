@@ -3,6 +3,7 @@ import { api } from "../providers/Api";
 import { Page } from "../@types/page";
 import { Option } from "../interfaces/Option";
 import { NextRouter } from "next/router";
+import { Exams } from "../@types/exams";
 
 type PatientCardResponse = {
   id: string;
@@ -16,6 +17,7 @@ type PatientCardResponse = {
   prognosis: string;
   diagnosis: Option[];
   physical_shape: string;
+  exams: Exams[];
 };
 
 export default function useSearch(param: {currentPage: number, router: NextRouter}) {
