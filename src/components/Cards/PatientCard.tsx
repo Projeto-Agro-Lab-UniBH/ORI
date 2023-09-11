@@ -37,15 +37,23 @@ const PatientCard: React.FC<PatientCardProps> = ({
 }) => {
   const [openMoreDiagnosis, setOpenMoreDiagnosis] = useState<boolean>(false);
   const [openMoreExams, setOpenMoreExams] = useState<boolean>(false);
-  const [copyArea, setCopyArea] = useState<string>("");
+  const [copyArea, setCopyArea] = useState<string>(id);
+
+  useEffect(() => {
+    setCopyArea(id);
+  }, [id]);
 
   const uniqueExams: Exams[] = exams.filter((exam, index, self) =>
     index === self.findIndex((e) => e.type_of_exam === exam.type_of_exam)
   );
 
-  useEffect(() => {
-    setCopyArea(id);
-  }, [id]);
+  const renderBadges = (data: string | undefined, defaultValue: string) => (
+    <Badges data={data ?? defaultValue} />
+  );
+
+  const renderExams = (exam: Exams) => (
+    <Badges key={exam.id} data={exam.type_of_exam} />
+  );
 
   return (
     <div className="w-[1280px] h-[104px] px-4 py-2 flex items-center bg-white border border-gray-200 rounded-lg">
@@ -111,21 +119,9 @@ const PatientCard: React.FC<PatientCardProps> = ({
                 Dados do paciente:
               </span>
               <div className="w-full flex items-center flex-row gap-2">
-                {!gender ? (
-                  <Badges data={"Não registrado"} />
-                ) : (
-                  <Badges data={gender} />
-                )}
-                {!physical_shape ? (
-                  <Badges data={"Não registrado"} />
-                ) : (
-                  <Badges data={physical_shape} />
-                )}
-                {!weight ? (
-                  <Badges data={"Não registrado"} />
-                ) : (
-                  <Badges data={weight} />
-                )}
+                {renderBadges(gender, "Não registrado")}
+                {renderBadges(physical_shape, "Não registrado")}
+                {renderBadges(weight, "Não registrado")}
               </div>
             </div>
             <div className="flex flex-col gap-2">
@@ -133,11 +129,7 @@ const PatientCard: React.FC<PatientCardProps> = ({
                 Prognóstico:
               </span>
               <div className="w-full flex flex-row gap-2">
-                {!prognosis ? (
-                  <Badges data={"Não registrado"} />
-                ) : (
-                  <Badges data={prognosis} />
-                )}
+                {renderBadges(prognosis, "Não registrado")}
               </div>
             </div>
             <div className="flex items-center flex-col gap-2">
@@ -151,19 +143,9 @@ const PatientCard: React.FC<PatientCardProps> = ({
               >
                 {diagnosis.length >= 4 ? (
                   <div className="w-full flex flex-row items-center gap-2">
-                    {diagnosis.map((data, index) => {
-                      if (index <= 2) {
-                        return <Badges key={data.label} data={data.value} />;
-                      }
-                      return null;
-                    })}
+                    {diagnosis.slice(0, 3).map((data) => renderBadges(data.value, ""))}
                     <Collapsible.Content className="flex flex-row items-center gap-2">
-                      {diagnosis.map((data, index) => {
-                        if (index >= 3) {
-                          return <Badges key={data.label} data={data.value} />;
-                        }
-                        return null;
-                      })}
+                      {diagnosis.slice(3).map((data) => renderBadges(data.value, ""))}
                     </Collapsible.Content>
                     <Collapsible.Trigger asChild>
                       <button className="w-6 h-6 flex items-center justify-center hover:border hover:rounded hover:border-gray-200 cursor-pointer">
@@ -177,12 +159,10 @@ const PatientCard: React.FC<PatientCardProps> = ({
                   </div>
                 ) : (
                   <div className="w-full flex flex-row items-center gap-2">
-                    {diagnosis.length == 0 ? (
+                    {diagnosis.length === 0 ? (
                       <Badges data={"Não identificado"} />
                     ) : (
-                      diagnosis.map((data) => (
-                        <Badges key={data.label} data={data.value} />
-                      ))
+                      diagnosis.map((data) => renderBadges(data.value, ""))
                     )}
                   </div>
                 )}
@@ -199,27 +179,13 @@ const PatientCard: React.FC<PatientCardProps> = ({
               >
                 {exams.length >= 2 ? (
                   <div className="w-full flex flex-row items-center gap-2">
-                    {exams.map((data, index) => {
-                      if (index == 0) {
-                        return (
-                          <Badges key={data.id} data={data.type_of_exam} />
-                        );
-                      }
-                      return null;
-                    })}
+                    {exams.slice(0, 1).map(renderExams)}
                     <Collapsible.Content className="flex flex-row items-center gap-2">
-                      {exams.map((data, index) => {
-                        if (index >= 0) {
-                          return (
-                            <Badges key={data.id} data={data.type_of_exam} />
-                          );
-                        }
-                        return null;
-                      })}
+                      {exams.slice(1).map(renderExams)}
                     </Collapsible.Content>
                     <Collapsible.Trigger asChild>
                       <button className="w-6 h-6 flex items-center justify-center hover:border hover:rounded hover:border-gray-200 cursor-pointer">
-                        {openMoreDiagnosis ? (
+                        {openMoreExams ? (
                           <DashIcon color="#212529" width={15} height={15} />
                         ) : (
                           <PlusIcon color="#212529" width={15} height={15} />
@@ -229,12 +195,10 @@ const PatientCard: React.FC<PatientCardProps> = ({
                   </div>
                 ) : (
                   <div className="w-full flex flex-row items-center gap-2">
-                    {exams.length == 0 ? (
+                    {exams.length === 0 ? (
                       <Badges data={"Não cadastrado"} />
                     ) : (
-                      uniqueExams.map((data) => (
-                        <Badges key={data.id} data={data.type_of_exam} />
-                      ))
+                      uniqueExams.map(renderExams)
                     )}
                   </div>
                 )}
