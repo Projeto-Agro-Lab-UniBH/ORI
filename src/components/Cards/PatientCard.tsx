@@ -1,6 +1,6 @@
 import * as Avatar from "@radix-ui/react-avatar";
 import * as Collapsible from '@radix-ui/react-collapsible';
-import PatientProfileRecordModal from "../Modal/PatientProfileRecordModal/PatientProfileRecordModal";
+import PatientProfileRecordModal from "../Modal/PatientProfileRecordModal";
 import { Badges } from "../Badges/Badges";
 import { useEffect, useState } from "react";
 import { Option } from "../../interfaces/Option";
@@ -82,31 +82,33 @@ const PatientCard: React.FC<PatientCardProps> = ({
             </div>
             <div className="w-[238.6px] h-full flex items-center">
               <PatientProfileRecordModal patientId={id}>
-                <div className="w-16 h-16 flex items-center">
-                  <Avatar.Root className="w-16 h-16 flex items-center justify-center rounded-full overflow-hidden">
-                    <Avatar.Image
-                      src={profile_photo}
-                      className="w-full h-full object-cover"
-                    />
-                    <Avatar.Fallback
-                      className="w-16 h-16 flex items-center justify-center border border-gray-200 rounded-full overflow-hidden"
-                      delayMs={600}
-                    >
-                      <CameraIcon width={16} height={16} color="#e5e7eb" />
-                    </Avatar.Fallback>
-                  </Avatar.Root>
-                </div>
-                <div className="w-[158.6px] flex items-center">
-                  <div className="w-[158.6px] flex items-center flex-col">
-                    <div className="w-[158.6px] flex">
-                      <span className="whitespace-nowrap overflow-hidden text-ellipsis text-xl font-semibold text-brand-standard-black">
-                        {!name ? "Sem nome" : name}
-                      </span>
-                    </div>
-                    <div className="w-[158.6px] flex">
-                      <span className="whitespace-nowrap overflow-hidden text-ellipsis text-lg font-light text-brand-standard-black">
-                        {!specie ? race : specie}
-                      </span>
+                <div className="w-full flex items-center gap-4">
+                  <div className="w-16 h-16 flex items-center">
+                    <Avatar.Root className="w-16 h-16 flex items-center justify-center rounded-full overflow-hidden">
+                      <Avatar.Image
+                        src={profile_photo}
+                        className="w-full h-full object-cover"
+                      />
+                      <Avatar.Fallback
+                        className="w-16 h-16 flex items-center justify-center border border-gray-200 rounded-full overflow-hidden"
+                        delayMs={600}
+                      >
+                        <CameraIcon width={16} height={16} color="#e5e7eb" />
+                      </Avatar.Fallback>
+                    </Avatar.Root>
+                  </div>
+                  <div className="w-[158.6px] flex items-center">
+                    <div className="w-[158.6px] flex items-center flex-col">
+                      <div className="w-[158.6px] flex">
+                        <span className="whitespace-nowrap overflow-hidden text-ellipsis text-xl font-semibold text-brand-standard-black">
+                          {!name ? "Sem nome" : name}
+                        </span>
+                      </div>
+                      <div className="w-[158.6px] flex">
+                        <span className="whitespace-nowrap overflow-hidden text-ellipsis text-lg font-light text-brand-standard-black">
+                          {!specie ? race : specie}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -119,9 +121,9 @@ const PatientCard: React.FC<PatientCardProps> = ({
                 Dados do paciente:
               </span>
               <div className="w-full flex items-center flex-row gap-2">
-                {renderBadges(gender, "Não registrado")}
-                {renderBadges(physical_shape, "Não registrado")}
-                {renderBadges(weight, "Não registrado")}
+                {renderBadges(gender, "Não cadastrado")}
+                {renderBadges(physical_shape, "Não cadastrado")}
+                {renderBadges(weight, "Não cadastrado")}
               </div>
             </div>
             <div className="flex flex-col gap-2">
@@ -129,7 +131,7 @@ const PatientCard: React.FC<PatientCardProps> = ({
                 Prognóstico:
               </span>
               <div className="w-full flex flex-row gap-2">
-                {renderBadges(prognosis, "Não registrado")}
+                {renderBadges(prognosis, "Não cadastrado")}
               </div>
             </div>
             <div className="flex items-center flex-col gap-2">
@@ -160,7 +162,7 @@ const PatientCard: React.FC<PatientCardProps> = ({
                 ) : (
                   <div className="w-full flex flex-row items-center gap-2">
                     {diagnosis.length === 0 ? (
-                      <Badges data={"Não identificado"} />
+                      <Badges data={"Não cadastrado"} />
                     ) : (
                       diagnosis.map((data) => renderBadges(data.value, ""))
                     )}
