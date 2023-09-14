@@ -3,10 +3,10 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { useEffect, useState } from "react";
 import { Document, Page } from 'react-pdf'; 
 import { DownloadIcon, ExclamationTriangleIcon, TrashIcon } from '@radix-ui/react-icons';
-import { formatFileSize } from "../../functions/formatBytes";
+import { formatFileSize } from "../../../functions/formatBytes";
 import { useMutation } from "react-query";
-import { queryClient } from "../../providers/QueryClient";
-import { api } from "../../providers/Api";
+import { queryClient } from "../../../providers/QueryClient";
+import { api } from "../../../providers/Api";
 
 type FileCardProps = {
   id: string;
