@@ -8,6 +8,8 @@ import { CopyToClipboard } from "react-copy-to-clipboard";
 import { CopyIcon, CameraIcon, PlusIcon, DashIcon } from "@radix-ui/react-icons";
 import { Exams } from "../../../@types/exams";
 
+import styles from './styles.module.css';
+
 type PatientCardProps = {
   id: string;
   profile_photo?: string;
@@ -58,7 +60,7 @@ const PatientCard: React.FC<PatientCardProps> = ({
   return (
     <div className="w-[1280px] h-[104px] px-4 py-2 flex items-center bg-white border border-gray-200 rounded-lg">
       <div
-        id="animal-patient-card-scroll"
+        id={styles.patientCardScroll}
         className="w-full flex items-center border-none rounded-lg overflow-x-scroll"
       >
         <div className="h-20 flex items-center p-2 gap-[24px]">

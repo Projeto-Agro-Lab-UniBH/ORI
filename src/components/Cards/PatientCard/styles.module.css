@@ -1,0 +1,16 @@
+/* Vertical scroll of patient cards */
+
+#patientCardScroll::-webkit-scrollbar {
+  height: 6px;
+  border-top-right-radius: 4px;
+  border-top-left-radius: 4px;
+}
+
+#patientCardScroll::-webkit-scrollbar-thumb {
+  background-color: none;
+  border-radius: 50px;
+}
+
+#patientCardScroll::-webkit-scrollbar-thumb:hover {
+  background-color: #ced4da;
+}
