@@ -1,19 +1,21 @@
 import Image from "next/image";
-import Load from "../../Load/Load";
-import WarningToDeleteExamModal from "../WarningToDeleteExamModal/WarningToDeleteExamModal";
-import * as Dialog from "@radix-ui/react-dialog";
-import { Document, Page } from "react-pdf";
-import { Cross1Icon, DownloadIcon, Pencil2Icon, TrashIcon } from "@radix-ui/react-icons";
-import { ChangeEvent, useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { queryClient } from "../../../providers/QueryClient";
+import SpinnerLoad from "../../Load/SpinnerLoad";
+import Select from "react-select";
 import { api } from "../../../providers/Api";
-import { useMutation, useQuery } from "react-query";
-import { formatFileSize } from "../../../functions/formatBytes";
 import { z } from "zod";
+import { Document, Page } from "react-pdf";
+import { formatFileSize } from "../../../functions/formatBytes";
+import { queryClient } from "../../../providers/QueryClient";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ChangeEvent, Dispatch, SetStateAction, useEffect, useState } from "react";
+import { useController, useForm } from "react-hook-form";
+import { Cross1Icon, DownloadIcon, ExclamationTriangleIcon, Pencil2Icon, TrashIcon } from "@radix-ui/react-icons";
+import { useMutation, useQuery } from "react-query";
+import * as Dialog from "@radix-ui/react-dialog";
 
-type EditPatientExamModalProps = {
+import styles from '../styles.module.css';
+
+type EditPatientReportModalProps = {
   id: string;
   patientId: string;
 };
@@ -22,7 +24,7 @@ type UploadFileResponse = {
   fileUrl: string;
 };
 
-type ExamData = {
+type ReportData = {
   id: string;
   filename: string;
   fileUrl: string;
@@ -31,13 +33,12 @@ type ExamData = {
   updatedAt: string;
 };
 
-type ExamResponse = {
+type ReportResponse = {
   id: string;
   patientId: string;
-  date: string;
+  shift: string;
   author: string;
-  type_of_exam: string;
-  annotations: string;
+  report_text: string;
   filename: string;
   fileUrl: string;
   fileSize: number;
@@ -45,12 +46,17 @@ type ExamResponse = {
   updatedAt: string;
 };
 
-const editExamFormSchema = z.object({
-  date: z.string().nonempty("Selecione a data de realização do exame."),
-  type_of_exam: z.string().nonempty("O exame precisa ter um nome."),
+const turnOptions = [
+  { label: "Matutino", value: "Matutino" },
+  { label: "Diurno", value: "Diurno" },
+  { label: "Noturno", value: "Noturno" },
+];
+
+const editReportFormSchema = z.object({
+  shift: z.any(),
   author: z
     .string()
-    .nonempty("Preencha o nome completo do responsável pelo exame.")
+    .nonempty("Preencha o seu nome completo.")
     .transform((name) => {
       return name
         .trim()
@@ -60,23 +66,25 @@ const editExamFormSchema = z.object({
         })
         .join(" ");
     }),
-  annotations: z.string().optional(),
+  title: z.string().nonempty("O relatório precisa ter um título."),
+  report_text: z.string().optional(),
 });
 
-type editExamFormData = z.infer<typeof editExamFormSchema>;
+type editReportFormData = z.infer<typeof editReportFormSchema>;
 
-const EditPatientExamModal: React.FC<EditPatientExamModalProps> = ({ id, patientId }) => {
+const EditPatientReportModal: React.FC<EditPatientReportModalProps> = ({ id, patientId }) => {
   const {
     reset,
     register,
+    control,
     handleSubmit,
     formState: { errors },
-  } = useForm<editExamFormData>({
-    resolver: zodResolver(editExamFormSchema),
+  } = useForm<editReportFormData>({
+    resolver: zodResolver(editReportFormSchema),
   });
 
   const [open, setOpen] = useState<boolean>(false);
-  const [data, setData] = useState<ExamData>({} as ExamData);
+  const [data, setData] = useState<ReportData>({} as ReportData);
   const [callRequest, setCallRequest] = useState<boolean>(false);
   const [numPages, setNumPages] = useState<number | undefined>(undefined);
   const [download, setDownload] = useState<any>({} as any);
@@ -88,20 +96,27 @@ const EditPatientExamModal: React.FC<EditPatientExamModalProps> = ({ id, patient
   const [attachment, setAttachment] = useState<File | undefined>();
   const [isRemovingRecord, setIsRemovingRecord] = useState<boolean>(false);
 
+  const { field: selectShift } = useController({ name: "shift", control });
+  const {
+    value: selectShiftValue,
+    onChange: selectShiftOnChange,
+    ...restSelectShift
+  } = selectShift;
+
   const { isLoading } = useQuery({
-    queryKey: ["get-exam-by-id"],
+    queryKey: ["get-report-by-id"],
     queryFn: async () => {
-      await api.get<ExamResponse>(`/exams/${id}`).then((res) => {
+      await api.get<ReportResponse>(`/reports/${id}`).then((res) => {
         reset(res.data);
         setData(res.data);
       });
     },
     enabled: callRequest,
-  })
+  });
 
   const { isLoading: savingChanges, mutate } = useMutation({
-    mutationKey: ["update-patient-exam"],
-    mutationFn: async (data: editExamFormData) => {
+    mutationKey: ["update-patient-report"],
+    mutationFn: async (data: editReportFormData) => {
       if (attachedFile != undefined && fecthedAttachment === "") {
         const formData = new FormData();
         formData.append("file", attachedFile);
@@ -111,7 +126,7 @@ const EditPatientExamModal: React.FC<EditPatientExamModalProps> = ({ id, patient
           formData
         );
 
-        await api.patch<ExamResponse>(`/exams/${id}`, {
+        await api.patch<ReportResponse>(`/reports/${id}`, {
           ...data,
           filename: filename,
           fileUrl: upload.data.fileUrl,
@@ -119,12 +134,12 @@ const EditPatientExamModal: React.FC<EditPatientExamModalProps> = ({ id, patient
         });
       }
       if (fecthedAttachment != "" && attachedFile === undefined) {
-        await api.patch<ExamResponse>(`/exams/${id}`, {
+        await api.patch<ReportResponse>(`/reports/${id}`, {
           ...data,
         });
       }
       if (fecthedAttachment === "" && attachedFile === undefined) {
-        await api.patch<ExamResponse>(`/exams/${id}`, {
+        await api.patch<ReportResponse>(`/reports/${id}`, {
           ...data,
           filename: "",
           fileUrl: "",
@@ -133,7 +148,7 @@ const EditPatientExamModal: React.FC<EditPatientExamModalProps> = ({ id, patient
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["list-all-exams"] });
+      queryClient.invalidateQueries({ queryKey: ["list-all-reports"] });
       if (savingChanges != true) {
         setOpen(false);
       }
@@ -211,7 +226,7 @@ const EditPatientExamModal: React.FC<EditPatientExamModalProps> = ({ id, patient
     setNumPages(numPages);
   };
 
-  const send = (data: editExamFormData) => {
+  const send = (data: editReportFormData) => {
     const request = {
       ...data,
     };
@@ -230,7 +245,7 @@ const EditPatientExamModal: React.FC<EditPatientExamModalProps> = ({ id, patient
         <Dialog.Content className="w-[608px] rounded-lg border border-gray-200 bg-white fixed overflow-hidden pt-4 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
           <div className="w-full px-6 pb-4 border-b-[1px] border-gray-200 flex items-center flex-row justify-between">
             <Dialog.Title className="font-semibold text-2xl">
-              Editar exame
+              Editar relatório
             </Dialog.Title>
             <Dialog.Close className="w-[32px] h-[32px] flex justify-center items-center">
               <Cross1Icon width={24} height={24} />
@@ -239,7 +254,7 @@ const EditPatientExamModal: React.FC<EditPatientExamModalProps> = ({ id, patient
           {isLoading && (
             <div className="w-full h-full absolute z-20">
               <div className="w-full h-full bg-[#f9fafb8b]">
-                <Load
+                <SpinnerLoad
                   divProps={{
                     className:
                       "w-full h-[488px] relative flex items-center justify-center bg-gray-500-50",
@@ -251,10 +266,10 @@ const EditPatientExamModal: React.FC<EditPatientExamModalProps> = ({ id, patient
           {savingChanges && (
             <div className="w-full h-full absolute z-20">
               <div className="w-full h-full bg-[#f9fafb8b]">
-                <Load
+                <SpinnerLoad
                   divProps={{
                     className:
-                      "w-full h-full relative flex items-center justify-center bg-gray-500-50",
+                      "w-full h-[488px] relative flex items-center justify-center bg-gray-500-50",
                   }}
                 />
               </div>
@@ -263,7 +278,7 @@ const EditPatientExamModal: React.FC<EditPatientExamModalProps> = ({ id, patient
           {isRemovingRecord && (
             <div className="w-full h-full absolute z-20">
               <div className="w-full h-full bg-[#f9fafb8b]">
-                <Load
+                <SpinnerLoad
                   divProps={{
                     className:
                       "w-full h-[488px] relative flex items-center justify-center bg-gray-500-50",
@@ -273,7 +288,7 @@ const EditPatientExamModal: React.FC<EditPatientExamModalProps> = ({ id, patient
             </div>
           )}
           <div
-            id="modal-scroll"
+            id={styles.modalScroll}
             className="w-full h-[402px] px-6 py-6 overflow-y-scroll"
           >
             <form
@@ -281,57 +296,58 @@ const EditPatientExamModal: React.FC<EditPatientExamModalProps> = ({ id, patient
               className="w-full flex flex-col h-360 gap-6"
             >
               <div className="w-full flex flex-col gap-6">
-                <div className="w-[324px] flex flex-col gap-2">
-                  <div className="w-[176px] flex flex-col gap-3">
+                <div className="w-full flex flex-row gap-3">
+                  <div className="w-[184px] flex flex-col gap-3">
                     <label
-                      htmlFor="date"
+                      htmlFor="shift"
                       className="w-full text-sm font-normal text-brand-standard-black"
                     >
-                      Data de realização
+                      Turno
                     </label>
-                    <input
-                      type="date"
-                      className={
-                        errors.date
-                          ? "w-[176px] h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
-                          : "w-[176px] h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                    <Select
+                      styles={{
+                        control: (baseStyles, state) => ({
+                          ...baseStyles,
+                          width: 184,
+                          height: 40,
+                          borderColor: state.isFocused ? "#e2e8f0" : "#e2e8f0",
+                          whiteSpace: "nowrap",
+                          textOverflow: "ellipsis",
+                          fontFamily: "Inter",
+                          fontWeight: 400,
+                          fontSize: "0.875rem",
+                          lineHeight: "1.25rem",
+                        }),
+                      }}
+                      theme={(theme) => ({
+                        ...theme,
+                        borderRadius: 4,
+                        colors: {
+                          ...theme.colors,
+                          primary75: "#cbd5e1",
+                          primary50: "##e2e8f0",
+                          primary25: "#f8fafc",
+                          primary: "#212529",
+                        },
+                      })}
+                      placeholder="Selecione o turno"
+                      isSearchable={false}
+                      options={turnOptions}
+                      value={
+                        selectShiftValue
+                          ? turnOptions.find(
+                              (x) => x.value === selectShiftValue
+                            )
+                          : selectShiftValue
                       }
-                      {...register("date")}
+                      onChange={(option) =>
+                        selectShiftOnChange(option ? option.value : option)
+                      }
+                      {...restSelectShift}
                     />
                   </div>
-                  {errors.date && (
-                    <span className="text-xs font-normal text-red-500">
-                      {errors.date.message}
-                    </span>
-                  )}
-                </div>
-                <div className="w-full flex flex-row gap-3">
-                  <div className="w-[224px] flex flex-col gap-2">
-                    <div className="w-[224px] flex flex-col gap-3">
-                      <label
-                        htmlFor="type_of_exam"
-                        className="w-full text-sm font-normal text-brand-standard-black"
-                      >
-                        Tipo de exame
-                      </label>
-                      <input
-                        type="text"
-                        className={
-                          errors.type_of_exam
-                            ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
-                            : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                        }
-                        {...register("type_of_exam")}
-                      />
-                    </div>
-                    {errors.type_of_exam && (
-                      <span className="text-xs font-normal text-red-500">
-                        {errors.type_of_exam.message}
-                      </span>
-                    )}
-                  </div>
-                  <div className="w-[316.8px] flex flex-col gap-2">
-                    <div className="w-[316.8px] flex flex-col gap-3">
+                  <div className="w-full flex flex-col gap-2">
+                    <div className="w-full flex flex-col gap-3">
                       <label
                         htmlFor="author"
                         className="w-full text-sm font-normal text-brand-standard-black"
@@ -355,19 +371,43 @@ const EditPatientExamModal: React.FC<EditPatientExamModalProps> = ({ id, patient
                     )}
                   </div>
                 </div>
+                <div className="w-full flex flex-col gap-2">
+                  <div className="w-full flex flex-col gap-3">
+                    <label
+                      htmlFor="author"
+                      className="w-full text-sm font-normal text-brand-standard-black"
+                    >
+                      Título
+                    </label>
+                    <input
+                      type="text"
+                      className={
+                        errors.title
+                          ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                          : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                      }
+                      {...register("title")}
+                    />
+                  </div>
+                  {errors.title && (
+                    <span className="text-xs font-normal text-red-500">
+                      {errors.title.message}
+                    </span>
+                  )}
+                </div>
                 <div className="w-full flex flex-col gap-3">
                   <label
-                    htmlFor="annotations"
+                    htmlFor="report_text"
                     className="w-full text-sm font-normal text-brand-standard-black"
                   >
-                    Anotações
+                    Descrição / Relatório
                   </label>
                   <div>
                     <textarea
                       cols={30}
-                      rows={6}
+                      rows={10}
                       className="w-full px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                      {...register("annotations")}
+                      {...register("report_text")}
                     ></textarea>
                   </div>
                 </div>
@@ -513,12 +553,12 @@ const EditPatientExamModal: React.FC<EditPatientExamModalProps> = ({ id, patient
                     </div>
                   )}
                   <div className="w-full h-10 flex justify-end gap-2">
-                    <WarningToDeleteExamModal
+                    <WarningToDeleteReportModal
                       id={id}
                       modalIsOpen={setOpen}
                       setLoading={setIsRemovingRecord}
                     />
-                    <button className="w-[120px] border border-gray-200 rounded font-medium text-base text-brand-standard-black bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500">
+                    <button className="w-[152px] h-10 border border-gray-200 rounded font-medium text-base text-brand-standard-black bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500">
                       Salvar alterações
                     </button>
                   </div>
@@ -532,4 +572,73 @@ const EditPatientExamModal: React.FC<EditPatientExamModalProps> = ({ id, patient
   );
 };
 
-export default EditPatientExamModal;
+export default EditPatientReportModal;
+
+type WarningToDeleteReportModalProps = {
+  id: string;
+  setLoading: Dispatch<SetStateAction<boolean>>;
+  modalIsOpen: Dispatch<SetStateAction<boolean>>;
+};
+
+const WarningToDeleteReportModal: React.FC<WarningToDeleteReportModalProps> = ({ id, modalIsOpen, setLoading }) => {
+  const [open, setOpen] = useState<boolean>(false);
+
+  const { isLoading, mutate } = useMutation({
+    mutationKey: ["delete-report-by-id"],
+    mutationFn: async () => {
+      await api.delete(`/reports/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["list-all-reports"] });
+      if (isLoading != true) {
+        setOpen(false);
+        modalIsOpen(false);
+      }
+    },
+  });
+
+  useEffect(() => {
+    if (isLoading) {
+      setLoading(isLoading);
+    }
+  }, [setLoading, isLoading]);
+
+  const acceptRemoveFile = (event: any) => {
+    event.preventDefault();
+    mutate();
+    setOpen(false);
+  };
+
+  return (
+    <Dialog.Root onOpenChange={setOpen} open={open}>
+      <Dialog.Trigger className="w-10 flex items-center justify-center border border-gray-200 rounded text-base text-brand-standard-black font-medium bg-white hover:border-red-500">
+        <TrashIcon color="#ef4444" width={20} height={20} />
+      </Dialog.Trigger>
+      <Dialog.Portal>
+        <Dialog.Overlay className="bg-black/60 inset-0 fixed z-20" />
+        <Dialog.Content className="w-[358px] rounded-lg border border-gray-200 fixed z-20 pt-4 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white overflow-hidden">
+          <div className="w-full px-6 pb-4 border-b-[1px] border-gray-200 flex items-center gap-4 flex-row justify-start">
+            <ExclamationTriangleIcon color="#0f172a" width={24} height={24} />
+            <Dialog.Title className="font-semibold text-2xl text-slate-900">
+              Aviso
+            </Dialog.Title>
+          </div>
+          <div className="w-full flex flex-col justify-center text-center gap-4 px-6 pt-6 pb-6">
+            <span>Tem certeza que você quer remover este registro?</span>
+            <div className="flex justify-center gap-6">
+              <Dialog.Close className="w-[124px] px-3 py-[6px] border rounded font-medium text-base text-slate-900 shadow-md hover:shadow-blue-500/50 hover:border-none hover:text-neutral-50 hover: hover:bg-blue-500">
+                Não
+              </Dialog.Close>
+              <button
+                onClick={(e) => acceptRemoveFile(e)}
+                className="w-[124px] px-3 py-[6px] border rounded font-medium text-base text-slate-900 shadow-md hover:shadow-blue-500/50 hover:border-none hover:text-neutral-50 hover: hover:bg-blue-500"
+              >
+                Sim
+              </button>
+            </div>
+          </div>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+};

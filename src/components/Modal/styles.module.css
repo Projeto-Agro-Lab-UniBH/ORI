@@ -1,0 +1,20 @@
+/* Horizontal scroll of modals */
+
+#modalScroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+#modalScroll::-webkit-scrollbar-thumb {
+  background: #e2e8f0;
+}
+
+#modalScroll::-webkit-scrollbar-thumb:hover {
+  background: #ced4da;
+}
+
+/* button tab modal */
+
+#buttonTabModal[data-state="active"] {
+  color: #212529;
+  border-bottom: 2px solid #212529;
+}

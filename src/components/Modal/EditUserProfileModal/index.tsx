@@ -1,6 +1,6 @@
 import * as Avatar from "@radix-ui/react-avatar";
 import * as Dialog from "@radix-ui/react-dialog";
-import Load from "../../Load/Load";
+import SpinnerLoad from "../../Load/SpinnerLoad";
 import { api } from "../../../providers/Api";
 import { useForm } from "react-hook-form";
 import { Cross1Icon } from "@radix-ui/react-icons";
@@ -154,7 +154,7 @@ const EditUserProfileModal: React.FC<EditUserProfileModalProps> = ({ id, childre
           {isLoading && 
             <div className="w-full h-full absolute z-20">
               <div className="w-full h-full bg-[#f9fafb8b]">
-                <Load
+                <SpinnerLoad
                   divProps={{
                     className:
                       "w-full h-[488px] relative flex items-center justify-center bg-gray-500-50",
@@ -166,7 +166,7 @@ const EditUserProfileModal: React.FC<EditUserProfileModalProps> = ({ id, childre
           {updating && 
             <div className="w-full h-full absolute z-20">
               <div className="w-full h-full bg-[#f9fafb8b]">
-                <Load
+                <SpinnerLoad
                   divProps={{
                     className:
                       "w-full h-[488px] relative flex items-center justify-center bg-gray-500-50",

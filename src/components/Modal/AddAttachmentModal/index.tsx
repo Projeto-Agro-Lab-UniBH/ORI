@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Load from "../../Load/Load";
+import SpinnerLoad from "../../Load/SpinnerLoad";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Cross1Icon, TrashIcon, UploadIcon } from "@radix-ui/react-icons";
 import { ChangeEvent, useEffect, useState } from "react";
@@ -121,7 +121,7 @@ const AddAttachmentModal: React.FC<AddAttachmentModalProps> = ({ patientId }) =>
           {isLoading && (
             <div className="w-full h-full absolute z-20">
               <div className="w-full h-full bg-[#f9fafb8b]">
-                <Load
+                <SpinnerLoad
                   divProps={{
                     className:
                       "w-full h-[488px] relative flex items-center justify-center bg-gray-500-50",

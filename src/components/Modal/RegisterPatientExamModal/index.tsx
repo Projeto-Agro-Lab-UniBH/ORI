@@ -1,17 +1,18 @@
 import Image from "next/image";
-import Load from "../../Load/Load";
-import Select from "react-select";
+import SpinnerLoad from "../../Load/SpinnerLoad";
 import * as Dialog from "@radix-ui/react-dialog";
-import { Cross1Icon, TrashIcon } from "@radix-ui/react-icons";
-import { useController, useForm } from "react-hook-form";
-import { ChangeEvent, useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "react-query";
-import { api } from "../../../providers/Api";
+import { Cross1Icon, TrashIcon } from "@radix-ui/react-icons";
+import { useForm } from "react-hook-form";
+import { ChangeEvent, useEffect, useState } from "react";
 import { Document, Page } from "react-pdf";
 import { formatFileSize } from "../../../functions/formatBytes";
 import { queryClient } from "../../../providers/QueryClient";
+import { useMutation } from "react-query";
+import { api } from "../../../providers/Api";
 import { z } from "zod";
+
+import styles from '../styles.module.css';
 
 type RegisterPatientReportProps = {
   patientId: string | null;
@@ -21,13 +22,13 @@ type UploadFileResponse = {
   fileUrl: string;
 };
 
-type MutationReportResponse = {
+type PostExamResponse = {
   id: string;
   patientId: string;
-  shift: string;
+  date: string;
   author: string;
-  title: string;
-  report_text: string;
+  type_of_exam: string;
+  annotations: string;
   filename: string;
   fileUrl: string;
   fileSize: number;
@@ -35,17 +36,10 @@ type MutationReportResponse = {
   updatedAt: string;
 };
 
-const turnOptions = [
-  { label: "Matutino", value: "Matutino" },
-  { label: "Diurno", value: "Diurno" },
-  { label: "Noturno", value: "Noturno" },
-];
-
-const registerReportFormSchema = z.object({
-  shift: z.any(),
-  author: z
+const registerExamFormSchema = z.object({
+  date: z
     .string()
-    .nonempty("Preencha o seu nome completo.")
+    .nonempty("Selecione a data de realização do exame.")
     .transform((name) => {
       return name
         .trim()
@@ -55,49 +49,64 @@ const registerReportFormSchema = z.object({
         })
         .join(" ");
     }),
-  title: z.string().nonempty("O relatório precisa ter um título."),
-  report_text: z.string().optional(),
+  type_of_exam: z
+    .string()
+    .nonempty("O exame precisa ter um nome.")
+    .transform((name) => {
+      return name
+        .trim()
+        .split(" ")
+        .map((word) => {
+          return word[0].toLocaleUpperCase().concat(word.substring(1));
+        })
+        .join(" ");
+    }),
+  author: z
+    .string()
+    .nonempty("Preencha o nome completo do responsável pelo exame.")
+    .transform((name) => {
+      return name
+        .trim()
+        .split(" ")
+        .map((word) => {
+          return word[0].toLocaleUpperCase().concat(word.substring(1));
+        })
+        .join(" ");
+    }),
+  annotations: z.string().optional(),
 });
 
-type registerReportFormData = z.infer<typeof registerReportFormSchema>;
+type registerExamFormData = z.infer<typeof registerExamFormSchema>;
 
-const RegisterPatientReportModal: React.FC<RegisterPatientReportProps> = ({ patientId }) => {
+const RegisterPatientExamModal: React.FC<RegisterPatientReportProps> = ({ patientId }) => {
   const {
     reset,
     register,
-    control,
     handleSubmit,
     formState: { errors },
-  } = useForm<registerReportFormData>({
-    resolver: zodResolver(registerReportFormSchema),
+  } = useForm<registerExamFormData>({
+    resolver: zodResolver(registerExamFormSchema),
   });
 
   const [open, setOpen] = useState<boolean>(false);
-  const [hasAttachment, setHasAttachment] = useState<boolean>(false);
-  const [numPages, setNumPages] = useState<number | undefined>(undefined);
-  const [attachedFile, setAttachedFile] = useState<File | undefined>();
   const [filename, setFilename] = useState<string>("");
-
-  const { field: selectShift } = useController({ name: "shift", control });
-  const {
-    value: selectShiftValue,
-    onChange: selectShiftOnChange,
-    ...restSelectShift
-  } = selectShift;
+  const [hasAttachment, setHasAttachment] = useState<boolean>(false);
+  const [attachedFile, setAttachedFile] = useState<any | undefined>();
+  const [numPages, setNumPages] = useState<number | undefined>(undefined);
 
   const { isLoading, mutate } = useMutation({
-    mutationKey: ["create-report"],
-    mutationFn: async (data: registerReportFormData) => {
-      if (attachedFile != undefined) {
-        const formData = new FormData();
-        formData.append("file", attachedFile);
+    mutationKey: ["register-exam"],
+    mutationFn: async (data: registerExamFormData) => {
+      const formData = new FormData();
+      formData.append("file", attachedFile);
 
+      if (attachedFile != undefined) {
         const upload = await api.post<UploadFileResponse>(
           "uploads/file/",
           formData
         );
 
-        await api.post<MutationReportResponse>("/reports", {
+        await api.post<PostExamResponse>("/exams", {
           ...data,
           patientId: patientId,
           filename: filename,
@@ -105,7 +114,7 @@ const RegisterPatientReportModal: React.FC<RegisterPatientReportProps> = ({ pati
           fileSize: attachedFile.size,
         });
       } else {
-        await api.post<MutationReportResponse>("/reports", {
+        await api.post<PostExamResponse>("/exams", {
           ...data,
           patientId: patientId,
           filename: "",
@@ -115,7 +124,7 @@ const RegisterPatientReportModal: React.FC<RegisterPatientReportProps> = ({ pati
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["list-all-reports"] });
+      queryClient.invalidateQueries({ queryKey: ["list-all-exams"] });
       if (isLoading != true) {
         reset();
         setOpen(false);
@@ -156,7 +165,7 @@ const RegisterPatientReportModal: React.FC<RegisterPatientReportProps> = ({ pati
     setNumPages(numPages);
   };
 
-  const send = (data: registerReportFormData) => {
+  const send = (data: registerExamFormData) => {
     const request = {
       ...data,
     };
@@ -165,15 +174,15 @@ const RegisterPatientReportModal: React.FC<RegisterPatientReportProps> = ({ pati
 
   return (
     <Dialog.Root onOpenChange={setOpen} open={open}>
-      <Dialog.Trigger className="w-[164px] h-10 border border-gray-200 rounded font-medium text-base text-brand-standard-black bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500">
-        Criar novo relatório
+      <Dialog.Trigger className="w-[184px] h-10 border border-gray-200 rounded font-medium text-base text-brand-standard-black bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500">
+        Registrar novo exame
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className="bg-black/60 inset-0 fixed z-20" />
         <Dialog.Content className="w-[608px] rounded-lg border border-gray-200 bg-white fixed overflow-hidden pt-4 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
           <div className="w-full px-6 pb-4 border-b-[1px] border-gray-200 flex items-center flex-row justify-between">
             <Dialog.Title className="font-semibold text-2xl">
-              Criar novo relatório
+              Registrar novo exame
             </Dialog.Title>
             <Dialog.Close className="w-[32px] h-[32px] flex justify-center items-center">
               <Cross1Icon width={24} height={24} />
@@ -182,7 +191,7 @@ const RegisterPatientReportModal: React.FC<RegisterPatientReportProps> = ({ pati
           {isLoading && (
             <div className="w-full h-full absolute z-20">
               <div className="w-full h-full bg-[#f9fafb8b]">
-                <Load
+                <SpinnerLoad
                   divProps={{
                     className:
                       "w-full h-[488px] relative flex items-center justify-center bg-gray-500-50",
@@ -192,66 +201,65 @@ const RegisterPatientReportModal: React.FC<RegisterPatientReportProps> = ({ pati
             </div>
           )}
           <div
-            id="modal-scroll"
+            id={styles.modalScroll}
             className="w-full h-[402px] px-6 py-6 overflow-y-scroll"
           >
             <form
               onSubmit={handleSubmit(send)}
-              className="w-full flex flex-col h-360 gap-6"
+              className="w-full flex flex-col h-360"
             >
               <div className="w-full flex flex-col gap-6">
-                <div className="w-full flex flex-row gap-3">
-                  <div className="w-[184px] flex flex-col gap-3">
+                <div className="w-[324px] flex flex-col gap-2">
+                  <div className="w-[176px] flex flex-col gap-3">
                     <label
-                      htmlFor="shift"
+                      htmlFor="date"
                       className="w-full text-sm font-normal text-brand-standard-black"
                     >
-                      Turno
+                      Data de realização
                     </label>
-                    <Select
-                      styles={{
-                        control: (baseStyles, state) => ({
-                          ...baseStyles,
-                          width: 184,
-                          height: 40,
-                          borderColor: state.isFocused ? "#e2e8f0" : "#e2e8f0",
-                          whiteSpace: "nowrap",
-                          textOverflow: "ellipsis",
-                          fontFamily: "Inter",
-                          fontWeight: 400,
-                          fontSize: "0.875rem",
-                          lineHeight: "1.25rem",
-                        }),
-                      }}
-                      theme={(theme) => ({
-                        ...theme,
-                        borderRadius: 4,
-                        colors: {
-                          ...theme.colors,
-                          primary75: "#cbd5e1",
-                          primary50: "##e2e8f0",
-                          primary25: "#f8fafc",
-                          primary: "#212529",
-                        },
-                      })}
-                      placeholder="Selecione o turno"
-                      isSearchable={false}
-                      options={turnOptions}
-                      value={
-                        selectShiftValue
-                          ? turnOptions.find(
-                              (x) => x.value === selectShiftValue
-                            )
-                          : selectShiftValue
+                    <input
+                      type="date"
+                      className={
+                        errors.date
+                          ? "w-[176px] h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                          : "w-[176px] h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                       }
-                      onChange={(option) =>
-                        selectShiftOnChange(option ? option.value : option)
-                      }
-                      {...restSelectShift}
+                      {...register("date")}
                     />
                   </div>
-                  <div className="w-full flex flex-col gap-2">
-                    <div className="w-full flex flex-col gap-3">
+                  {errors.date && (
+                    <span className="text-xs font-normal text-red-500">
+                      {errors.date.message}
+                    </span>
+                  )}
+                </div>
+                <div className="w-full flex flex-row gap-3">
+                  <div className="w-[224px] flex flex-col gap-2">
+                    <div className="w-[224px] flex flex-col gap-3">
+                      <label
+                        htmlFor="type_of_exam"
+                        className="w-full text-sm font-normal text-brand-standard-black"
+                      >
+                        Tipo de exame
+                      </label>
+                      <input
+                        type="text"
+                        className={
+                          errors.type_of_exam
+                            ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                            : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                        }
+                        {...register("type_of_exam")}
+                      />
+                    </div>
+                    {errors.type_of_exam && (
+                      <span className="text-xs font-normal text-red-500">
+                        {errors.type_of_exam.message}
+                      </span>
+                    )}
+                  </div>
+                  <div className="w-[316.8px] flex flex-col gap-2">
+                    <div className="w-[316.8px] flex flex-col gap-3">
                       <label
                         htmlFor="author"
                         className="w-full text-sm font-normal text-brand-standard-black"
@@ -275,43 +283,19 @@ const RegisterPatientReportModal: React.FC<RegisterPatientReportProps> = ({ pati
                     )}
                   </div>
                 </div>
-                <div className="w-full flex flex-col gap-2">
-                  <div className="w-full flex flex-col gap-3">
-                    <label
-                      htmlFor="author"
-                      className="w-full text-sm font-normal text-brand-standard-black"
-                    >
-                      Título
-                    </label>
-                    <input
-                      type="text"
-                      className={
-                        errors.title
-                          ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
-                          : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                      }
-                      {...register("title")}
-                    />
-                  </div>
-                  {errors.title && (
-                    <span className="text-xs font-normal text-red-500">
-                      {errors.title.message}
-                    </span>
-                  )}
-                </div>
                 <div className="w-full flex flex-col gap-3">
                   <label
-                    htmlFor="report_text"
+                    htmlFor="annotations"
                     className="w-full text-sm font-normal text-brand-standard-black"
                   >
-                    Descrição / Relatório
+                    Anotações
                   </label>
                   <div>
                     <textarea
                       cols={30}
-                      rows={10}
+                      rows={6}
                       className="w-full px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                      {...register("report_text")}
+                      {...register("annotations")}
                     ></textarea>
                   </div>
                 </div>
@@ -363,45 +347,47 @@ const RegisterPatientReportModal: React.FC<RegisterPatientReportProps> = ({ pati
                     </div>
                   </div>
                 )}
-              </div>
-              <div className="w-full flex justify-between">
-                {hasAttachment === true ? undefined : (
-                  <div className="w-full flex">
-                    <label
-                      htmlFor="patient-photo-file"
-                      className="border border-gray-200 flex items-center px-3 py-[6px] gap-1 rounded text-base text-brand-standard-black font-medium bg-white hover:border-[#b3b3b3] cursor-pointer"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="#212529"
-                        className="w-5 h-5"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"
+                <div className="w-full flex flex-col gap-3">
+                  <div className="w-full flex justify-between">
+                    {hasAttachment === true ? undefined : (
+                      <div className="w-full flex">
+                        <label
+                          htmlFor="patient-photo-file"
+                          className="border border-gray-200 flex items-center px-3 py-[6px] gap-1 rounded text-base text-brand-standard-black font-medium bg-white hover:border-[#b3b3b3] cursor-pointer"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="#212529"
+                            className="w-5 h-5"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"
+                            />
+                          </svg>
+                          Adicionar um anexo
+                        </label>
+                        <input
+                          type="file"
+                          accept=".pdf"
+                          id="patient-photo-file"
+                          className="hidden"
+                          onChange={handleFile}
                         />
-                      </svg>
-                      Adicionar um anexo
-                    </label>
-                    <input
-                      type="file"
-                      accept=".pdf"
-                      id="patient-photo-file"
-                      className="hidden"
-                      onChange={handleFile}
-                    />
+                      </div>
+                    )}
+                    <div className="w-full h-10 flex justify-end">
+                      <button
+                        type="submit"
+                        className="w-[120px] border border-gray-200 rounded font-medium text-base text-brand-standard-black bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500"
+                      >
+                        Salvar exame
+                      </button>
+                    </div>
                   </div>
-                )}
-                <div className="w-full h-10 flex justify-end">
-                  <button
-                    type="submit"
-                    className="w-[132px] h-10 border border-gray-200 rounded font-medium text-base text-brand-standard-black bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500"
-                  >
-                    Salvar relatório
-                  </button>
                 </div>
               </div>
             </form>
@@ -412,4 +398,4 @@ const RegisterPatientReportModal: React.FC<RegisterPatientReportProps> = ({ pati
   );
 };
 
-export default RegisterPatientReportModal;
+export default RegisterPatientExamModal;

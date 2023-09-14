@@ -1,6 +1,6 @@
 import * as Avatar from "@radix-ui/react-avatar";
 import * as Dialog from "@radix-ui/react-dialog";
-import Load from "../../Load/Load";
+import SpinnerLoad from "../../Load/SpinnerLoad";
 import Select from "react-select";
 import CreatableSelect from "react-select/creatable";
 import { z } from "zod";
@@ -12,6 +12,8 @@ import { Option } from "../../../interfaces/Option";
 import { useController, useForm } from "react-hook-form";
 import { useState, KeyboardEventHandler, useEffect, ChangeEvent } from "react";
 import { useMutation } from "react-query";
+
+import styles from '../styles.module.css';
 
 type UploadImageResponse = {
   imageUrl: string;
@@ -207,8 +209,8 @@ const RegisterPatientModal = () => {
 
   return (
     <Dialog.Root onOpenChange={setIsOpen} open={isOpen}>
-      <Dialog.Trigger className="w-10 h-10 border rounded flex justify-center items-center hover:boder hover:border-[#b3b3b3]">
-        <PlusIcon color="#212529" width={20} height={20} />
+      <Dialog.Trigger className="w-10 h-10 rounded flex justify-center items-center bg-blue-500 hover:bg-blue-600">
+        <PlusIcon color="#ffff" width={20} height={20} />
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className="bg-black/60 inset-0 fixed z-10" />
@@ -224,7 +226,7 @@ const RegisterPatientModal = () => {
           {isLoading && (
             <div className="w-full h-full absolute z-20">
               <div className="w-full h-full bg-[#f9fafb8b]">
-                <Load
+                <SpinnerLoad
                   divProps={{
                     className:
                       "w-full h-[488px] relative flex items-center justify-center bg-gray-500-50",
@@ -234,7 +236,7 @@ const RegisterPatientModal = () => {
             </div>
           )}
           <div
-            id="modal-scroll"
+            id={styles.modalScroll}
             className="w-full h-[488px] px-6 pt-6 pb-6 overflow-y-scroll"
           >
             <form
@@ -719,58 +721,77 @@ const RegisterPatientModal = () => {
                     </div>
                   </div>
                 </div>
-                <div className="w-full">
-                  <div className="w-full flex flex-col gap-5">
-                    <div className="w-full flex flex-col gap-3">
-                      <label
-                        htmlFor="diagnosis"
-                        className="w-full text-sm font-normal text-brand-standard-black"
-                      >
-                        Diagnóstico/Suspeita Clínica
-                      </label>
-                      <CreatableSelect
-                        styles={{
-                          control: (baseStyles, state) => ({
-                            ...baseStyles,
-                            width: "100%",
-                            minHeight: 40,
-                            borderColor: state.isFocused
-                              ? "#e2e8f0"
-                              : "#e2e8f0",
-                            whiteSpace: "nowrap",
-                            textOverflow: "ellipsis",
-                            fontFamily: "Inter",
-                            fontWeight: 400,
-                            fontSize: "0.875rem",
-                            lineHeight: "1.25rem",
-                          }),
-                        }}
-                        theme={(theme) => ({
-                          ...theme,
-                          borderRadius: 4,
-                          colors: {
-                            ...theme.colors,
-                            primary75: "#cbd5e1",
-                            primary50: "##e2e8f0",
-                            primary25: "#f8fafc",
-                            primary: "#212529",
+                <div className="w-full flex flex-col gap-2">
+                  <div className="w-full flex flex-col gap-3">
+                    <label
+                      htmlFor="diagnosis"
+                      className="w-full text-sm font-normal text-brand-standard-black"
+                    >
+                      Diagnóstico/Suspeita Clínica
+                    </label>
+                    <CreatableSelect
+                      styles={{
+                        control: (baseStyles, state) => ({
+                          ...baseStyles,
+                          width: "100%",
+                          minHeight: 40,
+                          borderColor: state.isFocused
+                            ? "#e2e8f0"
+                            : "#e2e8f0",
+                          whiteSpace: "nowrap",
+                          textOverflow: "ellipsis",
+                          fontFamily: "Inter",
+                          fontWeight: 400,
+                          fontSize: "0.875rem",
+                          lineHeight: "1.25rem",
+                        }),
+                        multiValue: (styles) => {
+                          return {
+                            ...styles,
+                            backgroundColor: "#e0f2fe",
+                          };
+                        },
+                        multiValueLabel: (styles) => ({
+                          ...styles,
+                          color: "#0ea5e9",
+                        }),
+                        multiValueRemove: (styles) => ({
+                          ...styles,
+                          color: "#0ea5e9",
+                          ":hover": {
+                            backgroundColor: "#7dd3fc",
+                            color: "white",
                           },
-                        })}
-                        components={{ DropdownIndicator: null }}
-                        inputValue={diagnosisInputValue}
-                        isClearable
-                        isMulti
-                        menuIsOpen={false}
-                        onChange={(newValue) => setValueDiagnosis(newValue)}
-                        onInputChange={(newValue) =>
-                          setDiagnosisInputValue(newValue)
-                        }
-                        onKeyDown={handleKeyDown}
-                        placeholder="Digite o nome da doença diagnosticada/suspeita clínica e depois aperte a tecla 'Enter'"
-                        value={valueDiagnosis}
-                      />
-                    </div>
+                        }),
+                      }}
+                      theme={(theme) => ({
+                        ...theme,
+                        borderRadius: 4,
+                        colors: {
+                          ...theme.colors,
+                          primary75: "#cbd5e1",
+                          primary50: "##e2e8f0",
+                          primary25: "#f8fafc",
+                          primary: "#212529",
+                        },
+                      })}
+                      components={{ DropdownIndicator: null }}
+                      inputValue={diagnosisInputValue}
+                      isClearable
+                      isMulti
+                      menuIsOpen={false}
+                      onChange={(newValue) => setValueDiagnosis(newValue)}
+                      onInputChange={(newValue) =>
+                        setDiagnosisInputValue(newValue)
+                      }
+                      onKeyDown={handleKeyDown}
+                      placeholder=""
+                      value={valueDiagnosis}
+                    />
                   </div>
+                  <span className="text-xs font-normal text-gray-500">
+                    <strong className="font-medium">Instrução: </strong> Digite o nome da doença diagnosticada/suspeita clínica e depois aperte a tecla <strong className="font-medium">Enter</strong> ou <strong className="font-medium">Tab.</strong>
+                  </span>
                 </div>
               </div>
               <div className="w-full h-10 flex items-center justify-end">

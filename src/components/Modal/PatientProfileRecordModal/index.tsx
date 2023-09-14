@@ -1,18 +1,120 @@
 import * as Tabs from "@radix-ui/react-tabs";
+import * as Dialog from "@radix-ui/react-dialog";
 import * as Avatar from "@radix-ui/react-avatar";
 import Select from "react-select";
-import Load from "../../Load/Load";
+import SpinnerLoad from "../../Load/SpinnerLoad";
 import CreatableSelect from "react-select/creatable";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+import RegisterPatientReportModal from "../RegisterPatientReportModal";
+import ReportItem from "../../Items/ReportItem";
+import RegisterPatientExamModal from "../RegisterPatientExamModal";
+import ExamItem from "../../Items/ExamItem";
+import AddAttachmentModal from "../AddAttachmentModal";
+import { CameraIcon, Cross1Icon } from "@radix-ui/react-icons";
 import { Option } from "../../../interfaces/Option";
-import { CameraIcon } from "@radix-ui/react-icons";
-import { useState, ChangeEvent, KeyboardEventHandler, useEffect } from "react";
-import { useForm, useController } from "react-hook-form";
-import { useQuery, useMutation } from "react-query";
+import { ChangeEvent, KeyboardEventHandler, useEffect, useState } from "react";
+import { z } from "zod";
+import { useController, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery } from "react-query";
 import { api } from "../../../providers/Api";
 import { queryClient } from "../../../providers/QueryClient";
-import { TabContentProps } from "./PatientRecordContent";
+import { FileCard } from "../../Cards/FileCard";
+
+import styles from '../styles.module.css';
+
+type PatientProfileRecordModalProps = {
+  patientId: string;
+  children: React.ReactNode;
+};
+
+const PatientProfileRecordModal: React.FC<PatientProfileRecordModalProps> = ({ patientId, children }) => {
+  const [open, setOpen] = useState<boolean>(false);
+
+  return (
+    <Dialog.Root onOpenChange={setOpen} open={open}>
+      <Dialog.Trigger>
+        {children}
+      </Dialog.Trigger>
+      <Dialog.Portal>
+        <Dialog.Overlay className="bg-black/60 inset-0 fixed z-10" />
+        <Dialog.Content className="w-[720px] rounded-lg border border-gray-200 bg-white fixed overflow-hidden pt-4 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+          <div className="w-full px-6 mb-6 flex items-center flex-row justify-between">
+            <Dialog.Title className="font-semibold text-2xl">
+              Ficha do paciente
+            </Dialog.Title>
+            <Dialog.Close className="w-[32px] h-[32px] flex justify-center items-center">
+              <Cross1Icon width={24} height={24} />
+            </Dialog.Close>
+          </div>
+          <Tabs.Root defaultValue="profile">
+            <div className="w-full">
+              <PatientTabHeader />
+              <PatientTabContentProfile
+                modalIsOpen={open}
+                patientId={patientId}
+              />
+              <PatientTabContentReports
+                modalIsOpen={open}
+                patientId={patientId}
+              />
+              <PatientTabContentExam
+                modalIsOpen={open}
+                patientId={patientId}
+              />
+              <PatientTabContentAttachment
+                modalIsOpen={open}
+                patientId={patientId}
+              />
+            </div>
+          </Tabs.Root>    
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+};
+
+export default PatientProfileRecordModal;
+
+type TabContentProps = {
+  patientId: string;
+  modalIsOpen: boolean;
+};
+
+const PatientTabHeader = () => {
+  return (
+    <Tabs.List className="w-full h-10 pl-6 flex flex-wrap -mb-px text-sm font-medium text-center border-b border-gray-200">
+      <Tabs.Trigger
+        value="profile"
+        id={styles.buttonTabModal}
+        className="inline-block px-[12px] pt-[6px] pb-3 rounded-t-lg border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+      >
+        Perfil
+      </Tabs.Trigger>
+      <Tabs.Trigger
+        value="reports"
+        id={styles.buttonTabModal}
+        className="inline-block px-[12px] pt-[6px] pb-3 rounded-t-lg border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+      >
+        Relatórios
+      </Tabs.Trigger>
+      <Tabs.Trigger
+        value="exams"
+        id={styles.buttonTabModal}
+        className="inline-block px-[12px] pt-[6px] pb-3 rounded-t-lg border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+      >
+        Exames
+      </Tabs.Trigger>
+      <Tabs.Trigger
+        value="attachments"
+        id={styles.buttonTabModal}
+        className="inline-block px-[12px] pt-[6px] pb-3 rounded-t-lg border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+      >
+        Arquivos
+      </Tabs.Trigger>
+    </Tabs.List>
+  )
+}
+
 
 type UploadImageResponse = {
   imageUrl: string;
@@ -267,7 +369,7 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, modalI
       {isLoading && (
         <div className="w-full h-full absolute z-20">
           <div className="w-full h-full bg-[#f9fafb8b]">
-            <Load
+            <SpinnerLoad
               divProps={{
                 className:
                   "w-full h-[488px] relative flex items-center justify-center bg-gray-500-50",
@@ -279,7 +381,7 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, modalI
       {isUpdating && (
         <div className="w-full h-full absolute z-20">
           <div className="w-full h-full bg-[#f9fafb8b]">
-            <Load
+            <SpinnerLoad
               divProps={{
                 className:
                   "w-full h-[488px] relative flex items-center justify-center bg-gray-500-50",
@@ -289,7 +391,7 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, modalI
         </div>
       )}
       <div
-        id="modal-scroll"
+        id={styles.modalScroll}
         className="w-full h-[488px] px-6 py-6 overflow-y-scroll"
       >
         <form
@@ -315,11 +417,7 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, modalI
                         className="w-16 h-16 border border-gray-200 flex items-center justify-center rounded-full overflow-hidden"
                         delayMs={600}
                       >
-                        <CameraIcon
-                          width={16}
-                          height={16}
-                          color="#e5e7eb"
-                        />
+                        <CameraIcon width={16} height={16} color="#e5e7eb" />
                       </Avatar.Fallback>
                     </Avatar.Root>
                   </div>
@@ -413,9 +511,7 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, modalI
                           ...baseStyles,
                           width: "100%",
                           height: 40,
-                          borderColor: state.isFocused
-                            ? "#e2e8f0"
-                            : "#e2e8f0",
+                          borderColor: state.isFocused ? "#e2e8f0" : "#e2e8f0",
                           borderRadius: 4,
                           whiteSpace: "nowrap",
                           textOverflow: "ellipsis",
@@ -446,9 +542,7 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, modalI
                           : selectPrognosisValue
                       }
                       onChange={(option) =>
-                        selectPrognosisOnChange(
-                          option ? option.value : option
-                        )
+                        selectPrognosisOnChange(option ? option.value : option)
                       }
                       {...restSelectPrognosis}
                     />
@@ -477,9 +571,7 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, modalI
                     />
                   </div>
                   {errors.name && (
-                    <span
-                      className={"text-xs font-normal text-red-500"}
-                    >
+                    <span className={"text-xs font-normal text-red-500"}>
                       {errors.name.message}
                     </span>
                   )}
@@ -663,9 +755,7 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, modalI
                           ...baseStyles,
                           width: "100%",
                           height: 40,
-                          borderColor: state.isFocused
-                            ? "#e2e8f0"
-                            : "#e2e8f0",
+                          borderColor: state.isFocused ? "#e2e8f0" : "#e2e8f0",
                           borderRadius: 4,
                           whiteSpace: "nowrap",
                           textOverflow: "ellipsis",
@@ -691,8 +781,7 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, modalI
                       value={
                         selectPhysicalShapeValue
                           ? physicalShapeOptions.find(
-                              (x) =>
-                                x.value === selectPhysicalShapeValue
+                              (x) => x.value === selectPhysicalShapeValue
                             )
                           : selectPhysicalShapeValue
                       }
@@ -738,9 +827,7 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, modalI
                           ...baseStyles,
                           width: "100%",
                           height: 40,
-                          borderColor: state.isFocused
-                            ? "#e2e8f0"
-                            : "#e2e8f0",
+                          borderColor: state.isFocused ? "#e2e8f0" : "#e2e8f0",
                           borderRadius: 4,
                           whiteSpace: "nowrap",
                           textOverflow: "ellipsis",
@@ -764,9 +851,7 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, modalI
                       isSearchable={false}
                       options={genderOptions}
                       onChange={(option) =>
-                        selectGenderOnChange(
-                          option ? option.value : option
-                        )
+                        selectGenderOnChange(option ? option.value : option)
                       }
                       value={
                         selectGenderValue
@@ -781,60 +866,73 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, modalI
                 </div>
               </div>
             </div>
-            <div className="w-full">
-              <div className="w-full flex flex-col gap-5">
-                <div className="w-full flex flex-col gap-3">
-                  <label
-                    htmlFor="diagnosis"
-                    className="w-full text-sm font-normal text-brand-standard-black"
-                  >
-                    Diagnóstico / Suspeita Clínica
-                  </label>
-                  <CreatableSelect
-                    styles={{
-                      control: (baseStyles, state) => ({
-                        ...baseStyles,
-                        width: "100%",
-                        minHeight: 40,
-                        borderColor: state.isFocused
-                          ? "#e2e8f0"
-                          : "#e2e8f0",
-                        borderRadius: 4,
-                        whiteSpace: "nowrap",
-                        textOverflow: "ellipsis",
-                        fontFamily: "Inter",
-                        fontWeight: 400,
-                        fontSize: "0.875rem",
-                        lineHeight: "1.25rem",
-                      }),
-                    }}
-                    theme={(theme) => ({
-                      ...theme,
-                      colors: {
-                        ...theme.colors,
-                        primary75: "#cbd5e1",
-                        primary50: "##e2e8f0",
-                        primary25: "#f8fafc",
-                        primary: "#212529",
+            <div className="w-full flex flex-col gap-2">
+              <div className="w-full flex flex-col gap-3">
+                <label
+                  htmlFor="diagnosis"
+                  className="w-full text-sm font-normal text-brand-standard-black"
+                >
+                  Diagnóstico / Suspeita Clínica
+                </label>
+                <CreatableSelect
+                  styles={{
+                    control: (baseStyles, state) => ({
+                      ...baseStyles,
+                      width: "100%",
+                      minHeight: 40,
+                      borderColor: state.isFocused ? "#e2e8f0" : "#e2e8f0",
+                      borderRadius: 4,
+                      whiteSpace: "nowrap",
+                      textOverflow: "ellipsis",
+                      fontFamily: "Inter",
+                      fontWeight: 400,
+                      fontSize: "0.875rem",
+                      lineHeight: "1.25rem",
+                    }),
+                    multiValue: (styles) => {
+                      return {
+                        ...styles,
+                        backgroundColor: "#e0f2fe",
+                      };
+                    },
+                    multiValueLabel: (styles) => ({
+                      ...styles,
+                      color: "#0ea5e9",
+                    }),
+                    multiValueRemove: (styles) => ({
+                      ...styles,
+                      color: "#0ea5e9",
+                      ":hover": {
+                        backgroundColor: "#7dd3fc",
+                        color: "white",
                       },
-                    })}
-                    components={{ DropdownIndicator: null }}
-                    inputValue={diagnosisInputValue}
-                    isClearable
-                    isMulti
-                    menuIsOpen={false}
-                    onChange={(newValue) =>
-                      setValueDiagnosis(newValue)
-                    }
-                    onInputChange={(newValue) =>
-                      setDiagnosisInputValue(newValue)
-                    }
-                    onKeyDown={handleKeyDown}
-                    placeholder="Digite o nome da doença diagnosticada/suspeita clínica e depois aperte a tecla 'Enter'"
-                    value={valueDiagnosis}
-                  />
-                </div>
+                    }),
+                  }}
+                  theme={(theme) => ({
+                    ...theme,
+                    colors: {
+                      ...theme.colors,
+                      primary75: "#cbd5e1",
+                      primary50: "##e2e8f0",
+                      primary25: "#f8fafc",
+                      primary: "#212529",
+                    },
+                  })}
+                  components={{ DropdownIndicator: null }}
+                  inputValue={diagnosisInputValue}
+                  isClearable
+                  isMulti
+                  menuIsOpen={false}
+                  onChange={(newValue) => setValueDiagnosis(newValue)}
+                  onInputChange={(newValue) => setDiagnosisInputValue(newValue)}
+                  onKeyDown={handleKeyDown}
+                  placeholder=""
+                  value={valueDiagnosis}
+                />
               </div>
+              <span className="text-xs font-normal text-gray-500">
+                <strong className="font-medium">Instrução: </strong> Digite o nome da doença diagnosticada/suspeita clínica e depois aperte a tecla <strong className="font-medium">Enter</strong> ou <strong className="font-medium">Tab.</strong>
+              </span>
             </div>
           </div>
           <div className="w-full h-10 flex items-center justify-end">
@@ -848,7 +946,234 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, modalI
         </form>
       </div>
     </Tabs.Content>
+  );
+};
+
+type ListReportsResponse = {
+	id: string;
+	patientId: string;
+	shift: string;
+	author: string;
+	title: string;
+	report_text: string;
+	filename: string;
+  fileUrl: string;
+  fileSize: number;
+	createdAt: string;
+	updatedAt: string;
+};
+
+const PatientTabContentReports: React.FC<TabContentProps> = ({ patientId, modalIsOpen }) => {
+  const [callRequest, setCallRequest] = useState<boolean>(false);
+  
+  const { isLoading, data: patientReports } = useQuery({
+		queryKey: ['list-all-reports'],
+		queryFn: async () => {
+			const response = await api.get<ListReportsResponse[]>(`/reports/${patientId}/reports`);
+			return response.data;
+		},
+		enabled: callRequest,
+	});
+
+  useEffect(() => {
+    if (modalIsOpen != true) {
+      setCallRequest(false);
+    } else {
+      setCallRequest(true);
+    }
+  }, [modalIsOpen, setCallRequest]);
+
+  return (
+    <Tabs.Content value="reports">
+      {isLoading && (
+        <div className="w-full h-full absolute z-20">
+          <div className="w-full h-full bg-[#f9fafb8b]">
+            <SpinnerLoad
+              divProps={{
+                className:
+                  "w-full h-[362px] relative flex items-center justify-center bg-gray-500-50",
+              }}
+            />
+          </div>
+        </div>
+      )}
+      <div className="w-full flex flex-col pb-6 items-center gap-6">
+        <div
+          id={styles.modalScroll}
+          className="w-full h-[362px] px-6 py-6 overflow-y-scroll"
+        >
+          <div className="w-full flex flex-col items-center gap-6">
+            {patientReports &&
+              patientReports?.map((data) => (
+                <ReportItem
+                  key={data.id}
+                  id={data.id}
+                  patientId={data.patientId}
+                  shift={data.shift}
+                  author={data.author}
+                  title={data.title}
+                  report_text={data.report_text}
+                  filename={data.filename}
+                  fileUrl={data.fileUrl}
+                  createdAt={data.createdAt}
+                  updatedAt={data.updatedAt}
+                />
+              ))}
+          </div>
+        </div>
+        <div className="w-full h-10 px-6 flex justify-end">
+          <RegisterPatientReportModal patientId={patientId} />
+        </div>
+      </div>
+    </Tabs.Content>
   )
 };
 
-export default PatientTabContentProfile;
+type ListExamsResponse = {
+  id: string;
+  patientId: string;
+  date: string;
+  author: string;
+  type_of_exam: string;
+  annotations: string;
+  filename: string;
+  fileUrl: string;
+  fileSize: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+const PatientTabContentExam: React.FC<TabContentProps> = ({ patientId, modalIsOpen }) => {
+  const [callRequest, setCallRequest] = useState<boolean>(false);
+  
+  const { isLoading, data: patientExams } = useQuery({
+    queryKey: ["list-all-exams"],
+    queryFn: async () => {
+      const response = await api.get<ListExamsResponse[]>(`/exams/${patientId}/exams`)
+      return response.data 
+    },
+    enabled: callRequest,
+  });
+
+  useEffect(() => {
+    if (modalIsOpen != true) {
+      setCallRequest(false);
+    } else {
+      setCallRequest(true);
+    }
+  }, [modalIsOpen, setCallRequest]);
+  
+  return (
+    <Tabs.Content value="exams">
+      {isLoading && (
+        <div className="w-full h-full absolute z-20">
+          <div className="w-full h-full bg-[#f9fafb8b]">
+            <SpinnerLoad
+              divProps={{
+                className:
+                  "w-full h-[362px] relative flex items-center justify-center bg-gray-500-50",
+              }}
+            />
+          </div>
+        </div>
+      )}
+      <div className="w-full flex flex-col pb-6 items-center gap-6">
+        <div
+          id={styles.modalScroll}
+          className="w-full h-[362px] px-6 py-6 overflow-y-scroll"
+        >
+          <div className="w-full flex flex-col items-center gap-6">
+            {patientExams &&
+              patientExams.map((data) => (
+                <ExamItem
+                  key={data.id}
+                  id={data.id}
+                  patientId={data.patientId}
+                  date={data.date}
+                  author={data.author}
+                  type_of_exam={data.type_of_exam}
+                  annotations={data.annotations}
+                  filename={data.filename}
+                  fileUrl={data.fileUrl}
+                  fileSize={data.fileSize}
+                  createdAt={data.createdAt}
+                  updatedAt={data.updatedAt}
+                />
+              ))}
+          </div>
+        </div>
+        <div className="w-full h-10 px-6 flex justify-end">
+          <RegisterPatientExamModal patientId={patientId} />
+        </div>
+      </div>
+    </Tabs.Content>
+  )
+}
+
+type ListFilesResponse = {
+  id: string;
+  patientId: string;
+  filename: string;
+  fileUrl: string;
+  fileSize: number;
+}
+
+const PatientTabContentAttachment: React.FC<TabContentProps> = ({ patientId, modalIsOpen }) => {
+  const [callRequest, setCallRequest] = useState<boolean>(false);
+
+  const { isLoading, data: patientFiles } = useQuery({
+    queryKey: ["get-file-by-patientId"],
+    queryFn: async () => {
+      const response = await api.get<ListFilesResponse[]>(`/files/${patientId}/files`)
+      return response.data
+    },
+    enabled: callRequest,
+  })
+
+  useEffect(() => {
+    if (modalIsOpen != true) {
+      setCallRequest(false);
+    } else {
+      setCallRequest(true);
+    }
+  }, [modalIsOpen, setCallRequest]);
+  
+  return (
+    <Tabs.Content value="attachments">
+      {isLoading && (
+        <div className="w-full h-full absolute z-20">
+          <div className="w-full h-full bg-[#f9fafb8b]">
+            <SpinnerLoad
+              divProps={{
+                className:
+                  "w-full h-[488px] relative flex items-center justify-center bg-gray-500-50",
+              }}
+            />
+          </div>
+        </div>
+      )}
+      <div
+        id={styles.modalScroll}
+        className="w-full h-[488px] px-6 py-6 overflow-y-scroll"
+      >
+        <div className="w-full flex flex-col items-center gap-6">
+          <div className="w-full flex justify-start">
+            <AddAttachmentModal patientId={patientId} />
+          </div>
+          <div className="w-full grid grid-cols-3 gap-[28px]">
+            {patientFiles &&
+              patientFiles?.map((data) => (
+                <FileCard
+                  key={data.id}
+                  id={data.id}
+                  filename={data.filename}
+                  fileUrl={data.fileUrl}
+                  fileSize={data.fileSize}
+                />
+              ))}
+          </div>
+        </div>
+      </div>
+    </Tabs.Content>
+  )
+}
