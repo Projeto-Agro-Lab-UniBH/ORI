@@ -1,6 +1,6 @@
 import Select from "react-select";
 import { useState } from "react";
-import { SelectSchema } from "../../@types/SelectSchema";
+import { SelectSchema } from "../../../@types/SelectSchema";
 
 const SelectFilter = ({
   field,
@@ -18,7 +18,7 @@ const SelectFilter = ({
   const [instanceId] = useState(Math.random().toString());
   
   return (
-    <div className={`w-[200px] h-24 flex items-center`}>
+    <div className={`w-[200px]`}>
       <Select
         instanceId={instanceId}
         styles={{
