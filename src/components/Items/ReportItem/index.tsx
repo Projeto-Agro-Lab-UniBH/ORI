@@ -1,4 +1,4 @@
-import EditPatientReportModal from "../Modal/EditPatientReportModal/EditPatientReportModal";
+import EditPatientReportModal from "../../Modal/EditPatientReportModal";
 import { DownloadIcon } from "@radix-ui/react-icons";
 import { useEffect, useState } from "react";
 
