@@ -1,0 +1,218 @@
+import * as Avatar from "@radix-ui/react-avatar";
+import * as Collapsible from '@radix-ui/react-collapsible';
+import PatientProfileRecordModal from "../../Modal/PatientProfileRecordModal";
+import { Badges } from "../../Badges/Badges";
+import { useEffect, useState } from "react";
+import { Option } from "../../../interfaces/Option";
+import { CopyToClipboard } from "react-copy-to-clipboard";
+import { CopyIcon, CameraIcon, PlusIcon, DashIcon } from "@radix-ui/react-icons";
+import { Exams } from "../../../@types/exams";
+
+import styles from './styles.module.css';
+
+type PatientCardProps = {
+  id: string;
+  profile_photo?: string;
+  name: string;
+  race: string;
+  specie: string;
+  gender: string;
+  weight: string;
+  prognosis: string;
+  diagnosis: Option[];
+  physical_shape: string;
+  exams: Exams[];
+};
+
+const PatientCard: React.FC<PatientCardProps> = ({
+  id,
+  profile_photo,
+  name,
+  race,
+  specie,
+  gender,
+  weight,
+  prognosis,
+  diagnosis,
+  physical_shape,
+  exams,
+}) => {
+  const [openMoreDiagnosis, setOpenMoreDiagnosis] = useState<boolean>(false);
+  const [openMoreExams, setOpenMoreExams] = useState<boolean>(false);
+  const [copyArea, setCopyArea] = useState<string>(id);
+
+  useEffect(() => {
+    setCopyArea(id);
+  }, [id]);
+
+  const uniqueExams: Exams[] = exams.filter((exam, index, self) =>
+    index === self.findIndex((e) => e.type_of_exam === exam.type_of_exam)
+  );
+
+  const renderBadges = (data: string | undefined, defaultValue: string) => (
+    <Badges data={data ?? defaultValue} />
+  );
+
+  const renderExams = (exam: Exams) => (
+    <Badges key={exam.id} data={exam.type_of_exam} />
+  );
+
+  return (
+    <div className="w-[1280px] h-[104px] px-4 py-2 flex items-center bg-white border border-gray-200 rounded-lg">
+      <div
+        id={styles.patientCardScroll}
+        className="w-full flex items-center border-none rounded-lg overflow-x-scroll"
+      >
+        <div className="h-20 flex items-center p-2 gap-[24px]">
+          <div className="w-[344px] flex gap-4">
+            <div className="flex items-center flex-col gap-2">
+              <span className="w-[88px] text-lg font-semibold text-brand-standard-black">
+                ID:
+              </span>
+              <div className="h-full flex items-center gap-2">
+                <div className="w-[64px] h-6 px-2 bg-brand-standard-black border-none rounded flex items-center">
+                  <span className="whitespace-nowrap text-sm font-normal text-white overflow-hidden overflow-ellipsis">
+                    {copyArea}
+                  </span>
+                </div>
+                <CopyToClipboard text={copyArea}>
+                  <button className="w-6 h-6 flex items-center justify-center hover:border hover:rounded hover:border-gray-200 cursor-pointer">
+                    <CopyIcon color="#212529" width={15} height={15} />
+                  </button>
+                </CopyToClipboard>
+              </div>
+            </div>
+            <div className="w-[238.6px] h-full flex items-center">
+              <PatientProfileRecordModal patientId={id}>
+                <div className="w-full flex items-center gap-4">
+                  <div className="w-16 h-16 flex items-center">
+                    <Avatar.Root className="w-16 h-16 flex items-center justify-center rounded-full overflow-hidden">
+                      <Avatar.Image
+                        src={profile_photo}
+                        className="w-full h-full object-cover"
+                      />
+                      <Avatar.Fallback
+                        className="w-16 h-16 flex items-center justify-center border border-gray-200 rounded-full overflow-hidden"
+                        delayMs={600}
+                      >
+                        <CameraIcon width={16} height={16} color="#e5e7eb" />
+                      </Avatar.Fallback>
+                    </Avatar.Root>
+                  </div>
+                  <div className="w-[158.6px] flex items-center">
+                    <div className="w-[158.6px] flex items-center flex-col">
+                      <div className="w-[158.6px] flex">
+                        <span className="whitespace-nowrap overflow-hidden text-ellipsis text-xl font-semibold text-brand-standard-black">
+                          {!name ? "Sem nome" : name}
+                        </span>
+                      </div>
+                      <div className="w-[158.6px] flex">
+                        <span className="whitespace-nowrap overflow-hidden text-ellipsis text-lg font-light text-brand-standard-black">
+                          {!specie ? race : specie}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </PatientProfileRecordModal>
+            </div>
+          </div>
+          <div className="flex gap-9">
+            <div className="flex flex-col gap-2">
+              <span className="w-[256px] whitespace-nowrap text-lg font-semibold text-brand-standard-black">
+                Dados do paciente:
+              </span>
+              <div className="w-full flex items-center flex-row gap-2">
+                {renderBadges(gender, "Não cadastrado")}
+                {renderBadges(physical_shape, "Não cadastrado")}
+                {renderBadges(weight, "Não cadastrado")}
+              </div>
+            </div>
+            <div className="flex flex-col gap-2">
+              <span className="whitespace-nowrap text-lg font-semibold text-brand-standard-black">
+                Prognóstico:
+              </span>
+              <div className="w-full flex flex-row gap-2">
+                {renderBadges(prognosis, "Não cadastrado")}
+              </div>
+            </div>
+            <div className="flex items-center flex-col gap-2">
+              <span className="w-full whitespace-nowrap text-lg font-semibold text-brand-standard-black">
+                Diagnóstico / Suspeita Clínica:
+              </span>
+              <Collapsible.Root
+                open={openMoreDiagnosis}
+                onOpenChange={setOpenMoreDiagnosis}
+                className="w-full flex flex-row items-center"
+              >
+                {diagnosis.length >= 4 ? (
+                  <div className="w-full flex flex-row items-center gap-2">
+                    {diagnosis.slice(0, 3).map((data) => renderBadges(data.value, ""))}
+                    <Collapsible.Content className="flex flex-row items-center gap-2">
+                      {diagnosis.slice(3).map((data) => renderBadges(data.value, ""))}
+                    </Collapsible.Content>
+                    <Collapsible.Trigger asChild>
+                      <button className="w-6 h-6 flex items-center justify-center hover:border hover:rounded hover:border-gray-200 cursor-pointer">
+                        {openMoreDiagnosis ? (
+                          <DashIcon color="#212529" width={15} height={15} />
+                        ) : (
+                          <PlusIcon color="#212529" width={15} height={15} />
+                        )}
+                      </button>
+                    </Collapsible.Trigger>
+                  </div>
+                ) : (
+                  <div className="w-full flex flex-row items-center gap-2">
+                    {diagnosis.length === 0 ? (
+                      <Badges data={"Não cadastrado"} />
+                    ) : (
+                      diagnosis.map((data) => renderBadges(data.value, ""))
+                    )}
+                  </div>
+                )}
+              </Collapsible.Root>
+            </div>
+            <div className="w-full flex items-center flex-col gap-2">
+              <span className="whitespace-nowrap w-full text-lg font-semibold text-brand-standard-black">
+                Exames:
+              </span>
+              <Collapsible.Root
+                open={openMoreExams}
+                onOpenChange={setOpenMoreExams}
+                className="w-full flex flex-row items-center"
+              >
+                {exams.length >= 2 ? (
+                  <div className="w-full flex flex-row items-center gap-2">
+                    {exams.slice(0, 1).map(renderExams)}
+                    <Collapsible.Content className="flex flex-row items-center gap-2">
+                      {exams.slice(1).map(renderExams)}
+                    </Collapsible.Content>
+                    <Collapsible.Trigger asChild>
+                      <button className="w-6 h-6 flex items-center justify-center hover:border hover:rounded hover:border-gray-200 cursor-pointer">
+                        {openMoreExams ? (
+                          <DashIcon color="#212529" width={15} height={15} />
+                        ) : (
+                          <PlusIcon color="#212529" width={15} height={15} />
+                        )}
+                      </button>
+                    </Collapsible.Trigger>
+                  </div>
+                ) : (
+                  <div className="w-full flex flex-row items-center gap-2">
+                    {exams.length === 0 ? (
+                      <Badges data={"Não cadastrado"} />
+                    ) : (
+                      uniqueExams.map(renderExams)
+                    )}
+                  </div>
+                )}
+              </Collapsible.Root>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default PatientCard;
