@@ -5,7 +5,7 @@ import { Option } from "../interfaces/Option";
 import { NextRouter } from "next/router";
 import { Exams } from "../@types/exams";
 
-type PatientCardResponse = {
+export type PatientCardResponse = {
   id: string;
   profile_photo: string;
   name: string;
@@ -19,7 +19,7 @@ type PatientCardResponse = {
   exams: Exams[];
 };
 
-export default function useUrlQueryParams({ currentPage, router }: { currentPage: number; router: NextRouter }) {
+export default function useSearchByAllFilters({ currentPage, router }: { currentPage: number; router: NextRouter }) {
   return useQuery<Page<PatientCardResponse>, Error>({
     queryKey: ["search", currentPage],
     queryFn: async () => {

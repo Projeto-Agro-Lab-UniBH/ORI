@@ -2,6 +2,7 @@ import DotsLoad from "../../Load/DotsLoad";
 import SearchPatientResultItem from "../../Items/SearchPatientResultItem";
 import { Cross2Icon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { useState, useRef, useEffect, Dispatch, SetStateAction } from "react";
+import { useRouter } from "next/router";
 
 type Patient = {
   id: string;
@@ -12,20 +13,21 @@ type Patient = {
 };
 
 const SearchInput = ({
-  field,
   value,
   setValue,
   isLoading,
   data,
   onChange,
+  onClick
 }: {
-  field: string;
   value: string;
   setValue: Dispatch<SetStateAction<string>>;
   isLoading: boolean;
   data: Patient[] | undefined;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onClick: () => void;
 }) => {
+  const router = useRouter();
   const [isListOpen, setIsListOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
@@ -55,6 +57,21 @@ const SearchInput = ({
     setIsListOpen(true);
   };
 
+  const clearInput = async () => {
+    setValue("");
+    
+    if (router.query.search != "") {
+      const query = { ...router.query, ["search"]: "", page: "1" };
+
+      await router.push({
+        pathname: router.pathname,
+        query,
+      });
+
+      router.reload();
+    }
+  }
+
   return (
     <div className="w-[592px] flex">
       <div className="w-[592px] flex flex-col">
@@ -65,7 +82,6 @@ const SearchInput = ({
           <input
             ref={inputRef}
             type="text"
-            id={field}
             className="w-full h-10 pl-10 p-2.5 block bg-white border border-gray-200 rounded font-normal text-brand-standard-black text-sm hover:border-[#b3b3b3]"
             placeholder="Procure um paciente"
             value={value}
@@ -75,7 +91,7 @@ const SearchInput = ({
           {value !== "" && (
             <button
               type="button"
-              onClick={() => setValue("")}
+              onClick={clearInput}
               className="absolute inset-y-0 right-0 flex items-center pr-3"
             >
               <Cross2Icon
@@ -102,7 +118,7 @@ const SearchInput = ({
                     <ul className="w-full list-none">
                       {data && data.length > 0 ? (
                         data && data.length >= 3 ? (
-                          data?.slice(0, 3).map((data) => (
+                          data.slice(0, 3).map((data) => (
                             <li
                               key={data.id}
                               className="w-full flex items-center border-b px-4 py-4"
@@ -118,7 +134,7 @@ const SearchInput = ({
                             </li>
                           ))
                         ) : (
-                          data?.map((data, i) => {
+                          data.map((data, i) => {
                             if (i == 1) {
                               return (
                                 <li
@@ -160,7 +176,9 @@ const SearchInput = ({
                       )}
                     </ul>
                     {data && data.length >= 3 && (
-                      <button className="w-full h-10 font-normal text-sm">
+                      <button
+                        onClick={onClick} 
+                        className="w-full h-10 font-normal text-sm">
                         Ver todos os resultados
                       </button>
                     )}

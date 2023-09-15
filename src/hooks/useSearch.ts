@@ -1,6 +1,7 @@
 import { useQuery } from "react-query";
 import { api } from "../providers/Api";
 import { Dispatch, SetStateAction } from "react";
+import { NextRouter } from "next/router";
 
 type PatientCardResponse = {
   id: string;
@@ -11,20 +12,26 @@ type PatientCardResponse = {
 };
 
 export default function useSearch({
+  router,
   searchInputValue,
   setIsLoadingFindedData,
 }: {
+  router: NextRouter;
   searchInputValue: string;
   setIsLoadingFindedData: Dispatch<SetStateAction<boolean>>;
 }) {
   return useQuery<PatientCardResponse[]>(
-    ["searchValue", searchInputValue],
+    ["searchForInput", searchInputValue],
     async () => {
+      const { prognosis, physical_shape, gender } = router.query;
       setIsLoadingFindedData(true);
       const response = await api.get<PatientCardResponse[]>(
-        `/patient/search/by/${searchInputValue}`
+        `/patient/search/by/values?prognosis=${
+          prognosis || ""
+        }&physical_shape=${physical_shape || ""}&gender=${
+          gender || ""
+        }&search=${searchInputValue || ""}`
       );
-
       setIsLoadingFindedData(false);
       return response.data;
     },

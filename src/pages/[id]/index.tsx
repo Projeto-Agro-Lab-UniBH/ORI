@@ -2,7 +2,7 @@ import RegisterPatientModal from "../../components/Modal/RegisterPatientModal";
 import PatientCard from "../../components/Cards/PatientCard";
 import Pagination from "../../components/Pagination";
 import Header from "../../components/Header";
-import useUrlQueryParams from "../../hooks/useUrlQueryParams";
+import useSearchByAllFilters from "../../hooks/useSearchByAllFilters";
 import PatientCardSkeleton from "../../components/Skeletons/PatientCardSkeleton";
 import SelectFilter from "../../components/Selects/SelectFilter";
 import useSearch from "../../hooks/useSearch";
@@ -42,6 +42,18 @@ export default function AppPage() {
     setSearchInputValue(event.target.value);
   };
 
+  const handleViewAllResults = async () => {
+    const query = { ...router.query, ["search"]: searchInputValue, page: "1" };
+    setCurrentPage(1);
+    
+    await router.push({
+      pathname: router.pathname,
+      query
+    });
+
+    router.reload();
+  }
+
   useEffect(() => {
     const setSearchValue = (field: string) => {
       const value = searchParams.get(field);
@@ -57,6 +69,9 @@ export default function AppPage() {
           case "gender":
             setSelectGender(option);
             break;
+          case "search":
+            setSearchInputValue(value)
+            break; 
           default:
             break;
         }
@@ -71,6 +86,9 @@ export default function AppPage() {
           case "gender":
             setSelectGender(null);
             break;
+          case "search":
+            setSearchInputValue("");
+            break;
           default:
             break;
         }
@@ -80,15 +98,17 @@ export default function AppPage() {
     setSearchValue("prognosis");
     setSearchValue("physical_shape");
     setSearchValue("gender");
+    setSearchValue("search");
   }, [
     searchParams,
     setSelectPrognosis,
     setSelectPhysicalShape,
     setSelectGender,
+    setSearchInputValue,
   ]);
 
-  const { data: dataPatient } = useSearch({ searchInputValue, setIsLoadingFindedData });
-  const { data, isLoading } = useUrlQueryParams({ currentPage, router });
+  const { data: result } = useSearch({ router, searchInputValue, setIsLoadingFindedData });
+  const { data, isLoading } = useSearchByAllFilters({ currentPage, router });
 
   return (
     <div className="w-full flex items-center justify-center my-4">
@@ -138,12 +158,12 @@ export default function AppPage() {
             />
             {/* Search input */}
             <SearchInput
-              field="search"
-              data={dataPatient}
+              data={result}
               isLoading={isLoadingFindedData}
               value={searchInputValue}
-              setValue={setSearchInputValue} 
+              setValue={setSearchInputValue}
               onChange={handleSearchInput}
+              onClick={handleViewAllResults}
             />
             {/* RegisterPatientModal component */}
             <div className="w-10 h-24 flex items-center">
