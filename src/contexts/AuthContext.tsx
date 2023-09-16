@@ -27,6 +27,7 @@ type DecodedToken = {
 
 type AuthContext = {
   user: User | null;
+  isLoading: boolean;
   isAuthenticated: boolean;
   signIn: (data: SignInData) => Promise<void>;
   logOut: () => void;
@@ -40,6 +41,7 @@ export function useAuthContext() {
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const isAuthenticated = !!user;
 
   useEffect(() => {
@@ -73,12 +75,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       Cookies.set("nextauth.token", data.token, { expires: 1 / 3 }); // Token válido por 8 horas
       
       setUser(data.user);
+      setIsLoading(true);
 
       // Atualize os cabeçalhos da API com o token
       api.defaults.headers["Authorization"] = `Bearer ${data.token}`;
 
       // Redirecione para a página do usuário
-      Router.push(`/${data.user.id}?page=1`);
+      await Router.push(`/${data.user.id}?page=1`);
+
+      setIsLoading(false);
+
     } catch (error) {
       // Trate os erros de login adequadamente
       toast.error("Falha ao fazer login. Verifique suas credenciais.", {
@@ -116,7 +122,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, signIn, logOut }}>
+    <AuthContext.Provider value={{ user, isLoading, isAuthenticated, signIn, logOut }}>
       {children}
     </AuthContext.Provider>
   );
