@@ -6,6 +6,7 @@ import { pdfjs } from "react-pdf";
 import NextNProgress from 'nextjs-progressbar';
 import "../styles/globals.css";
 import "tailwindcss/tailwind.css";
+import "react-toastify/dist/ReactToastify.css";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 
