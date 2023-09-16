@@ -252,18 +252,19 @@ const RegisterPatientModal = () => {
                       </span>
                     </div>
                     <div className="w-full flex items-center justify-center">
-                      <Avatar.Root className="w-16 h-16 flex items-center justify-center rounded-full overflow-hidden">
-                        <Avatar.Image
-                          src={previewImage as string | undefined}
-                          className="w-full h-full object-cover"
-                        />
-                        <Avatar.Fallback className="w-16 h-16 border border-gray-200 flex items-center justify-center rounded-full overflow-hidden" delayMs={600}>
-                          <CameraIcon 
-                            width={16} 
-                            height={16} 
-                            color="#e5e7eb" 
-                          />    
-                        </Avatar.Fallback>
+                      <Avatar.Root
+                        className={`w-16 h-16 flex items-center justify-center ${
+                          previewImage ? "" : "border border-gray-200"
+                        } rounded-full overflow-hidden`}
+                      >
+                        {previewImage ? (
+                          <Avatar.Image
+                            src={previewImage as string | undefined}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <CameraIcon width={16} height={16} color="#e5e7eb" />
+                        )}
                       </Avatar.Root>
                     </div>
                   </div>
@@ -419,9 +420,7 @@ const RegisterPatientModal = () => {
                         />
                       </div>
                       {errors.name && (
-                        <span
-                          className={"text-xs font-normal text-red-500"}
-                        >
+                        <span className={"text-xs font-normal text-red-500"}>
                           {errors.name.message}
                         </span>
                       )}
@@ -446,14 +445,13 @@ const RegisterPatientModal = () => {
                           <input
                             type="text"
                             className={
-                              errors.specie 
+                              errors.specie
                                 ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
                                 : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                             }
                             {...register("specie")}
-                            />
-                          )
-                        }
+                          />
+                        )}
                       </div>
                       {errors.specie && (
                         <span
@@ -502,7 +500,7 @@ const RegisterPatientModal = () => {
                           <input
                             type="text"
                             className={
-                              errors.owner 
+                              errors.owner
                                 ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
                                 : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                             }
@@ -555,7 +553,7 @@ const RegisterPatientModal = () => {
                           <input
                             type="text"
                             className={
-                              errors.race 
+                              errors.race
                                 ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
                                 : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                             }
@@ -735,9 +733,7 @@ const RegisterPatientModal = () => {
                           ...baseStyles,
                           width: "100%",
                           minHeight: 40,
-                          borderColor: state.isFocused
-                            ? "#e2e8f0"
-                            : "#e2e8f0",
+                          borderColor: state.isFocused ? "#e2e8f0" : "#e2e8f0",
                           whiteSpace: "nowrap",
                           textOverflow: "ellipsis",
                           fontFamily: "Inter",
@@ -790,13 +786,17 @@ const RegisterPatientModal = () => {
                     />
                   </div>
                   <span className="text-xs font-normal text-gray-500">
-                    <strong className="font-medium">Instrução: </strong> Digite o nome da doença diagnosticada/suspeita clínica e depois aperte a tecla <strong className="font-medium">Enter</strong> ou <strong className="font-medium">Tab.</strong>
+                    <strong className="font-medium">Instrução: </strong> Digite
+                    o nome da doença diagnosticada/suspeita clínica e depois
+                    aperte a tecla{" "}
+                    <strong className="font-medium">Enter</strong> ou{" "}
+                    <strong className="font-medium">Tab.</strong>
                   </span>
                 </div>
               </div>
               <div className="w-full h-10 flex items-center justify-end">
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   className="w-24 h-10 border border-gray-200 rounded font-medium text-base text-brand-standard-black bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500"
                 >
                   Cadastrar

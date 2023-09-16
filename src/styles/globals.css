@@ -5,3 +5,13 @@
 * {
   font-family: "Inter", sans-serif;
 }
+
+/* Ocultar o spinner do NProgress */
+#nprogress .spinner {
+  display: none !important;
+}
+
+/* Personalizar a cor da barra de progresso */
+#nprogress .bar {
+  background: #212529;
+}

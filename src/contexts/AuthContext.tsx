@@ -1,14 +1,10 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
 import Router from "next/router";
+import Cookies from "js-cookie"; // Use js-cookie para manipular cookies
+import jwt_decode from "jwt-decode"; // Verifique o token JWT
+import { createContext, useContext, useEffect, useState } from "react";
+import { api } from "../providers/Api"; 
+import { toast } from "react-toastify";
 import { AuthService } from "../services/AuthService";
-import { parseCookies, setCookie } from "nookies"
-import { api } from "../providers/Api";
-import jwt_decode from "jwt-decode"
-
-type SignInData = {
-  email: string, 
-  password: string
-}
 
 type User = {
   id: string;
@@ -16,14 +12,26 @@ type User = {
   username: string;
   email: string;
   sub?: string;
+};
+
+type SignInData = {
+  email: string;
+  password: string;
+};
+
+// Define tipos para o token JWT
+type DecodedToken = {
+  sub: string;
+  exp: number;
 }
 
 type AuthContext = {
-  isAuthenticated: boolean
   user: User | null;
+  isLoading: boolean;
+  isAuthenticated: boolean;
   signIn: (data: SignInData) => Promise<void>;
   logOut: () => void;
-}
+};
 
 export const AuthContext = createContext({} as AuthContext);
 
@@ -33,46 +41,88 @@ export function useAuthContext() {
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const isAuthenticated = !!user
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const isAuthenticated = !!user;
 
   useEffect(() => {
-    const { 'nextauth.token': token } = parseCookies()
-    
+    // Verifique se o usuário já está autenticado ao carregar a página
+    const token = Cookies.get("nextauth.token");
     if (token) {
-      const id = jwt_decode<User>(token).sub
-      api.get(`/user/${id}`).then(res => setUser(res.data))
+      try {
+        const decodedToken = jwt_decode<DecodedToken>(token);
+        if (decodedToken && !isTokenExpired(decodedToken)) {
+          // Token válido e não expirado
+          api.get(`/user/${decodedToken.sub}`).then((res) => setUser(res.data));
+        } else {
+          // Token expirado, faça o logout
+          logOut();
+        }
+      } catch (error) {
+        // Manipule erros ao decodificar o token
+        logOut();
+      }
     }
-  }, [])
+  }, []);
 
   async function signIn({ email, password }: SignInData) {
-    const { data } = await AuthService.signIn({
-      email, 
-      password
-    });
+    try {
+      const { data } = await AuthService.signIn({
+        email,
+        password,
+      });
 
-    setCookie(undefined, 'nextauth.token', data.token, {
-      maxAge: 60 * 60 * 8
-    })
+      // Salve o token JWT nos cookies
+      Cookies.set("nextauth.token", data.token, { expires: 1 / 3 }); // Token válido por 8 horas
+      
+      setUser(data.user);
+      setIsLoading(true);
 
-    setUser(data.user)
+      // Atualize os cabeçalhos da API com o token
+      api.defaults.headers["Authorization"] = `Bearer ${data.token}`;
 
-    api.defaults.headers['Authorization'] = `Bearer ${data.token}`
+      // Redirecione para a página do usuário
+      await Router.push(`/${data.user.id}?page=1`);
 
-    Router.push(`/${data.user.id}?page=1`)
+      setIsLoading(false);
+
+    } catch (error) {
+      // Trate os erros de login adequadamente
+      toast.error("Falha ao fazer login. Verifique suas credenciais.", {
+        position: "bottom-right",
+        autoClose: 2500,
+        style: {
+          backgroundColor: "#212529",
+          fontFamily: "Inter, sans-serif",
+          fontWeight: "500",
+          fontSize: "12px",
+          color: "#f87171",
+        },
+        progressStyle: {
+          backgroundColor: "#f87171",
+        },
+      });
+    }
   }
-  
+
   function logOut() {
-    setCookie(undefined, 'nextauth.token', "", {
-      maxAge: 0
-    })
+    // Remova o token dos cookies
+    Cookies.remove("nextauth.token");
 
-    api.defaults.headers['Authorization'] = ""
+    // Limpe os cabeçalhos da API
+    delete api.defaults.headers["Authorization"];
 
-    Router.push('/sign-in')
-  } 
+    // Redirecione para a página de login
+    Router.push("/sign-in");
+  }
+
+  // Função para verificar se o token JWT está expirado
+  function isTokenExpired(decodedToken: DecodedToken): boolean {
+    const now = Date.now() / 1000;
+    return decodedToken.exp ? now > decodedToken.exp : false;
+  }
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, signIn, logOut }}>
+    <AuthContext.Provider value={{ user, isLoading, isAuthenticated, signIn, logOut }}>
       {children}
     </AuthContext.Provider>
   );
