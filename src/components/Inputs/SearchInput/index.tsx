@@ -1,36 +1,25 @@
-import DotsLoad from "../../Load/DotsLoad";
-import SearchPatientResultItem from "../../Items/SearchPatientResultItem";
 import { Cross2Icon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { useState, useRef, useEffect, Dispatch, SetStateAction } from "react";
 import { useRouter } from "next/router";
+import DotsLoad from "../../Load/DotsLoad";
+import useSearch from "../../../hooks/useSearch";
+import SearchPatientResultItem from "../../Items/SearchPatientResultItem";
 
-type Patient = {
-  id: string;
-  profile_photo: string;
-  name: string;
-  specie: string;
-  race: string;
-};
-
-const SearchInput = ({
-  value,
-  setValue,
-  isLoading,
-  data,
-  onChange,
-  onClick
-}: {
+type SearchInputProps = {
   value: string;
   setValue: Dispatch<SetStateAction<string>>;
-  isLoading: boolean;
-  data: Patient[] | undefined;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onClick: () => void;
-}) => {
+};
+
+const SearchInput: React.FC<SearchInputProps> = ({ value, setValue, onChange, onClick }) => {
   const router = useRouter();
   const [isListOpen, setIsListOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
+
+  const { data } = useSearch({ router, searchInputValue: value, setIsLoading })
 
   // Fecha a lista quando o usuário clica fora dela
   useEffect(() => {

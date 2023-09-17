@@ -2,37 +2,30 @@ import { useQuery } from "react-query";
 import { api } from "../providers/Api";
 import { Dispatch, SetStateAction } from "react";
 import { NextRouter } from "next/router";
-
-type PatientCardResponse = {
-  id: string;
-  profile_photo: string;
-  name: string;
-  specie: string;
-  race: string;
-};
+import { SearchPatientResponse } from "../@types/ApiResponse";
 
 export default function useSearch({
   router,
   searchInputValue,
-  setIsLoadingFindedData,
+  setIsLoading,
 }: {
   router: NextRouter;
   searchInputValue: string;
-  setIsLoadingFindedData: Dispatch<SetStateAction<boolean>>;
+  setIsLoading: Dispatch<SetStateAction<boolean>>;
 }) {
-  return useQuery<PatientCardResponse[]>(
+  return useQuery<SearchPatientResponse[]>(
     ["searchForInput", searchInputValue],
     async () => {
       const { prognosis, physical_shape, gender } = router.query;
-      setIsLoadingFindedData(true);
-      const response = await api.get<PatientCardResponse[]>(
+      setIsLoading(true);
+      const response = await api.get<SearchPatientResponse[]>(
         `/patient/search/by/values?prognosis=${
           prognosis || ""
         }&physical_shape=${physical_shape || ""}&gender=${
           gender || ""
         }&search=${searchInputValue || ""}`
       );
-      setIsLoadingFindedData(false);
+      setIsLoading(false);
       return response.data;
     },
     {
