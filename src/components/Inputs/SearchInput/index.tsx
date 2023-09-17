@@ -71,7 +71,7 @@ const SearchInput: React.FC<SearchInputProps> = ({ value, setValue, onChange, on
           <input
             ref={inputRef}
             type="text"
-            className="w-full h-10 pl-10 p-2.5 block bg-white border border-gray-200 rounded font-normal text-brand-standard-black text-sm hover:border-[#b3b3b3]"
+            className="w-full h-10 pl-10 p-2.5 block bg-white border border-gray-200 rounded font-normal text-shark-950 text-sm hover:border-[#b3b3b3]"
             placeholder="Procure um paciente"
             value={value}
             onChange={onChange}
@@ -159,7 +159,7 @@ const SearchInput: React.FC<SearchInputProps> = ({ value, setValue, onChange, on
                           })
                         )
                       ) : (
-                        <li className="w-full font-normal text-brand-standard-black text-base px-4 py-4">
+                        <li className="w-full font-normal text-shark-950 text-base px-4 py-4">
                           Nenhum resultado encontrado
                         </li>
                       )}

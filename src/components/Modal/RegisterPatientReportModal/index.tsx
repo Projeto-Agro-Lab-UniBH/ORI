@@ -167,7 +167,7 @@ const RegisterPatientReportModal: React.FC<RegisterPatientReportProps> = ({ pati
 
   return (
     <Dialog.Root onOpenChange={setOpen} open={open}>
-      <Dialog.Trigger className="w-[164px] h-10 border border-gray-200 rounded font-medium text-base text-brand-standard-black bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500">
+      <Dialog.Trigger className="w-[164px] h-10 border border-gray-200 rounded font-medium text-base text-shark-950 bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500">
         Criar novo relatório
       </Dialog.Trigger>
       <Dialog.Portal>
@@ -206,7 +206,7 @@ const RegisterPatientReportModal: React.FC<RegisterPatientReportProps> = ({ pati
                   <div className="w-[184px] flex flex-col gap-3">
                     <label
                       htmlFor="shift"
-                      className="w-full text-sm font-normal text-brand-standard-black"
+                      className="w-full text-sm font-normal text-shark-950"
                     >
                       Turno
                     </label>
@@ -256,7 +256,7 @@ const RegisterPatientReportModal: React.FC<RegisterPatientReportProps> = ({ pati
                     <div className="w-full flex flex-col gap-3">
                       <label
                         htmlFor="author"
-                        className="w-full text-sm font-normal text-brand-standard-black"
+                        className="w-full text-sm font-normal text-shark-950"
                       >
                         Nome do responsável
                       </label>
@@ -264,8 +264,8 @@ const RegisterPatientReportModal: React.FC<RegisterPatientReportProps> = ({ pati
                         type="text"
                         className={
                           errors.author
-                            ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
-                            : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                            ? "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                            : "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                         }
                         {...register("author")}
                       />
@@ -281,7 +281,7 @@ const RegisterPatientReportModal: React.FC<RegisterPatientReportProps> = ({ pati
                   <div className="w-full flex flex-col gap-3">
                     <label
                       htmlFor="author"
-                      className="w-full text-sm font-normal text-brand-standard-black"
+                      className="w-full text-sm font-normal text-shark-950"
                     >
                       Título
                     </label>
@@ -289,8 +289,8 @@ const RegisterPatientReportModal: React.FC<RegisterPatientReportProps> = ({ pati
                       type="text"
                       className={
                         errors.title
-                          ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
-                          : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                          ? "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                          : "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                       }
                       {...register("title")}
                     />
@@ -304,7 +304,7 @@ const RegisterPatientReportModal: React.FC<RegisterPatientReportProps> = ({ pati
                 <div className="w-full flex flex-col gap-3">
                   <label
                     htmlFor="report_text"
-                    className="w-full text-sm font-normal text-brand-standard-black"
+                    className="w-full text-sm font-normal text-shark-950"
                   >
                     Descrição / Relatório
                   </label>
@@ -312,7 +312,7 @@ const RegisterPatientReportModal: React.FC<RegisterPatientReportProps> = ({ pati
                     <textarea
                       cols={30}
                       rows={10}
-                      className="w-full px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                      className="w-full px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                       {...register("report_text")}
                     ></textarea>
                   </div>
@@ -371,7 +371,7 @@ const RegisterPatientReportModal: React.FC<RegisterPatientReportProps> = ({ pati
                   <div className="w-full flex">
                     <label
                       htmlFor="patient-photo-file"
-                      className="border border-gray-200 flex items-center px-3 py-[6px] gap-1 rounded text-base text-brand-standard-black font-medium bg-white hover:border-[#b3b3b3] cursor-pointer"
+                      className="border border-gray-200 flex items-center px-3 py-[6px] gap-1 rounded text-base text-shark-950 font-medium bg-white hover:border-[#b3b3b3] cursor-pointer"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -400,7 +400,7 @@ const RegisterPatientReportModal: React.FC<RegisterPatientReportProps> = ({ pati
                 <div className="w-full h-10 flex justify-end">
                   <button
                     type="submit"
-                    className="w-[132px] h-10 border border-gray-200 rounded font-medium text-base text-brand-standard-black bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500"
+                    className="w-[132px] h-10 border border-gray-200 rounded font-medium text-base text-shark-950 bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500"
                   >
                     Salvar relatório
                   </button>

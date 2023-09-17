@@ -184,7 +184,7 @@ const EditUserProfileModal: React.FC<EditUserProfileModalProps> = ({ id, childre
                 <div className="w-full flex items-center gap-4">
                   <div className="w-[72px] h-full flex items-center flex-col gap-2">
                     <div className="w-full flex items-center justify-center">
-                      <span className="text-sm font-semibold text-brand-standard-black">
+                      <span className="text-sm font-semibold text-shark-950">
                         Foto
                       </span>
                     </div>
@@ -217,7 +217,7 @@ const EditUserProfileModal: React.FC<EditUserProfileModalProps> = ({ id, childre
                       />
                       <div className="w-full">
                         <div className="w-[516px] flex flex-col">
-                          <p className="w-16 text-brand-standard-black font-semibold text-sm">
+                          <p className="w-16 text-shark-950 font-semibold text-sm">
                             Dica:
                           </p>
                           <p className="w-[500px] text-gray-500 font-normal text-sm whitespace-nowrap">
@@ -232,20 +232,20 @@ const EditUserProfileModal: React.FC<EditUserProfileModalProps> = ({ id, childre
                 <div className="w-full flex flex-row gap-4">
                   <div className="w-full">
                     <div className="w-full flex flex-col gap-3">
-                      <label htmlFor="username" className="w-full text-sm font-normal text-brand-standard-black">Nome completo</label>
+                      <label htmlFor="username" className="w-full text-sm font-normal text-shark-950">Nome completo</label>
                       <input
                         type="text"
-                        className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                        className="w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                         {...register("username")}
                       />
                     </div>
                   </div>
                   <div className="w-full">
                     <div className="w-full flex flex-col gap-3">
-                      <label htmlFor="email" className="w-full text-sm font-normal text-brand-standard-black">E-mail</label>
+                      <label htmlFor="email" className="w-full text-sm font-normal text-shark-950">E-mail</label>
                       <input
                         type="text"
-                        className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                        className="w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                         {...register("email")}
                       />
                     </div>
@@ -253,7 +253,7 @@ const EditUserProfileModal: React.FC<EditUserProfileModalProps> = ({ id, childre
                 </div>
               </div>
               <div className="w-full flex justify-end">
-                <button className="border border-gray-200 px-3 py-[6px] rounded text-base text-brand-standard-black font-medium bg-white hover:bg-gray-50">
+                <button className="border border-gray-200 px-3 py-[6px] rounded text-base text-shark-950 font-medium bg-white hover:bg-gray-50">
                   Salvar alterações
                 </button>
               </div>

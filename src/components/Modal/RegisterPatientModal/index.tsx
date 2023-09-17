@@ -247,7 +247,7 @@ const RegisterPatientModal = () => {
                 <div className="w-full flex items-center gap-4">
                   <div className="w-[72px] h-full flex items-center flex-col gap-2">
                     <div className="w-full flex items-center justify-center">
-                      <span className="text-sm font-semibold text-brand-standard-black">
+                      <span className="text-sm font-semibold text-shark-950">
                         Foto
                       </span>
                     </div>
@@ -285,7 +285,7 @@ const RegisterPatientModal = () => {
                       />
                       <div className="w-full">
                         <div className="w-[516px] flex flex-col">
-                          <p className="w-16 text-brand-standard-black font-semibold text-sm">
+                          <p className="w-16 text-shark-950 font-semibold text-sm">
                             Dica:
                           </p>
                           <p className="w-[500px] text-gray-500 font-normal text-sm whitespace-nowrap">
@@ -303,7 +303,7 @@ const RegisterPatientModal = () => {
                       <div className="w-full flex flex-col gap-3">
                         <label
                           htmlFor="entry_date"
-                          className="w-full text-sm font-normal text-brand-standard-black"
+                          className="w-full text-sm font-normal text-shark-950"
                         >
                           Data de entrada
                         </label>
@@ -311,8 +311,8 @@ const RegisterPatientModal = () => {
                           type="date"
                           className={
                             errors.entry_date
-                              ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
-                              : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                              ? "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                              : "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                           }
                           {...register("entry_date")}
                         />
@@ -329,13 +329,13 @@ const RegisterPatientModal = () => {
                       <div className="w-full flex flex-col gap-3">
                         <label
                           htmlFor="departure_date"
-                          className="w-full text-sm font-normal text-brand-standard-black"
+                          className="w-full text-sm font-normal text-shark-950"
                         >
                           Data de saída
                         </label>
                         <input
                           type="date"
-                          className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                          className="w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                           {...register("departure_date")}
                         />
                       </div>
@@ -346,7 +346,7 @@ const RegisterPatientModal = () => {
                       <div className="w-full flex flex-col gap-3">
                         <label
                           htmlFor="prognosis"
-                          className="w-full text-sm font-normal text-brand-standard-black"
+                          className="w-full text-sm font-normal text-shark-950"
                         >
                           Prognóstico
                         </label>
@@ -405,7 +405,7 @@ const RegisterPatientModal = () => {
                       <div className="w-[368px] flex flex-col gap-3">
                         <label
                           htmlFor="name"
-                          className="w-full text-sm font-normal text-brand-standard-black"
+                          className="w-full text-sm font-normal text-shark-950"
                         >
                           Nome do paciente
                         </label>
@@ -413,8 +413,8 @@ const RegisterPatientModal = () => {
                           type="text"
                           className={
                             errors.name
-                              ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
-                              : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                              ? "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                              : "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                           }
                           {...register("name")}
                         />
@@ -431,7 +431,7 @@ const RegisterPatientModal = () => {
                       <div className="w-full flex flex-col gap-3">
                         <label
                           htmlFor="specie"
-                          className="w-full text-sm font-normal text-brand-standard-black"
+                          className="w-full text-sm font-normal text-shark-950"
                         >
                           Espécie
                         </label>
@@ -446,8 +446,8 @@ const RegisterPatientModal = () => {
                             type="text"
                             className={
                               errors.specie
-                                ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
-                                : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                                ? "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                                : "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                             }
                             {...register("specie")}
                           />
@@ -486,7 +486,7 @@ const RegisterPatientModal = () => {
                       <div className="w-[368px] flex flex-col gap-3">
                         <label
                           htmlFor="owner"
-                          className="w-full text-sm font-normal text-brand-standard-black"
+                          className="w-full text-sm font-normal text-shark-950"
                         >
                           Nome do tutor(a)
                         </label>
@@ -501,8 +501,8 @@ const RegisterPatientModal = () => {
                             type="text"
                             className={
                               errors.owner
-                                ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
-                                : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                                ? "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                                : "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                             }
                             {...register("owner")}
                           />
@@ -539,7 +539,7 @@ const RegisterPatientModal = () => {
                       <div className="w-full flex flex-col gap-3">
                         <label
                           htmlFor="race"
-                          className="w-full text-sm font-normal text-brand-standard-black"
+                          className="w-full text-sm font-normal text-shark-950"
                         >
                           Raça
                         </label>
@@ -554,8 +554,8 @@ const RegisterPatientModal = () => {
                             type="text"
                             className={
                               errors.race
-                                ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
-                                : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                                ? "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                                : "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                             }
                             {...register("race")}
                           />
@@ -594,7 +594,7 @@ const RegisterPatientModal = () => {
                       <div className="w-full flex flex-col gap-3">
                         <label
                           htmlFor="physical_shape"
-                          className="w-full text-sm font-normal text-brand-standard-black"
+                          className="w-full text-sm font-normal text-shark-950"
                         >
                           Porte físico
                         </label>
@@ -651,13 +651,13 @@ const RegisterPatientModal = () => {
                       <div className="w-full flex flex-col gap-3">
                         <label
                           htmlFor="weight"
-                          className="w-full text-sm font-normal text-brand-standard-black"
+                          className="w-full text-sm font-normal text-shark-950"
                         >
                           Peso
                         </label>
                         <input
                           type="text"
-                          className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                          className="w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                           {...register("weight")}
                         />
                       </div>
@@ -668,7 +668,7 @@ const RegisterPatientModal = () => {
                       <div className="w-full flex flex-col gap-3">
                         <label
                           htmlFor="gender"
-                          className="w-full text-sm font-normal text-brand-standard-black"
+                          className="w-full text-sm font-normal text-shark-950"
                         >
                           Gênero
                         </label>
@@ -723,7 +723,7 @@ const RegisterPatientModal = () => {
                   <div className="w-full flex flex-col gap-3">
                     <label
                       htmlFor="diagnosis"
-                      className="w-full text-sm font-normal text-brand-standard-black"
+                      className="w-full text-sm font-normal text-shark-950"
                     >
                       Diagnóstico/Suspeita Clínica
                     </label>
@@ -797,7 +797,7 @@ const RegisterPatientModal = () => {
               <div className="w-full h-10 flex items-center justify-end">
                 <button
                   type="submit"
-                  className="w-24 h-10 border border-gray-200 rounded font-medium text-base text-brand-standard-black bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500"
+                  className="w-24 h-10 border border-gray-200 rounded font-medium text-base text-shark-950 bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500"
                 >
                   Cadastrar
                 </button>

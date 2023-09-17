@@ -91,7 +91,7 @@ const AddAttachmentModal: React.FC<AddAttachmentModalProps> = ({ patientId }) =>
 
   return (
     <Dialog.Root onOpenChange={setOpen} open={open}>
-      <Dialog.Trigger className="w-[202.8px] border border-gray-200 flex items-center px-3 py-[6px] gap-1 rounded text-base text-brand-standard-black font-medium bg-white hover:border-[#b3b3b3] cursor-pointer">
+      <Dialog.Trigger className="w-[202.8px] border border-gray-200 flex items-center px-3 py-[6px] gap-1 rounded text-base text-shark-950 font-medium bg-white hover:border-[#b3b3b3] cursor-pointer">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -207,7 +207,7 @@ const AddAttachmentModal: React.FC<AddAttachmentModalProps> = ({ patientId }) =>
                 <div className="w-full h-10 flex justify-end">
                   <button
                     onClick={(e) => send(e)}
-                    className="w-32 h-10 border border-gray-200 rounded font-medium text-base text-brand-standard-black bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500"
+                    className="w-32 h-10 border border-gray-200 rounded font-medium text-base text-shark-950 bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500"
                   >
                     Salvar arquivo
                   </button>

@@ -44,7 +44,7 @@ export default function SignIn() {
               <div className="w-full flex flex-col gap-3">
                 <label
                   htmlFor="email"
-                  className="text-sm font-normal text-brand-standard-black"
+                  className="text-sm font-normal text-shark-950"
                 >
                   E-mail
                 </label>
@@ -55,7 +55,7 @@ export default function SignIn() {
                     errors.email
                       ? "border-red-200 bg-white hover:border-red-500 focus:outline-red-500"
                       : "border-solid border-gray-200 bg-white hover:border-[#b3b3b3]"
-                  } rounded text-brand-standard-black`}
+                  } rounded text-shark-950`}
                   placeholder="Digite o email da sua conta"
                   {...register("email")}
                 />
@@ -70,7 +70,7 @@ export default function SignIn() {
               <div className="w-full flex flex-col gap-3">
                 <label
                   htmlFor="password"
-                  className="text-sm font-normal text-brand-standard-black"
+                  className="text-sm font-normal text-shark-950"
                 >
                   Senha
                 </label>
@@ -81,7 +81,7 @@ export default function SignIn() {
                     errors.password
                       ? "border-red-200 bg-white hover:border-red-500 focus:outline-red-500"
                       : "border-solid border-gray-200 bg-white hover:border-[#b3b3b3]"
-                  } rounded text-brand-standard-black`}
+                  } rounded text-shark-950`}
                   placeholder="Digite a sua senha"
                   {...register("password")}
                 />
@@ -96,7 +96,7 @@ export default function SignIn() {
           <div className="w-full flex justify-center">
             <button
               type="submit"
-              className="w-full h-10 flex justify-center items-center text-base font-medium text-neutral-50 bg-brand-standard-black border border-brand-standard-black rounded overflow-hidden hover:bg-white border-solid hover:text-brand-standard-black cursor-pointe"
+              className="w-full h-10 flex justify-center items-center text-base font-medium text-neutral-50 bg-shark-950 border border-shark-950 rounded overflow-hidden hover:bg-white border-solid hover:text-shark-950 cursor-pointe"
               disabled={isLoading}
             >
               Entrar

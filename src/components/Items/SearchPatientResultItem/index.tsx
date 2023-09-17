@@ -30,16 +30,16 @@ const SearchPatientResultItem = ({
           </Avatar.Root>
         </div>
         <div className="w-full flex flex-col">
-          <span className="max-w-[502.4px] flex whitespace-nowrap overflow-hidden text-ellipsis text-base font-semibold text-brand-standard-black">
+          <span className="max-w-[502.4px] flex whitespace-nowrap overflow-hidden text-ellipsis text-base font-semibold text-shark-950">
             {name}
           </span>
           {!specie && race != null ? undefined : (
-            <span className="max-w-[502.4px] flex whitespace-nowrap overflow-hidden text-ellipsis text-base font-light text-brand-standard-black">
+            <span className="max-w-[502.4px] flex whitespace-nowrap overflow-hidden text-ellipsis text-base font-light text-shark-950">
               {specie}
             </span>
           )}
           {!race && specie != null ? undefined : (
-            <span className="max-w-[502.4px] whitespace-nowrap overflow-hidden text-ellipsis text-base font-light text-brand-standard-black">
+            <span className="max-w-[502.4px] whitespace-nowrap overflow-hidden text-ellipsis text-base font-light text-shark-950">
               {race}
             </span>
           )}

@@ -174,7 +174,7 @@ const RegisterPatientExamModal: React.FC<RegisterPatientReportProps> = ({ patien
 
   return (
     <Dialog.Root onOpenChange={setOpen} open={open}>
-      <Dialog.Trigger className="w-[184px] h-10 border border-gray-200 rounded font-medium text-base text-brand-standard-black bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500">
+      <Dialog.Trigger className="w-[184px] h-10 border border-gray-200 rounded font-medium text-base text-shark-950 bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500">
         Registrar novo exame
       </Dialog.Trigger>
       <Dialog.Portal>
@@ -213,7 +213,7 @@ const RegisterPatientExamModal: React.FC<RegisterPatientReportProps> = ({ patien
                   <div className="w-[176px] flex flex-col gap-3">
                     <label
                       htmlFor="date"
-                      className="w-full text-sm font-normal text-brand-standard-black"
+                      className="w-full text-sm font-normal text-shark-950"
                     >
                       Data de realização
                     </label>
@@ -221,8 +221,8 @@ const RegisterPatientExamModal: React.FC<RegisterPatientReportProps> = ({ patien
                       type="date"
                       className={
                         errors.date
-                          ? "w-[176px] h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
-                          : "w-[176px] h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                          ? "w-[176px] h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                          : "w-[176px] h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                       }
                       {...register("date")}
                     />
@@ -238,7 +238,7 @@ const RegisterPatientExamModal: React.FC<RegisterPatientReportProps> = ({ patien
                     <div className="w-[224px] flex flex-col gap-3">
                       <label
                         htmlFor="type_of_exam"
-                        className="w-full text-sm font-normal text-brand-standard-black"
+                        className="w-full text-sm font-normal text-shark-950"
                       >
                         Tipo de exame
                       </label>
@@ -246,8 +246,8 @@ const RegisterPatientExamModal: React.FC<RegisterPatientReportProps> = ({ patien
                         type="text"
                         className={
                           errors.type_of_exam
-                            ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
-                            : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                            ? "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                            : "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                         }
                         {...register("type_of_exam")}
                       />
@@ -262,7 +262,7 @@ const RegisterPatientExamModal: React.FC<RegisterPatientReportProps> = ({ patien
                     <div className="w-[316.8px] flex flex-col gap-3">
                       <label
                         htmlFor="author"
-                        className="w-full text-sm font-normal text-brand-standard-black"
+                        className="w-full text-sm font-normal text-shark-950"
                       >
                         Nome do responsável
                       </label>
@@ -270,8 +270,8 @@ const RegisterPatientExamModal: React.FC<RegisterPatientReportProps> = ({ patien
                         type="text"
                         className={
                           errors.author
-                            ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
-                            : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                            ? "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                            : "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                         }
                         {...register("author")}
                       />
@@ -286,7 +286,7 @@ const RegisterPatientExamModal: React.FC<RegisterPatientReportProps> = ({ patien
                 <div className="w-full flex flex-col gap-3">
                   <label
                     htmlFor="annotations"
-                    className="w-full text-sm font-normal text-brand-standard-black"
+                    className="w-full text-sm font-normal text-shark-950"
                   >
                     Anotações
                   </label>
@@ -294,7 +294,7 @@ const RegisterPatientExamModal: React.FC<RegisterPatientReportProps> = ({ patien
                     <textarea
                       cols={30}
                       rows={6}
-                      className="w-full px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                      className="w-full px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                       {...register("annotations")}
                     ></textarea>
                   </div>
@@ -353,7 +353,7 @@ const RegisterPatientExamModal: React.FC<RegisterPatientReportProps> = ({ patien
                       <div className="w-full flex">
                         <label
                           htmlFor="patient-photo-file"
-                          className="border border-gray-200 flex items-center px-3 py-[6px] gap-1 rounded text-base text-brand-standard-black font-medium bg-white hover:border-[#b3b3b3] cursor-pointer"
+                          className="border border-gray-200 flex items-center px-3 py-[6px] gap-1 rounded text-base text-shark-950 font-medium bg-white hover:border-[#b3b3b3] cursor-pointer"
                         >
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -382,7 +382,7 @@ const RegisterPatientExamModal: React.FC<RegisterPatientReportProps> = ({ patien
                     <div className="w-full h-10 flex justify-end">
                       <button
                         type="submit"
-                        className="w-[120px] border border-gray-200 rounded font-medium text-base text-brand-standard-black bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500"
+                        className="w-[120px] border border-gray-200 rounded font-medium text-base text-shark-950 bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500"
                       >
                         Salvar exame
                       </button>

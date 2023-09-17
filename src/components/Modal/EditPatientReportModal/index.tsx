@@ -235,8 +235,8 @@ const EditPatientReportModal: React.FC<EditPatientReportModalProps> = ({ id, pat
 
   return (
     <Dialog.Root onOpenChange={setOpen} open={open}>
-      <div className="px-2 py-1 border border-gray-200 rounded hover:border-[#b3b3b3] flex items-center text-brand-standard-black font-semibold gap-1">
-        <Dialog.Trigger className="w-16 flex items-center gap-1 text-brand-standard-black font-semibold">
+      <div className="px-2 py-1 border border-gray-200 rounded hover:border-[#b3b3b3] flex items-center text-shark-950 font-semibold gap-1">
+        <Dialog.Trigger className="w-16 flex items-center gap-1 text-shark-950 font-semibold">
           <Pencil2Icon /> Editar
         </Dialog.Trigger>
       </div>
@@ -300,7 +300,7 @@ const EditPatientReportModal: React.FC<EditPatientReportModalProps> = ({ id, pat
                   <div className="w-[184px] flex flex-col gap-3">
                     <label
                       htmlFor="shift"
-                      className="w-full text-sm font-normal text-brand-standard-black"
+                      className="w-full text-sm font-normal text-shark-950"
                     >
                       Turno
                     </label>
@@ -350,7 +350,7 @@ const EditPatientReportModal: React.FC<EditPatientReportModalProps> = ({ id, pat
                     <div className="w-full flex flex-col gap-3">
                       <label
                         htmlFor="author"
-                        className="w-full text-sm font-normal text-brand-standard-black"
+                        className="w-full text-sm font-normal text-shark-950"
                       >
                         Nome do responsável
                       </label>
@@ -358,8 +358,8 @@ const EditPatientReportModal: React.FC<EditPatientReportModalProps> = ({ id, pat
                         type="text"
                         className={
                           errors.author
-                            ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
-                            : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                            ? "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                            : "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                         }
                         {...register("author")}
                       />
@@ -375,7 +375,7 @@ const EditPatientReportModal: React.FC<EditPatientReportModalProps> = ({ id, pat
                   <div className="w-full flex flex-col gap-3">
                     <label
                       htmlFor="author"
-                      className="w-full text-sm font-normal text-brand-standard-black"
+                      className="w-full text-sm font-normal text-shark-950"
                     >
                       Título
                     </label>
@@ -383,8 +383,8 @@ const EditPatientReportModal: React.FC<EditPatientReportModalProps> = ({ id, pat
                       type="text"
                       className={
                         errors.title
-                          ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
-                          : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                          ? "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                          : "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                       }
                       {...register("title")}
                     />
@@ -398,7 +398,7 @@ const EditPatientReportModal: React.FC<EditPatientReportModalProps> = ({ id, pat
                 <div className="w-full flex flex-col gap-3">
                   <label
                     htmlFor="report_text"
-                    className="w-full text-sm font-normal text-brand-standard-black"
+                    className="w-full text-sm font-normal text-shark-950"
                   >
                     Descrição / Relatório
                   </label>
@@ -406,7 +406,7 @@ const EditPatientReportModal: React.FC<EditPatientReportModalProps> = ({ id, pat
                     <textarea
                       cols={30}
                       rows={10}
-                      className="w-full px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                      className="w-full px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                       {...register("report_text")}
                     ></textarea>
                   </div>
@@ -526,7 +526,7 @@ const EditPatientReportModal: React.FC<EditPatientReportModalProps> = ({ id, pat
                     <div className="w-full flex">
                       <label
                         htmlFor="attachfile"
-                        className="border border-gray-200 flex items-center px-3 py-[6px] gap-1 rounded text-base text-brand-standard-black font-medium bg-white hover:border-[#b3b3b3] cursor-pointer"
+                        className="border border-gray-200 flex items-center px-3 py-[6px] gap-1 rounded text-base text-shark-950 font-medium bg-white hover:border-[#b3b3b3] cursor-pointer"
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -558,7 +558,7 @@ const EditPatientReportModal: React.FC<EditPatientReportModalProps> = ({ id, pat
                       modalIsOpen={setOpen}
                       setLoading={setIsRemovingRecord}
                     />
-                    <button className="w-[152px] h-10 border border-gray-200 rounded font-medium text-base text-brand-standard-black bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500">
+                    <button className="w-[152px] h-10 border border-gray-200 rounded font-medium text-base text-shark-950 bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500">
                       Salvar alterações
                     </button>
                   </div>
@@ -611,7 +611,7 @@ const WarningToDeleteReportModal: React.FC<WarningToDeleteReportModalProps> = ({
 
   return (
     <Dialog.Root onOpenChange={setOpen} open={open}>
-      <Dialog.Trigger className="w-10 flex items-center justify-center border border-gray-200 rounded text-base text-brand-standard-black font-medium bg-white hover:border-red-500">
+      <Dialog.Trigger className="w-10 flex items-center justify-center border border-gray-200 rounded text-base text-shark-950 font-medium bg-white hover:border-red-500">
         <TrashIcon color="#ef4444" width={20} height={20} />
       </Dialog.Trigger>
       <Dialog.Portal>

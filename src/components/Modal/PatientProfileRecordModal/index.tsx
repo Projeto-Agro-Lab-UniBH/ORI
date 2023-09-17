@@ -77,29 +77,25 @@ const PatientTabHeader = () => {
     <Tabs.List className="w-full h-10 pl-6 flex flex-wrap -mb-px text-sm font-medium text-center border-b border-gray-200">
       <Tabs.Trigger
         value="profile"
-        id={styles.buttonTabModal}
-        className="inline-block px-[12px] pt-[6px] pb-3 rounded-t-lg border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+        className="inline-block px-[12px] pt-[6px] pb-3 rounded-t-lg border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 data-[state=active]:text-shark-950 data-[state=active]:border-b-shark-950"
       >
         Perfil
       </Tabs.Trigger>
       <Tabs.Trigger
         value="reports"
-        id={styles.buttonTabModal}
-        className="inline-block px-[12px] pt-[6px] pb-3 rounded-t-lg border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+        className="inline-block px-[12px] pt-[6px] pb-3 rounded-t-lg border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 data-[state=active]:text-shark-950 data-[state=active]:border-b-shark-950"
       >
         Relatórios
       </Tabs.Trigger>
       <Tabs.Trigger
         value="exams"
-        id={styles.buttonTabModal}
-        className="inline-block px-[12px] pt-[6px] pb-3 rounded-t-lg border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+        className="inline-block px-[12px] pt-[6px] pb-3 rounded-t-lg border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 data-[state=active]:text-shark-950 data-[state=active]:border-b-shark-950"
       >
         Exames
       </Tabs.Trigger>
       <Tabs.Trigger
         value="attachments"
-        id={styles.buttonTabModal}
-        className="inline-block px-[12px] pt-[6px] pb-3 rounded-t-lg border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+        className="inline-block px-[12px] pt-[6px] pb-3 rounded-t-lg border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 data-[state=active]:text-shark-950 data-[state=active]:border-b-shark-950"
       >
         Arquivos
       </Tabs.Trigger>
@@ -300,7 +296,7 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, isOpen
               <div className="w-full flex items-center gap-4">
                 <div className="w-[72px] flex items-center flex-col gap-2">
                   <div className="w-full flex items-center justify-center">
-                    <span className="text-sm font-normal text-brand-standard-black">
+                    <span className="text-sm font-normal text-shark-950">
                       Foto
                     </span>
                   </div>
@@ -336,7 +332,7 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, isOpen
                     />
                     <div className="w-full">
                       <div className="w-[516px] flex flex-col">
-                        <p className="w-16 text-sm font-normal text-brand-standard-black ">
+                        <p className="w-16 text-sm font-normal text-shark-950 ">
                           Dica:
                         </p>
                         <p className="w-[500px] text-gray-500 font-normal text-sm whitespace-nowrap">
@@ -355,7 +351,7 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, isOpen
                   <div className="w-full flex flex-col gap-3">
                     <label
                       htmlFor="entry_date"
-                      className="w-full text-sm font-normal text-brand-standard-black"
+                      className="w-full text-sm font-normal text-shark-950"
                     >
                       Data de entrada
                     </label>
@@ -363,8 +359,8 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, isOpen
                       type="date"
                       className={
                         errors.entry_date
-                          ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
-                          : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                          ? "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                          : "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                       }
                       {...register("entry_date")}
                     />
@@ -381,13 +377,13 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, isOpen
                   <div className="w-full flex flex-col gap-3">
                     <label
                       htmlFor="departure_date"
-                      className="w-full text-sm font-normal text-brand-standard-black"
+                      className="w-full text-sm font-normal text-shark-950"
                     >
                       Data de saída
                     </label>
                     <input
                       type="date"
-                      className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                      className="w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                       {...register("departure_date")}
                     />
                   </div>
@@ -398,7 +394,7 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, isOpen
                   <div className="w-full flex flex-col gap-3">
                     <label
                       htmlFor="prognosis"
-                      className="w-full text-sm font-normal text-brand-standard-black"
+                      className="w-full text-sm font-normal text-shark-950"
                     >
                       Prognóstico
                     </label>
@@ -453,7 +449,7 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, isOpen
                   <div className="w-[368px] flex flex-col gap-3">
                     <label
                       htmlFor="name"
-                      className="w-full text-sm font-normal text-brand-standard-black"
+                      className="w-full text-sm font-normal text-shark-950"
                     >
                       Nome do paciente
                     </label>
@@ -461,8 +457,8 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, isOpen
                       type="text"
                       className={
                         errors.name
-                          ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
-                          : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                          ? "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                          : "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                       }
                       {...register("name")}
                     />
@@ -479,7 +475,7 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, isOpen
                   <div className="w-full flex flex-col gap-3">
                     <label
                       htmlFor="specie"
-                      className="w-full text-sm font-normal text-brand-standard-black"
+                      className="w-full text-sm font-normal text-shark-950"
                     >
                       Espécie
                     </label>
@@ -494,8 +490,8 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, isOpen
                         type="text"
                         className={
                           errors.specie
-                            ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
-                            : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                            ? "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                            : "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                         }
                         {...register("specie")}
                       />
@@ -534,7 +530,7 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, isOpen
                   <div className="w-[368px] flex flex-col gap-3">
                     <label
                       htmlFor="owner"
-                      className="w-full text-sm font-normal text-brand-standard-black"
+                      className="w-full text-sm font-normal text-shark-950"
                     >
                       Nome do tutor(a)
                     </label>
@@ -549,8 +545,8 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, isOpen
                         type="text"
                         className={
                           errors.owner
-                            ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
-                            : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                            ? "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                            : "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                         }
                         {...register("owner")}
                       />
@@ -587,7 +583,7 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, isOpen
                   <div className="w-full flex flex-col gap-3">
                     <label
                       htmlFor="race"
-                      className="w-full text-sm font-normal text-brand-standard-black"
+                      className="w-full text-sm font-normal text-shark-950"
                     >
                       Raça
                     </label>
@@ -602,8 +598,8 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, isOpen
                         type="text"
                         className={
                           errors.race
-                            ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
-                            : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                            ? "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                            : "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                         }
                         {...register("race")}
                       />
@@ -642,7 +638,7 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, isOpen
                   <div className="w-full flex flex-col gap-3">
                     <label
                       htmlFor="physical_shape"
-                      className="w-full text-sm font-normal text-brand-standard-black"
+                      className="w-full text-sm font-normal text-shark-950"
                     >
                       Porte físico
                     </label>
@@ -697,13 +693,13 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, isOpen
                   <div className="w-full flex flex-col gap-3">
                     <label
                       htmlFor="weight"
-                      className="w-full text-sm font-normal text-brand-standard-black"
+                      className="w-full text-sm font-normal text-shark-950"
                     >
                       Peso
                     </label>
                     <input
                       type="text"
-                      className="w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                      className="w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                       {...register("weight")}
                     />
                   </div>
@@ -714,7 +710,7 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, isOpen
                   <div className="w-full flex flex-col gap-3">
                     <label
                       htmlFor="gender"
-                      className="w-full text-sm font-normal text-brand-standard-black"
+                      className="w-full text-sm font-normal text-shark-950"
                     >
                       Gênero
                     </label>
@@ -767,7 +763,7 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, isOpen
               <div className="w-full flex flex-col gap-3">
                 <label
                   htmlFor="diagnosis"
-                  className="w-full text-sm font-normal text-brand-standard-black"
+                  className="w-full text-sm font-normal text-shark-950"
                 >
                   Diagnóstico / Suspeita Clínica
                 </label>
@@ -835,7 +831,7 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, isOpen
           <div className="w-full h-10 flex items-center justify-end">
             <button
               type="submit"
-              className="w-[152px] h-10 border border-gray-200 rounded font-medium text-base text-brand-standard-black bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500"
+              className="w-[152px] h-10 border border-gray-200 rounded font-medium text-base text-shark-950 bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500"
             >
               Salvar alterações
             </button>

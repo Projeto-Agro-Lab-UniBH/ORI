@@ -11,12 +11,12 @@ const UserProfileSkeleton = () => {
       </div>
       <div className="w-[244px] h-14 flex justify-center items-center flex-col">
         <div className="w-[244px] flex">
-          <p className="whitespace-nowrap overflow-hidden text-ellipsis text-[18px] font-semibold text-brand-standard-black">
+          <p className="whitespace-nowrap overflow-hidden text-ellipsis text-[18px] font-semibold text-shark-950">
           <Skeleton width={244} />
           </p>
         </div>
         <div className="w-[244px] flex">
-          <p className="whitespace-nowrap overflow-hidden text-ellipsis text-[14px] font-light text-brand-standard-black">
+          <p className="whitespace-nowrap overflow-hidden text-ellipsis text-[14px] font-light text-shark-950">
             <Skeleton width={204} />
           </p>
         </div>

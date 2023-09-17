@@ -66,11 +66,11 @@ const PatientCard: React.FC<PatientCardProps> = ({
         <div className="h-20 flex items-center p-2 gap-[24px]">
           <div className="w-[344px] flex gap-4">
             <div className="flex items-center flex-col gap-2">
-              <span className="w-[88px] text-lg font-semibold text-brand-standard-black">
+              <span className="w-[88px] text-lg font-semibold text-shark-950">
                 ID:
               </span>
               <div className="h-full flex items-center gap-2">
-                <div className="w-[64px] h-6 px-2 bg-brand-standard-black border-none rounded flex items-center">
+                <div className="w-[64px] h-6 px-2 bg-shark-950 border-none rounded flex items-center">
                   <span className="whitespace-nowrap text-sm font-normal text-white overflow-hidden overflow-ellipsis">
                     {copyArea}
                   </span>
@@ -102,12 +102,12 @@ const PatientCard: React.FC<PatientCardProps> = ({
                   <div className="w-[158.6px] flex items-center">
                     <div className="w-[158.6px] flex items-center flex-col">
                       <div className="w-[158.6px] flex">
-                        <span className="whitespace-nowrap overflow-hidden text-ellipsis text-xl font-semibold text-brand-standard-black">
+                        <span className="whitespace-nowrap overflow-hidden text-ellipsis text-xl font-semibold text-shark-950">
                           {!name ? "Sem nome" : name}
                         </span>
                       </div>
                       <div className="w-[158.6px] flex">
-                        <span className="whitespace-nowrap overflow-hidden text-ellipsis text-lg font-light text-brand-standard-black">
+                        <span className="whitespace-nowrap overflow-hidden text-ellipsis text-lg font-light text-shark-950">
                           {!specie ? race : specie}
                         </span>
                       </div>
@@ -119,7 +119,7 @@ const PatientCard: React.FC<PatientCardProps> = ({
           </div>
           <div className="flex gap-9">
             <div className="flex flex-col gap-2">
-              <span className="w-[256px] whitespace-nowrap text-lg font-semibold text-brand-standard-black">
+              <span className="w-[256px] whitespace-nowrap text-lg font-semibold text-shark-950">
                 Dados do paciente:
               </span>
               <div className="w-full flex items-center flex-row gap-2">
@@ -129,7 +129,7 @@ const PatientCard: React.FC<PatientCardProps> = ({
               </div>
             </div>
             <div className="flex flex-col gap-2">
-              <span className="whitespace-nowrap text-lg font-semibold text-brand-standard-black">
+              <span className="whitespace-nowrap text-lg font-semibold text-shark-950">
                 Prognóstico:
               </span>
               <div className="w-full flex flex-row gap-2">
@@ -137,7 +137,7 @@ const PatientCard: React.FC<PatientCardProps> = ({
               </div>
             </div>
             <div className="flex items-center flex-col gap-2">
-              <span className="w-full whitespace-nowrap text-lg font-semibold text-brand-standard-black">
+              <span className="w-full whitespace-nowrap text-lg font-semibold text-shark-950">
                 Diagnóstico / Suspeita Clínica:
               </span>
               <Collapsible.Root
@@ -173,7 +173,7 @@ const PatientCard: React.FC<PatientCardProps> = ({
               </Collapsible.Root>
             </div>
             <div className="w-full flex items-center flex-col gap-2">
-              <span className="whitespace-nowrap w-full text-lg font-semibold text-brand-standard-black">
+              <span className="whitespace-nowrap w-full text-lg font-semibold text-shark-950">
                 Exames:
               </span>
               <Collapsible.Root

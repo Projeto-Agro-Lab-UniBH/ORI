@@ -32,7 +32,7 @@ const Pagination = ({ limit, total, currentPage, setCurrentPage }: any) => {
               className={
                 currentPage === 1
                   ? "relative block rounded bg-transparent px-3 py-1.5 text-sm text-gray-400 transition-all duration-300 pointer-events-none"
-                  : "relative block rounded bg-transparent px-3 py-1.5 text-sm text-brand-standard-black transition-all duration-300 hover:bg-neutral-100"
+                  : "relative block rounded bg-transparent px-3 py-1.5 text-sm text-shark-950 transition-all duration-300 hover:bg-neutral-100"
               }
             >
               <span aria-hidden="true">&laquo;</span>
@@ -52,7 +52,7 @@ const Pagination = ({ limit, total, currentPage, setCurrentPage }: any) => {
                   className={
                     page === currentPage
                       ? "relative block rounded bg-neutral-100 px-3 py-1.5 text-sm text-[#0f172a] transition-all duration-300"
-                      : "relative block rounded bg-transparent px-3 py-1.5 text-sm text-brand-standard-black transition-all duration-300 hover:bg-neutral-100"
+                      : "relative block rounded bg-transparent px-3 py-1.5 text-sm text-shark-950 transition-all duration-300 hover:bg-neutral-100"
                   }
                 >
                   {page}
@@ -70,7 +70,7 @@ const Pagination = ({ limit, total, currentPage, setCurrentPage }: any) => {
               className={
                 currentPage === pages
                   ? "relative block rounded bg-transparent px-3 py-1.5 text-sm text-gray-400 transition-all duration-300 pointer-events-none"
-                  : "relative block rounded bg-transparent px-3 py-1.5 text-sm text-brand-standard-black transition-all duration-300 hover:bg-neutral-100"
+                  : "relative block rounded bg-transparent px-3 py-1.5 text-sm text-shark-950 transition-all duration-300 hover:bg-neutral-100"
               }
             >
               <span aria-hidden="true">&raquo;</span>

@@ -11,10 +11,3 @@
 #modalScroll::-webkit-scrollbar-thumb:hover {
   background: #ced4da;
 }
-
-/* button tab modal */
-
-#buttonTabModal[data-state="active"] {
-  color: #212529;
-  border-bottom: 2px solid #212529;
-}

@@ -65,21 +65,21 @@ const ExamItem: React.FC<ExamItemProps> = ({
         <div className="w-full flex flex-col items-center gap-2">
           <div className="w-full flex flex-row items-center justify-between">
             <div className="w-[504px] items-center flex">
-              <span className="w-[504px] whitespace-nowrap text-2xl text-brand-standard-black font-semibold overflow-hidden text-ellipsis">
+              <span className="w-[504px] whitespace-nowrap text-2xl text-shark-950 font-semibold overflow-hidden text-ellipsis">
                 {type_of_exam}
               </span>
             </div>
             <EditPatientExamModal id={id} patientId={patientId} />
           </div>
-          <div className="w-full font-light text-brand-standard-black">
+          <div className="w-full font-light text-shark-950">
             {author}
           </div>
           <div className="w-full flex-row flex items-center gap-5">
             <div className="flex items-center gap-1">
-              <span className="text-sm text-brand-standard-black font-semibold">
+              <span className="text-sm text-shark-950 font-semibold">
                 Data de realização do exame:
               </span>
-              <p className="text-base font-normal text-brand-standard-black">
+              <p className="text-base font-normal text-shark-950">
                 {date}
               </p>
             </div>
@@ -108,7 +108,7 @@ const ExamItem: React.FC<ExamItemProps> = ({
           )}
           {textNotes && (
             <div className="w-full">
-              <p className="text-base font-normal text-brand-standard-black">
+              <p className="text-base font-normal text-shark-950">
                 {textNotes}
               </p>
             </div>

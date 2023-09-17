@@ -221,8 +221,8 @@ const EditPatientExamModal: React.FC<EditPatientExamModalProps> = ({ id, patient
 
   return (
     <Dialog.Root onOpenChange={setOpen} open={open}>
-      <div className="px-2 py-1 border border-gray-200 rounded hover:border-[#b3b3b3] flex items-center text-brand-standard-black font-semibold gap-1">
-        <Dialog.Trigger className="w-16 flex items-center gap-1 text-brand-standard-black font-semibold">
+      <div className="px-2 py-1 border border-gray-200 rounded hover:border-[#b3b3b3] flex items-center text-shark-950 font-semibold gap-1">
+        <Dialog.Trigger className="w-16 flex items-center gap-1 text-shark-950 font-semibold">
           <Pencil2Icon /> Editar
         </Dialog.Trigger>
       </div>
@@ -286,7 +286,7 @@ const EditPatientExamModal: React.FC<EditPatientExamModalProps> = ({ id, patient
                   <div className="w-[176px] flex flex-col gap-3">
                     <label
                       htmlFor="date"
-                      className="w-full text-sm font-normal text-brand-standard-black"
+                      className="w-full text-sm font-normal text-shark-950"
                     >
                       Data de realização
                     </label>
@@ -294,8 +294,8 @@ const EditPatientExamModal: React.FC<EditPatientExamModalProps> = ({ id, patient
                       type="date"
                       className={
                         errors.date
-                          ? "w-[176px] h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
-                          : "w-[176px] h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                          ? "w-[176px] h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                          : "w-[176px] h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                       }
                       {...register("date")}
                     />
@@ -311,7 +311,7 @@ const EditPatientExamModal: React.FC<EditPatientExamModalProps> = ({ id, patient
                     <div className="w-[224px] flex flex-col gap-3">
                       <label
                         htmlFor="type_of_exam"
-                        className="w-full text-sm font-normal text-brand-standard-black"
+                        className="w-full text-sm font-normal text-shark-950"
                       >
                         Tipo de exame
                       </label>
@@ -319,8 +319,8 @@ const EditPatientExamModal: React.FC<EditPatientExamModalProps> = ({ id, patient
                         type="text"
                         className={
                           errors.type_of_exam
-                            ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
-                            : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                            ? "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                            : "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                         }
                         {...register("type_of_exam")}
                       />
@@ -335,7 +335,7 @@ const EditPatientExamModal: React.FC<EditPatientExamModalProps> = ({ id, patient
                     <div className="w-[316.8px] flex flex-col gap-3">
                       <label
                         htmlFor="author"
-                        className="w-full text-sm font-normal text-brand-standard-black"
+                        className="w-full text-sm font-normal text-shark-950"
                       >
                         Nome do responsável
                       </label>
@@ -343,8 +343,8 @@ const EditPatientExamModal: React.FC<EditPatientExamModalProps> = ({ id, patient
                         type="text"
                         className={
                           errors.author
-                            ? "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
-                            : "w-full h-10 px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                            ? "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
+                            : "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                         }
                         {...register("author")}
                       />
@@ -359,7 +359,7 @@ const EditPatientExamModal: React.FC<EditPatientExamModalProps> = ({ id, patient
                 <div className="w-full flex flex-col gap-3">
                   <label
                     htmlFor="annotations"
-                    className="w-full text-sm font-normal text-brand-standard-black"
+                    className="w-full text-sm font-normal text-shark-950"
                   >
                     Anotações
                   </label>
@@ -367,7 +367,7 @@ const EditPatientExamModal: React.FC<EditPatientExamModalProps> = ({ id, patient
                     <textarea
                       cols={30}
                       rows={6}
-                      className="w-full px-3 py-3 text-sm text-brand-standard-black font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                      className="w-full px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
                       {...register("annotations")}
                     ></textarea>
                   </div>
@@ -487,7 +487,7 @@ const EditPatientExamModal: React.FC<EditPatientExamModalProps> = ({ id, patient
                     <div className="w-full flex">
                       <label
                         htmlFor="attachfile"
-                        className="border border-gray-200 flex items-center px-3 py-[6px] gap-1 rounded text-base text-brand-standard-black font-medium bg-white hover:border-[#b3b3b3] cursor-pointer"
+                        className="border border-gray-200 flex items-center px-3 py-[6px] gap-1 rounded text-base text-shark-950 font-medium bg-white hover:border-[#b3b3b3] cursor-pointer"
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -519,7 +519,7 @@ const EditPatientExamModal: React.FC<EditPatientExamModalProps> = ({ id, patient
                       modalIsOpen={setOpen}
                       setLoading={setIsRemovingRecord}
                     />
-                    <button className="w-[120px] border border-gray-200 rounded font-medium text-base text-brand-standard-black bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500">
+                    <button className="w-[120px] border border-gray-200 rounded font-medium text-base text-shark-950 bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500">
                       Salvar alterações
                     </button>
                   </div>
@@ -572,7 +572,7 @@ const WarningToDeleteExamModal: React.FC<WarningToDeleteExamModalProps> = ({ id,
   
   return (
     <Dialog.Root onOpenChange={setOpen} open={open}>
-      <Dialog.Trigger className="w-10 flex items-center justify-center border border-gray-200 rounded text-base text-brand-standard-black font-medium bg-white hover:border-red-500">
+      <Dialog.Trigger className="w-10 flex items-center justify-center border border-gray-200 rounded text-base text-shark-950 font-medium bg-white hover:border-red-500">
         <TrashIcon
           color="#ef4444" 
           width={20} 
