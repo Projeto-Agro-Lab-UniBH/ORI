@@ -1,4 +1,3 @@
-import Link from "next/link"
 import { useRouter } from "next/router";
 import { useSearchParams } from 'next/navigation'
 import { useEffect } from "react";
@@ -23,10 +22,12 @@ const Pagination = ({ limit, total, currentPage, setCurrentPage }: any) => {
       <nav aria-label="Page navigation example">
         <ul className="list-style-none flex gap-1">
           <li>
-            <Link
-              href={{
-                pathname: router.pathname,
-                query: { ...router.query, page: currentPage - 1 }
+            <button
+              onClick={() => {
+                router.push({
+                  pathname: router.pathname,
+                  query: { ...router.query, page: currentPage - 1 }
+                })
               }}
               className={
                 currentPage === 1
@@ -35,16 +36,18 @@ const Pagination = ({ limit, total, currentPage, setCurrentPage }: any) => {
               }
             >
               <span aria-hidden="true">&laquo;</span>
-            </Link>
+            </button>
           </li>
           {Array.from({ length: Math.min(max_items, pages) })
             .map((_, index) => index + first)
             .map((page) => (
               <li key={page}>
-                <Link
-                  href={{
-                    pathname: router.pathname,
-                    query: { ...router.query, page }
+                <button
+                  onClick={() => {
+                    router.push({
+                      pathname: router.pathname,
+                      query: { ...router.query, page }
+                    })
                   }}
                   className={
                     page === currentPage
@@ -53,14 +56,16 @@ const Pagination = ({ limit, total, currentPage, setCurrentPage }: any) => {
                   }
                 >
                   {page}
-                </Link>
+                </button>
               </li>
             ))}
           <li>
-            <Link
-              href={{
-                pathname: router.pathname,
-                query: { ...router.query, page: currentPage + 1 }
+            <button
+              onClick={() => {
+                router.push({
+                  pathname: router.pathname,
+                  query: { ...router.query, page: currentPage + 1 }
+                })
               }}
               className={
                 currentPage === pages
@@ -69,7 +74,7 @@ const Pagination = ({ limit, total, currentPage, setCurrentPage }: any) => {
               }
             >
               <span aria-hidden="true">&raquo;</span>
-            </Link>
+            </button>
           </li>
         </ul>
       </nav>
