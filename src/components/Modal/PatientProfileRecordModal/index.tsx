@@ -9,23 +9,20 @@ import ReportItem from "../../Items/ReportItem";
 import RegisterPatientExamModal from "../RegisterPatientExamModal";
 import ExamItem from "../../Items/ExamItem";
 import AddAttachmentModal from "../AddAttachmentModal";
+import { api } from "../../../providers/Api";
+import { queryClient } from "../../../providers/QueryClient";
+import { useMutation, useQuery } from "react-query";
 import { CameraIcon, Cross1Icon } from "@radix-ui/react-icons";
 import { Option } from "../../../interfaces/Option";
 import { ChangeEvent, KeyboardEventHandler, useEffect, useState } from "react";
-import { z } from "zod";
 import { useController, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery } from "react-query";
-import { api } from "../../../providers/Api";
-import { queryClient } from "../../../providers/QueryClient";
 import { FileCard } from "../../Cards/FileCard";
+import { PatientProfileRecordModalProps, TabContentProps } from "../@types/PatientProfileRecordModal";
+import { GetPatientResponse, ListExamsResponse, ListFilesResponse, ListReportsResponse, PatchPatientResponse, UploadImageResponse } from "../../../@types/ApiResponse";
+import { editPatientProfileFormData, editPatientProfileFormSchema } from "../../../schemas/editPatientProfileFormSchema";
 
 import styles from '../styles.module.css';
-
-type PatientProfileRecordModalProps = {
-  patientId: string;
-  children: React.ReactNode;
-};
 
 const PatientProfileRecordModal: React.FC<PatientProfileRecordModalProps> = ({ patientId, children }) => {
   const [open, setOpen] = useState<boolean>(false);
@@ -50,19 +47,19 @@ const PatientProfileRecordModal: React.FC<PatientProfileRecordModalProps> = ({ p
             <div className="w-full">
               <PatientTabHeader />
               <PatientTabContentProfile
-                modalIsOpen={open}
+                isOpen={open}
                 patientId={patientId}
               />
               <PatientTabContentReports
-                modalIsOpen={open}
+                isOpen={open}
                 patientId={patientId}
               />
               <PatientTabContentExam
-                modalIsOpen={open}
+                isOpen={open}
                 patientId={patientId}
               />
               <PatientTabContentAttachment
-                modalIsOpen={open}
+                isOpen={open}
                 patientId={patientId}
               />
             </div>
@@ -74,11 +71,6 @@ const PatientProfileRecordModal: React.FC<PatientProfileRecordModalProps> = ({ p
 };
 
 export default PatientProfileRecordModal;
-
-type TabContentProps = {
-  patientId: string;
-  modalIsOpen: boolean;
-};
 
 const PatientTabHeader = () => {
   return (
@@ -115,131 +107,7 @@ const PatientTabHeader = () => {
   )
 }
 
-
-type UploadImageResponse = {
-  imageUrl: string;
-};
-
-type GetPatientResponse = {
-  profile_photo: string;
-  name: string;
-  owner: string;
-  specie: string;
-  race: string;
-  gender: string;
-  weight: string;
-  prognosis: string;
-  diagnosis: Option[];
-  physical_shape: string;
-  entry_date: string;
-  departure_date: string;
-};
-
-type PatchPatientResponse = {
-  id: string;
-  profile_photo: string;
-  name: string;
-  owner: string;
-  specie: string;
-  race: string;
-  gender: string;
-  weight: string;
-  prognosis: string;
-  diagnosis: Option[];
-  physical_shape: string;
-  entry_date: string;
-  departure_date: string;
-};
-
-const editPatientProfileFormSchema = z
-  .object({
-    name: z
-    .string()
-    .nonempty({ message: "O paciente precisa de um nome" })
-    .transform((name) => {
-      return name
-        .trim()
-        .split(" ")
-        .map((word) => {
-          return word[0].toLocaleUpperCase().concat(word.substring(1));
-        })
-        .join(" ");
-    }),
-    owner: z.string(),
-    ownerless_patient: z.boolean(),
-    specie: z.string(),
-    undefined_specie: z.boolean(),
-    race: z.string(),
-    undefined_race: z.boolean(),
-    gender: z.any(),
-    weight: z.string(),
-    prognosis: z.any(),
-    diagnosis: z.any(),
-    physical_shape: z.any(),
-    entry_date: z.string().nonempty({ message: "Selecione a data de entrada" }),
-    departure_date: z.string().optional(),
-  })
-  .superRefine((field, ctx) => {
-    const addCustomIssue = (path: string[], message: string) => {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message,
-        path,
-      });
-    };
-
-    if (!field.owner && !field.ownerless_patient) {
-      addCustomIssue(
-        ["owner"],
-        "Se o paciente não tem o nome do tutor identificado selecione à caixinha abaixo"
-      );
-    }
-
-    if (!field.specie && !field.undefined_specie) {
-      addCustomIssue(
-        ["specie"],
-        "Se o paciente não possui espécie definiada selecione à caixinha abaixo"
-      );
-    }
-
-    if (!field.race && !field.undefined_race) {
-      addCustomIssue(
-        ["race"],
-        "Se o paciente não possui raça definiada selecione à caixinha abaixo"
-      );
-    }
-  });
-
-type editPatientProfileFormData = z.infer<typeof editPatientProfileFormSchema>;
-
-const createOption = (label: string) => ({ 
-  label, 
-  value: label 
-});
-
-const genderOptions: Option[] = [
-  { label: "Macho", value: "Macho" },
-  { label: "Fêmea", value: "Fêmea" },
-];
-
-const physicalShapeOptions: Option[] = [
-  { label: "Grande porte", value: "Grande porte" },
-  { label: "Médio porte", value: "Médio porte" },
-  { label: "Pequeno porte", value: "Pequeno porte" },
-];
-
-const prognosisOptions: Option[] = [
-  { label: "Alta", value: "Alta" },
-  { label: "Aguardando alta médica", value: "Aguardando alta médica" },
-  { label: "Obscuro", value: "Obscuro" },
-  { label: "Desfávoravel", value: "Desfávoravel" },
-  { label: "Reservado", value: "Reservado" },
-  { label: "Favorável", value: "Favorável" },
-  { label: "Risco", value: "Risco" },
-  { label: "Alto risco", value: "Alto risco" },
-];
-
-const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, modalIsOpen }) => {
+const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, isOpen }) => {
   const {
     reset,
     register,
@@ -253,6 +121,7 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, modalI
   });
 
   const [callRequest, setCallRequest] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [photo, setPhoto] = useState<string | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [fetchedImage, setFetchedImage] = useState<string | null>(null);
@@ -268,6 +137,33 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, modalI
   
   const { field: selectPrognosis } = useController({ name: "prognosis", control });
   const { value: selectPrognosisValue, onChange: selectPrognosisOnChange, ...restSelectPrognosis } = selectPrognosis;
+
+  const createOption = (label: string) => ({ 
+    label, 
+    value: label 
+  });
+  
+  const genderOptions: Option[] = [
+    { label: "Macho", value: "Macho" },
+    { label: "Fêmea", value: "Fêmea" },
+  ];
+  
+  const physicalShapeOptions: Option[] = [
+    { label: "Grande porte", value: "Grande porte" },
+    { label: "Médio porte", value: "Médio porte" },
+    { label: "Pequeno porte", value: "Pequeno porte" },
+  ];
+  
+  const prognosisOptions: Option[] = [
+    { label: "Alta", value: "Alta" },
+    { label: "Aguardando alta médica", value: "Aguardando alta médica" },
+    { label: "Obscuro", value: "Obscuro" },
+    { label: "Desfávoravel", value: "Desfávoravel" },
+    { label: "Reservado", value: "Reservado" },
+    { label: "Favorável", value: "Favorável" },
+    { label: "Risco", value: "Risco" },
+    { label: "Alto risco", value: "Alto risco" },
+  ];
 
   const handleImage = (event: ChangeEvent<HTMLInputElement>) => {
     if (event?.target?.files?.[0]) {
@@ -291,11 +187,11 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, modalI
     }
   };
 
-  const { isLoading } = useQuery({
+  useQuery({
     queryKey: ["get-patient-by-id"],
     queryFn: async () => {
-      await api
-        .get<GetPatientResponse>(`/patient/${patientId}`)
+      setIsLoading(true);
+      await api.get<GetPatientResponse>(`/patient/${patientId}`)
         .then((res) => {
           if ((res.data as GetPatientResponse).diagnosis.length > 0) {
             setValueDiagnosis(
@@ -305,6 +201,7 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, modalI
           reset(res.data);
           setFetchedImage(res.data.profile_photo);
         });
+      setIsLoading(false);
     },
     enabled: callRequest,
   });
@@ -341,7 +238,7 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, modalI
   };
 
   useEffect(() => {
-    if (modalIsOpen != true) {
+    if (isOpen != true) {
       setCallRequest(false);
       setPreviewImage(null);
       setPhoto(null);
@@ -349,7 +246,7 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, modalI
     } else {
       setCallRequest(true);
     }
-  }, [modalIsOpen, setPhoto, setCallRequest, reset]);
+  }, [isOpen, setPhoto, setCallRequest, reset]);
 
   useEffect(() => {
     if (fetchedImage) {
@@ -949,39 +846,29 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, modalI
   );
 };
 
-type ListReportsResponse = {
-	id: string;
-	patientId: string;
-	shift: string;
-	author: string;
-	title: string;
-	report_text: string;
-	filename: string;
-  fileUrl: string;
-  fileSize: number;
-	createdAt: string;
-	updatedAt: string;
-};
 
-const PatientTabContentReports: React.FC<TabContentProps> = ({ patientId, modalIsOpen }) => {
+const PatientTabContentReports: React.FC<TabContentProps> = ({ patientId, isOpen }) => {
   const [callRequest, setCallRequest] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   
-  const { isLoading, data: patientReports } = useQuery({
+  const { data } = useQuery({
 		queryKey: ['list-all-reports'],
 		queryFn: async () => {
-			const response = await api.get<ListReportsResponse[]>(`/reports/${patientId}/reports`);
+			setIsLoading(true)
+      const response = await api.get<ListReportsResponse[]>(`/reports/${patientId}/reports`);
+      setIsLoading(false);
 			return response.data;
 		},
 		enabled: callRequest,
 	});
 
   useEffect(() => {
-    if (modalIsOpen != true) {
+    if (isOpen != true) {
       setCallRequest(false);
     } else {
       setCallRequest(true);
     }
-  }, [modalIsOpen, setCallRequest]);
+  }, [isOpen, setCallRequest]);
 
   return (
     <Tabs.Content value="reports">
@@ -1003,8 +890,8 @@ const PatientTabContentReports: React.FC<TabContentProps> = ({ patientId, modalI
           className="w-full h-[362px] px-6 py-6 overflow-y-scroll"
         >
           <div className="w-full flex flex-col items-center gap-6">
-            {patientReports &&
-              patientReports?.map((data) => (
+            {data &&
+              data?.map((data) => (
                 <ReportItem
                   key={data.id}
                   id={data.id}
@@ -1029,39 +916,28 @@ const PatientTabContentReports: React.FC<TabContentProps> = ({ patientId, modalI
   )
 };
 
-type ListExamsResponse = {
-  id: string;
-  patientId: string;
-  date: string;
-  author: string;
-  type_of_exam: string;
-  annotations: string;
-  filename: string;
-  fileUrl: string;
-  fileSize: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-const PatientTabContentExam: React.FC<TabContentProps> = ({ patientId, modalIsOpen }) => {
+const PatientTabContentExam: React.FC<TabContentProps> = ({ patientId, isOpen }) => {
   const [callRequest, setCallRequest] = useState<boolean>(false);
-  
-  const { isLoading, data: patientExams } = useQuery({
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const { data } = useQuery({
     queryKey: ["list-all-exams"],
     queryFn: async () => {
+      setIsLoading(true)
       const response = await api.get<ListExamsResponse[]>(`/exams/${patientId}/exams`)
+      setIsLoading(false)
       return response.data 
     },
     enabled: callRequest,
   });
 
   useEffect(() => {
-    if (modalIsOpen != true) {
+    if (isOpen != true) {
       setCallRequest(false);
     } else {
       setCallRequest(true);
     }
-  }, [modalIsOpen, setCallRequest]);
+  }, [isOpen, setCallRequest]);
   
   return (
     <Tabs.Content value="exams">
@@ -1083,8 +959,8 @@ const PatientTabContentExam: React.FC<TabContentProps> = ({ patientId, modalIsOp
           className="w-full h-[362px] px-6 py-6 overflow-y-scroll"
         >
           <div className="w-full flex flex-col items-center gap-6">
-            {patientExams &&
-              patientExams.map((data) => (
+            {data &&
+              data.map((data) => (
                 <ExamItem
                   key={data.id}
                   id={data.id}
@@ -1110,33 +986,28 @@ const PatientTabContentExam: React.FC<TabContentProps> = ({ patientId, modalIsOp
   )
 }
 
-type ListFilesResponse = {
-  id: string;
-  patientId: string;
-  filename: string;
-  fileUrl: string;
-  fileSize: number;
-}
-
-const PatientTabContentAttachment: React.FC<TabContentProps> = ({ patientId, modalIsOpen }) => {
+const PatientTabContentAttachment: React.FC<TabContentProps> = ({ patientId, isOpen }) => {
   const [callRequest, setCallRequest] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const { isLoading, data: patientFiles } = useQuery({
+  const { data } = useQuery({
     queryKey: ["get-file-by-patientId"],
     queryFn: async () => {
+      setIsLoading(true)
       const response = await api.get<ListFilesResponse[]>(`/files/${patientId}/files`)
+      setIsLoading(false)
       return response.data
     },
     enabled: callRequest,
   })
 
   useEffect(() => {
-    if (modalIsOpen != true) {
+    if (isOpen != true) {
       setCallRequest(false);
     } else {
       setCallRequest(true);
     }
-  }, [modalIsOpen, setCallRequest]);
+  }, [isOpen, setCallRequest]);
   
   return (
     <Tabs.Content value="attachments">
@@ -1161,8 +1032,8 @@ const PatientTabContentAttachment: React.FC<TabContentProps> = ({ patientId, mod
             <AddAttachmentModal patientId={patientId} />
           </div>
           <div className="w-full grid grid-cols-3 gap-[28px]">
-            {patientFiles &&
-              patientFiles?.map((data) => (
+            {data &&
+              data?.map((data) => (
                 <FileCard
                   key={data.id}
                   id={data.id}
