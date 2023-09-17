@@ -81,7 +81,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       api.defaults.headers["Authorization"] = `Bearer ${data.token}`;
 
       // Redirecione para a página do usuário
-      await Router.push(`/${data.user.id}?page=1`);
+      await Router.push("/dashboard");
 
       setIsLoading(false);
 

@@ -1,6 +1,6 @@
 import Select from "react-select";
 import { useState } from "react";
-import { SelectSchema } from "../../../@types/SelectSchema";
+import { Option } from "../../../interfaces/Option";
 
 const SelectFilter = ({
   field,
@@ -10,10 +10,10 @@ const SelectFilter = ({
   onChange,
 }: {
   field: string;
-  value: SelectSchema | null;
+  value: Option | null;
   placeholder: string;
-  options: SelectSchema[];
-  onChange: (option: SelectSchema | null) => void;
+  options: Option[];
+  onChange: (option: Option | null) => void;
 }) => {
   const [instanceId] = useState(Math.random().toString());
   

@@ -1,30 +1,32 @@
-import RegisterPatientModal from "../../components/Modal/RegisterPatientModal";
-import PatientCard from "../../components/Cards/PatientCard";
-import Pagination from "../../components/Pagination";
-import Header from "../../components/Header";
-import useSearchByAllFilters from "../../hooks/useSearchByAllFilters";
-import PatientCardSkeleton from "../../components/Skeletons/PatientCardSkeleton";
-import SelectFilter from "../../components/Selects/SelectFilter";
-import useSearch from "../../hooks/useSearch";
-import SearchInput from "../../components/Inputs/SearchInput";
-import { useState, useEffect } from "react";
-import { parseCookies } from "nookies";
-import { useRouter } from "next/router";
 import { GetServerSideProps } from "next";
-import { useAuthContext } from "../../contexts/AuthContext";
+import { parseCookies } from "nookies";
+import { api } from "../providers/Api";
 import { useSearchParams } from "next/navigation";
-import { SelectSchema } from "../../@types/SelectSchema";
+import { useRouter } from "next/router";
+import { useState, useEffect } from "react";
+import { useAuthContext } from "../contexts/AuthContext";
+import { DashboardPatientDataResponse } from "../@types/ApiResponse";
+import { Option } from "../interfaces/Option";
+import Header from "../components/Header";
+import SelectFilter from "../components/Selects/SelectFilter";
+import SearchInput from "../components/Inputs/SearchInput";
+import RegisterPatientModal from "../components/Modal/RegisterPatientModal";
+import PatientCard from "../components/Cards/PatientCard";
+import Pagination from "../components/Pagination";
 
-export default function AppPage() {
+type DashboardProps = {
+  data: DashboardPatientDataResponse;
+};
+
+export default function Dashboard({ data }: DashboardProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, logOut } = useAuthContext();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchInputValue, setSearchInputValue] = useState<string>("");
-  const [selectPrognosis, setSelectPrognosis] = useState<SelectSchema | null>(null);
-  const [selectPhysicalShape, setSelectPhysicalShape] = useState<SelectSchema | null>(null);
-  const [selectGender, setSelectGender] = useState<SelectSchema | null>(null);
-  const [isLoadingFindedData, setIsLoadingFindedData] = useState<boolean>(false);
+  const [selectPrognosis, setSelectPrognosis] = useState<Option | null>(null);
+  const [selectPhysicalShape, setSelectPhysicalShape] = useState<Option | null>(null);
+  const [selectGender, setSelectGender] = useState<Option | null>(null);
 
   const handleSelect = async (field: string, value: any) => {
     const query = { ...router.query, [field]: value, page: "1" };
@@ -34,8 +36,6 @@ export default function AppPage() {
       pathname: router.pathname,
       query,
     });
-
-    router.reload();
   };
 
   const handleSearchInput = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,8 +50,6 @@ export default function AppPage() {
       pathname: router.pathname,
       query
     });
-
-    router.reload();
   }
 
   useEffect(() => {
@@ -106,10 +104,7 @@ export default function AppPage() {
     setSelectGender,
     setSearchInputValue,
   ]);
-
-  const { data: result } = useSearch({ router, searchInputValue, setIsLoadingFindedData });
-  const { data, isLoading } = useSearchByAllFilters({ currentPage, router });
-
+  
   return (
     <div className="w-full flex items-center justify-center my-4">
       <div className="w-[1280px] flex flex-col items-center justify-center gap-6">
@@ -158,8 +153,6 @@ export default function AppPage() {
             />
             {/* Search input */}
             <SearchInput
-              data={result}
-              isLoading={isLoadingFindedData}
               value={searchInputValue}
               setValue={setSearchInputValue}
               onChange={handleSearchInput}
@@ -171,27 +164,17 @@ export default function AppPage() {
             </div>
           </div>
         </div>
-        <div className="w-[1280px] flex flex-col gap-6">
+        <div className={`w-[1280px] flex flex-col ${data.info.length >= 6 ? "" : "mb-14"} gap-6`}>
           {/* Patient cards */}
           <div className="w-[1280px] flex flex-col gap-6">
-            {isLoading ? (
-              <>
-                {/* Skeleton loading */}
-                {[1, 2, 3, 4, 5, 6].map((index) => (
-                  <PatientCardSkeleton key={index} />
-                ))}
-              </>
-            ) : (
-              // Render patient cards
-              data?.results.map((data) => (
-                <PatientCard key={data.id} {...data} />
-              ))
-            )}
+            {data.results.map((data) => (
+              <PatientCard key={data.id} {...data} />
+            ))}
           </div>
           {/* Pagination */}
-          {!isLoading && data?.info && data.info.length >= 6 && (
+          {data.info.length >= 6 && (
             <div className="w-[1280px] h-14 flex items-center justify-center">
-              {data?.info && (
+              {data.info && (
                 <Pagination
                   limit={data.info.size}
                   total={data.info.length}
@@ -204,7 +187,7 @@ export default function AppPage() {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
@@ -219,7 +202,15 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     };
   }
 
+  const { query } = ctx;
+  const { page, prognosis, physical_shape, gender, search } = query;
+  
+  const response = await api.get<DashboardPatientDataResponse>(`/patient/search/filters?page=${page || 1}&prognosis=${prognosis || ''}&physical_shape=${physical_shape || ''}&gender=${gender || ''}&search=${search || ''}`);
+  const data = response.data;
+
   return {
-    props: {},
+    props: {
+      data
+    },
   };
 };
