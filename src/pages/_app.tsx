@@ -18,7 +18,7 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
     <AuthProvider>
       <QueryClientProvider client={queryClient}>
         <NextNProgress
-          color="#212529"
+          color="#3b82f6"
           options={{ showSpinner: false }}
           startPosition={0.3}
           stopDelayMs={200}
