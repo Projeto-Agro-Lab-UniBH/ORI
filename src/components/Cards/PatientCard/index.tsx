@@ -1,7 +1,7 @@
 import * as Avatar from "@radix-ui/react-avatar";
 import * as Collapsible from '@radix-ui/react-collapsible';
 import PatientProfileRecordModal from "../../Modal/PatientProfileRecordModal";
-import { Badges } from "../../Badges/Badges";
+import { Badges } from "../../Badges";
 import { useEffect, useState } from "react";
 import { Option } from "../../../interfaces/Option";
 import { CopyToClipboard } from "react-copy-to-clipboard";
