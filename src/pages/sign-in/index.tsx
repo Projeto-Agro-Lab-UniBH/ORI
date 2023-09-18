@@ -51,10 +51,10 @@ export default function SignIn() {
                 <input
                   type="email"
                   id="email"
-                  className={`w-full h-10 px-3 py-3 text-sm font-normal border ${
+                  className={`w-full h-10 px-3 py-3 text-sm font-normal transition border border-solid ${
                     errors.email
-                      ? "border-red-200 bg-white hover:border-red-500 focus:outline-red-500"
-                      : "border-solid border-gray-200 bg-white hover:border-[#b3b3b3]"
+                      ? "border-red-200 bg-white focus:outline-outline focus:ring-1 focus:ring-red-700"
+                      : "border-gray-200 bg-white hover:border-[#b3b3b3]"
                   } rounded text-shark-950`}
                   placeholder="Digite o email da sua conta"
                   {...register("email")}
@@ -77,10 +77,10 @@ export default function SignIn() {
                 <input
                   type="password"
                   id="password"
-                  className={`w-full h-10 px-3 py-3 text-sm font-normal border ${
+                  className={`w-full h-10 px-3 py-3 text-sm font-normal transition border border-solid ${
                     errors.password
-                      ? "border-red-200 bg-white hover:border-red-500 focus:outline-red-500"
-                      : "border-solid border-gray-200 bg-white hover:border-[#b3b3b3]"
+                      ? "border-red-200 bg-white hover:border-red-500 focus:outline-outline focus:ring-1 focus:ring-red-700"
+                      : "border-gray-200 bg-white hover:border-[#b3b3b3]"
                   } rounded text-shark-950`}
                   placeholder="Digite a sua senha"
                   {...register("password")}
