@@ -1,14 +1,13 @@
+import * as Avatar from "@radix-ui/react-avatar";
+import * as Collapsible from '@radix-ui/react-collapsible';
 import { Dispatch, Fragment, SetStateAction, useEffect, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { CameraIcon, Cross2Icon, DashIcon, PlusIcon } from "@radix-ui/react-icons";
 import { api } from "../../providers/Api";
 import { useQuery } from "react-query";
 import { GetPatientClipboardResponse } from "../../@types/ApiResponse";
-import * as Collapsible from '@radix-ui/react-collapsible';
-import * as Avatar from "@radix-ui/react-avatar";
-
-import styles from "./styles.module.css"
 import EditPatientModal from "../Modal/EditPatientModal";
+import VerticalScrollbar from "../Scrollbar/VerticalScrollbar";
 
 type PatientClipboardProps = {
   patientId: string;
@@ -23,6 +22,7 @@ const PatientClipboard: React.FC<PatientClipboardProps> = ({
   open,
   setOpen,
 }) => {
+  const [openHospitalizationsSection, setOpenHospitalizationsSection] = useState<boolean>(false);
   const [openReportSection, setOpenReportSection] = useState<boolean>(false);
   const [openExamsSection, setOpenExamsSection] = useState<boolean>(false);
   const [openFilesSection, setOpenFilesSection] = useState<boolean>(false);
@@ -101,12 +101,11 @@ const PatientClipboard: React.FC<PatientClipboardProps> = ({
                         </button>
                       </div>
                     </Transition.Child>
-                    <div
-                      id={styles.scroll}
-                      className="h-full flex flex-col overflow-y-scroll bg-white shadow-xl"
+                    <VerticalScrollbar
+                      styleViewportArea="h-screen rounded-l-lg bg-white shadow-xl"
                     >
-                      <div className="w-full flex flex-col gap-3 pt-3 px-3 justify-center items-center">
-                        <div className="w-full flex flex-col gap-3 px-3 py-3 border border-gray-200 rounded">
+                      <div className="w-full flex flex-col gap-3 py-3 px-3">
+                        <div className="w-full flex flex-col gap-3 px-3 py-3 border border-gray-200 rounded-lg">
                           <div className="w-full flex flex-row items-center justify-end gap-4">
                             <div className="w-full">
                               <span className="text-ellipsis text-lg text-shark-950 font-semibold overflow-hidden">
@@ -201,9 +200,38 @@ const PatientClipboard: React.FC<PatientClipboardProps> = ({
                           </div>
                         </div>
                         <Collapsible.Root
+                          open={openHospitalizationsSection}
+                          onOpenChange={setOpenHospitalizationsSection}
+                          className="w-full flex flex-col gap-3 px-3 py-3 border border-gray-200 rounded-lg"
+                        >
+                          <div className="w-full flex justify-between items-center">
+                            <span className="w-[87.61px] text-lg text-shark-950 font-semibold">
+                              Internações
+                            </span>
+                            <Collapsible.Trigger asChild>
+                              <button className="w-8 h-8 flex justify-center items-center rounded hover:border hover:border-gray-200">
+                                {openHospitalizationsSection ? (
+                                  <DashIcon
+                                    color="#212529"
+                                    width={16}
+                                    height={16}
+                                  />
+                                ) : (
+                                  <PlusIcon
+                                    color="#212529"
+                                    width={16}
+                                    height={16}
+                                  />
+                                )}
+                              </button>
+                            </Collapsible.Trigger>
+                          </div>
+                          <Collapsible.Content></Collapsible.Content>
+                        </Collapsible.Root>
+                        <Collapsible.Root
                           open={openReportSection}
                           onOpenChange={setOpenReportSection}
-                          className="w-full flex flex-col gap-3 px-3 py-3 border border-gray-200 rounded"
+                          className="w-full flex flex-col gap-3 px-3 py-3 border border-gray-200 rounded-lg"
                         >
                           <div className="w-full flex justify-between items-center">
                             <span className="w-[87.61px] text-lg text-shark-950 font-semibold">
@@ -232,7 +260,7 @@ const PatientClipboard: React.FC<PatientClipboardProps> = ({
                         <Collapsible.Root
                           open={openExamsSection}
                           onOpenChange={setOpenExamsSection}
-                          className="w-full flex flex-col gap-3 px-3 py-3 border border-gray-200 rounded"
+                          className="w-full flex flex-col gap-3 px-3 py-3 border border-gray-200 rounded-lg"
                         >
                           <div className="w-full flex justify-between items-center">
                             <span className="w-[68.09px] text-lg text-shark-950 font-semibold">
@@ -261,7 +289,7 @@ const PatientClipboard: React.FC<PatientClipboardProps> = ({
                         <Collapsible.Root
                           open={openFilesSection}
                           onOpenChange={setOpenFilesSection}
-                          className="w-full flex flex-col gap-3 px-3 py-3 border border-gray-200 rounded"
+                          className="w-full flex flex-col gap-3 px-3 py-3 border border-gray-200 rounded-lg"
                         >
                           <div className="w-full flex justify-between items-center">
                             <span className="w-[68.09px] text-lg text-shark-950 font-semibold">
@@ -288,7 +316,7 @@ const PatientClipboard: React.FC<PatientClipboardProps> = ({
                           <Collapsible.Content></Collapsible.Content>
                         </Collapsible.Root>
                       </div>
-                    </div>
+                    </VerticalScrollbar>
                   </Dialog.Panel>
                 </Transition.Child>
               </div>
