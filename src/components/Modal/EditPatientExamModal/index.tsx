@@ -12,7 +12,7 @@ import { useMutation, useQuery } from "react-query";
 import { formatFileSize } from "../../../functions/formatBytes";
 import { z } from "zod";
 
-import styles from '../styles.module.css';
+import VerticalScrollbar from "../../Scrollbar/VerticalScrollbar";
 
 type EditPatientExamModalProps = {
   id: string;
@@ -212,7 +212,7 @@ const EditPatientExamModal: React.FC<EditPatientExamModalProps> = ({ id, patient
     setNumPages(numPages);
   };
 
-  const send = (data: editExamFormData) => {
+  const onSubmit = (data: editExamFormData) => {
     const request = {
       ...data,
     };
@@ -273,12 +273,11 @@ const EditPatientExamModal: React.FC<EditPatientExamModalProps> = ({ id, patient
               </div>
             </div>
           )}
-          <div
-            id={styles.modalScroll}
-            className="w-full h-[402px] px-6 py-6 overflow-y-scroll"
+          <VerticalScrollbar
+            styleViewportArea="w-full h-[402px] px-6 py-6"
           >
             <form
-              onSubmit={handleSubmit(send)}
+              onSubmit={handleSubmit(onSubmit)}
               className="w-full flex flex-col h-360 gap-6"
             >
               <div className="w-full flex flex-col gap-6">
@@ -526,7 +525,7 @@ const EditPatientExamModal: React.FC<EditPatientExamModalProps> = ({ id, patient
                 </div>
               </div>
             </form>
-          </div>
+          </VerticalScrollbar>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

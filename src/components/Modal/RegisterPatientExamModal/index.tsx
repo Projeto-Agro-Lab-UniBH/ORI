@@ -1,6 +1,7 @@
 import Image from "next/image";
 import SpinnerLoad from "../../Load/SpinnerLoad";
 import * as Dialog from "@radix-ui/react-dialog";
+import VerticalScrollbar from "../../Scrollbar/VerticalScrollbar";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Cross1Icon, TrashIcon } from "@radix-ui/react-icons";
 import { useForm } from "react-hook-form";
@@ -11,8 +12,6 @@ import { queryClient } from "../../../providers/QueryClient";
 import { useMutation } from "react-query";
 import { api } from "../../../providers/Api";
 import { z } from "zod";
-
-import styles from '../styles.module.css';
 
 type RegisterPatientReportProps = {
   patientId: string | null;
@@ -165,7 +164,7 @@ const RegisterPatientExamModal: React.FC<RegisterPatientReportProps> = ({ patien
     setNumPages(numPages);
   };
 
-  const send = (data: registerExamFormData) => {
+  const onSubmit = (data: registerExamFormData) => {
     const request = {
       ...data,
     };
@@ -200,12 +199,10 @@ const RegisterPatientExamModal: React.FC<RegisterPatientReportProps> = ({ patien
               </div>
             </div>
           )}
-          <div
-            id={styles.modalScroll}
-            className="w-full h-[402px] px-6 py-6 overflow-y-scroll"
+          <VerticalScrollbar styleViewportArea="w-full h-[402px] px-6 py-6"
           >
             <form
-              onSubmit={handleSubmit(send)}
+              onSubmit={handleSubmit(onSubmit)}
               className="w-full flex flex-col h-360"
             >
               <div className="w-full flex flex-col gap-6">
@@ -391,7 +388,7 @@ const RegisterPatientExamModal: React.FC<RegisterPatientReportProps> = ({ patien
                 </div>
               </div>
             </form>
-          </div>
+          </VerticalScrollbar>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

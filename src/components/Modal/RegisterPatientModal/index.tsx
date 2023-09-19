@@ -2,7 +2,6 @@ import * as Avatar from "@radix-ui/react-avatar";
 import * as Dialog from "@radix-ui/react-dialog";
 import SpinnerLoad from "../../Load/SpinnerLoad";
 import Select from "react-select";
-import CreatableSelect from "react-select/creatable";
 import { z } from "zod";
 import { api } from "../../../providers/Api";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,15 +13,11 @@ import { useState, KeyboardEventHandler, useEffect, ChangeEvent } from "react";
 import { useMutation } from "react-query";
 
 import styles from '../styles.module.css';
+import VerticalScrollbar from "../../Scrollbar/VerticalScrollbar";
 
 type UploadImageResponse = {
   imageUrl: string;
 };
-
-const createOption = (label: string) => ({
-  label,
-  value: label,
-});
 
 const genderOptions: Option[] = [
   { label: "Macho", value: "Macho" },
@@ -33,17 +28,6 @@ const physicalShapeOptions: Option[] = [
   { value: "Grande porte", label: "Grande porte" },
   { value: "Médio porte", label: "Médio porte" },
   { value: "Pequeno porte", label: "Pequeno porte" },
-];
-
-const prognosisOptions: Option[] = [
-  { label: "Alta", value: "Alta" },
-  { label: "Aguardando alta médica", value: "Aguardando alta médica" },
-  { label: "Obscuro", value: "Obscuro" },
-  { label: "Desfávoravel", value: "Desfávoravel" },
-  { label: "Reservado", value: "Reservado" },
-  { label: "Favorável", value: "Favorável" },
-  { label: "Risco", value: "Risco" },
-  { label: "Alto risco", value: "Alto risco" },
 ];
 
 const registerPatientFormSchema = z.object({
@@ -107,14 +91,7 @@ const registerPatientFormSchema = z.object({
 type registerPatientFormData = z.infer<typeof registerPatientFormSchema>;
 
 const RegisterPatientModal = () => {
-  const {
-    reset,
-    register,
-    watch,
-    setValue,
-    handleSubmit,
-    control,
-    formState: { errors },
+  const { reset, register, watch, handleSubmit, control, formState: { errors },
   } = useForm<registerPatientFormData>({
     resolver: zodResolver(registerPatientFormSchema),
   });
@@ -122,31 +99,20 @@ const RegisterPatientModal = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [selectedImage, setSelectedImage] = useState<File | undefined>(undefined);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const [diagnosisInputValue, setDiagnosisInputValue] = useState<string>("");
-  const [valueDiagnosis, setValueDiagnosis] = useState<readonly Option[]>([]);
 
   const { field: selectPhysicalShape } = useController({ name: "physical_shape", control });
   const { value: selectPhysicalShapeValue, onChange: selectPhysicalShapeOnChange, ...restSelectPhysicalShape } = selectPhysicalShape;
   
   const { field: selectGender } = useController({ name: "gender", control });
   const { value: selectGenderValue, onChange: selectGenderOnChange, ...restSelectGender } = selectGender;
-  
-  const { field: selectPrognosis } = useController({ name: "prognosis", control });
-  const { value: selectPrognosisValue, onChange: selectPrognosisOnChange, ...restSelectPrognosis } = selectPrognosis;
 
-  const handleKeyDown: KeyboardEventHandler = (event) => {
-    if (!diagnosisInputValue) return;
-    switch (event.key) {
-      case "Enter":
-      case "Tab":
-        setValueDiagnosis((prev) => [
-          ...prev,
-          createOption(diagnosisInputValue),
-        ]);
-        setDiagnosisInputValue("");
-        event.preventDefault();
+  useEffect(() => {
+    if (isOpen != true) {
+      setSelectedImage(undefined);
+      setPreviewImage(null);
+      reset();
     }
-  };
+  }, [isOpen, setPreviewImage, reset]);
 
   const handleImage = (event: ChangeEvent<HTMLInputElement>) => {
     if (event?.target?.files?.[0]) {
@@ -187,25 +153,12 @@ const RegisterPatientModal = () => {
     },
   });
 
-  const send = (data: registerPatientFormData) => {
+  const onSubmit = (data: registerPatientFormData) => {
     const request = {
       ...data,
     };
     mutate(request);
   };
-
-  useEffect(() => {
-    if (isOpen != true) {
-      setSelectedImage(undefined);
-      setPreviewImage(null);
-      setValueDiagnosis([]);
-      reset();
-    }
-  }, [isOpen, setPreviewImage, setValueDiagnosis, reset]);
-
-  useEffect(() => {
-    setValue("diagnosis", valueDiagnosis);
-  }, [setValue, valueDiagnosis, valueDiagnosis?.length]);
 
   return (
     <Dialog.Root onOpenChange={setIsOpen} open={isOpen}>
@@ -235,12 +188,11 @@ const RegisterPatientModal = () => {
               </div>
             </div>
           )}
-          <div
-            id={styles.modalScroll}
-            className="w-full h-[488px] px-6 pt-6 pb-6 overflow-y-scroll"
+          <VerticalScrollbar
+            styleViewportArea="w-full h-[488px] px-6 py-6"
           >
             <form
-              onSubmit={handleSubmit(send)}
+              onSubmit={handleSubmit(onSubmit)}
               className="w-full flex flex-col gap-10"
             >
               <div className="w-full flex flex-col gap-6">
@@ -298,108 +250,6 @@ const RegisterPatientModal = () => {
                   </div>
                 </div>
                 <div className="w-full flex flex-row gap-4">
-                  <div className="w-44">
-                    <div className="w-44 flex flex-col gap-2">
-                      <div className="w-full flex flex-col gap-3">
-                        <label
-                          htmlFor="entry_date"
-                          className="w-full text-sm font-normal text-shark-950"
-                        >
-                          Data de entrada
-                        </label>
-                        <input
-                          type="date"
-                          className={
-                            errors.entry_date
-                              ? "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
-                              : "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                          }
-                          {...register("entry_date")}
-                        />
-                      </div>
-                      {errors.entry_date && (
-                        <span className="text-xs font-normal text-red-500">
-                          {errors.entry_date.message}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="w-44">
-                    <div className="w-44 flex flex-col gap-6">
-                      <div className="w-full flex flex-col gap-3">
-                        <label
-                          htmlFor="departure_date"
-                          className="w-full text-sm font-normal text-shark-950"
-                        >
-                          Data de saída
-                        </label>
-                        <input
-                          type="date"
-                          className="w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                          {...register("departure_date")}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="w-full">
-                    <div className="w-full flex flex-col gap-6">
-                      <div className="w-full flex flex-col gap-3">
-                        <label
-                          htmlFor="prognosis"
-                          className="w-full text-sm font-normal text-shark-950"
-                        >
-                          Prognóstico
-                        </label>
-                        <Select
-                          styles={{
-                            control: (baseStyles, state) => ({
-                              ...baseStyles,
-                              width: "100%",
-                              height: 40,
-                              borderColor: state.isFocused
-                                ? "#e2e8f0"
-                                : "#e2e8f0",
-                              whiteSpace: "nowrap",
-                              textOverflow: "ellipsis",
-                              fontFamily: "Inter",
-                              fontWeight: 400,
-                              fontSize: "0.875rem",
-                              lineHeight: "1.25rem",
-                            }),
-                          }}
-                          theme={(theme) => ({
-                            ...theme,
-                            borderRadius: 4,
-                            colors: {
-                              ...theme.colors,
-                              primary75: "#cbd5e1",
-                              primary50: "##e2e8f0",
-                              primary25: "#f8fafc",
-                              primary: "#212529",
-                            },
-                          })}
-                          placeholder="Selecione a situação do paciente"
-                          isSearchable={false}
-                          options={prognosisOptions}
-                          value={
-                            selectPrognosisValue
-                              ? prognosisOptions.find(
-                                  (x) => x.value === selectPrognosisValue
-                                )
-                              : selectPrognosisValue
-                          }
-                          onChange={(option) =>
-                            selectPrognosisOnChange(
-                              option ? option.value : option
-                            )
-                          }
-                          {...restSelectPrognosis}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="w-full flex flex-row gap-4">
                   <div className="w-[368px]">
                     <div className="w-[368px] flex flex-col gap-2">
                       <div className="w-[368px] flex flex-col gap-3">
@@ -411,11 +261,11 @@ const RegisterPatientModal = () => {
                         </label>
                         <input
                           type="text"
-                          className={
+                          className={`w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal bg-white rounded border border-solid ${
                             errors.name
-                              ? "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
-                              : "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                          }
+                              ? "border-red-200  hover:border-red-500"
+                              : "border-gray-200 hover:border-[#b3b3b3]"
+                          }`}
                           {...register("name")}
                         />
                       </div>
@@ -444,11 +294,11 @@ const RegisterPatientModal = () => {
                         ) : (
                           <input
                             type="text"
-                            className={
+                            className={`w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal bg-white rounded border border-solid ${
                               errors.specie
-                                ? "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
-                                : "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                            }
+                                ? "border-red-200  hover:border-red-500"
+                                : "border-gray-200 hover:border-[#b3b3b3]"
+                            }`}
                             {...register("specie")}
                           />
                         )}
@@ -499,11 +349,11 @@ const RegisterPatientModal = () => {
                         ) : (
                           <input
                             type="text"
-                            className={
+                            className={`w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal bg-white rounded border border-solid ${
                               errors.owner
-                                ? "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
-                                : "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                            }
+                                ? "border-red-200  hover:border-red-500"
+                                : "border-gray-200 hover:border-[#b3b3b3]"
+                            }`}
                             {...register("owner")}
                           />
                         )}
@@ -552,11 +402,11 @@ const RegisterPatientModal = () => {
                         ) : (
                           <input
                             type="text"
-                            className={
+                            className={`w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal bg-white rounded border border-solid ${
                               errors.race
-                                ? "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
-                                : "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                            }
+                                ? "border-red-200  hover:border-red-500"
+                                : "border-gray-200 hover:border-[#b3b3b3]"
+                            }`}
                             {...register("race")}
                           />
                         )}
@@ -719,80 +569,6 @@ const RegisterPatientModal = () => {
                     </div>
                   </div>
                 </div>
-                <div className="w-full flex flex-col gap-2">
-                  <div className="w-full flex flex-col gap-3">
-                    <label
-                      htmlFor="diagnosis"
-                      className="w-full text-sm font-normal text-shark-950"
-                    >
-                      Diagnóstico/Suspeita Clínica
-                    </label>
-                    <CreatableSelect
-                      styles={{
-                        control: (baseStyles, state) => ({
-                          ...baseStyles,
-                          width: "100%",
-                          minHeight: 40,
-                          borderColor: state.isFocused ? "#e2e8f0" : "#e2e8f0",
-                          whiteSpace: "nowrap",
-                          textOverflow: "ellipsis",
-                          fontFamily: "Inter",
-                          fontWeight: 400,
-                          fontSize: "0.875rem",
-                          lineHeight: "1.25rem",
-                        }),
-                        multiValue: (styles) => {
-                          return {
-                            ...styles,
-                            backgroundColor: "#e0f2fe",
-                          };
-                        },
-                        multiValueLabel: (styles) => ({
-                          ...styles,
-                          color: "#0ea5e9",
-                        }),
-                        multiValueRemove: (styles) => ({
-                          ...styles,
-                          color: "#0ea5e9",
-                          ":hover": {
-                            backgroundColor: "#7dd3fc",
-                            color: "white",
-                          },
-                        }),
-                      }}
-                      theme={(theme) => ({
-                        ...theme,
-                        borderRadius: 4,
-                        colors: {
-                          ...theme.colors,
-                          primary75: "#cbd5e1",
-                          primary50: "##e2e8f0",
-                          primary25: "#f8fafc",
-                          primary: "#212529",
-                        },
-                      })}
-                      components={{ DropdownIndicator: null }}
-                      inputValue={diagnosisInputValue}
-                      isClearable
-                      isMulti
-                      menuIsOpen={false}
-                      onChange={(newValue) => setValueDiagnosis(newValue)}
-                      onInputChange={(newValue) =>
-                        setDiagnosisInputValue(newValue)
-                      }
-                      onKeyDown={handleKeyDown}
-                      placeholder=""
-                      value={valueDiagnosis}
-                    />
-                  </div>
-                  <span className="text-xs font-normal text-gray-500">
-                    <strong className="font-medium">Instrução: </strong> Digite
-                    o nome da doença diagnosticada/suspeita clínica e depois
-                    aperte a tecla{" "}
-                    <strong className="font-medium">Enter</strong> ou{" "}
-                    <strong className="font-medium">Tab.</strong>
-                  </span>
-                </div>
               </div>
               <div className="w-full h-10 flex items-center justify-end">
                 <button
@@ -803,7 +579,7 @@ const RegisterPatientModal = () => {
                 </button>
               </div>
             </form>
-          </div>
+          </VerticalScrollbar>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

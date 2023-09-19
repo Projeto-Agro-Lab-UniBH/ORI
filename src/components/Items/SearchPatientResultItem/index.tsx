@@ -16,7 +16,7 @@ const SearchPatientResultItem = ({
   race?: string;
 }) => {
   return (
-    <PatientProfileRecordModal key={id} patientId={id}>
+    <PatientProfileRecordModal patientId={id}>
       <div className="w-full flex flex-row items-center gap-4">
         <div className="w-12 h-12">
           <Avatar.Root className="w-12 h-12 flex items-center justify-center rounded-full overflow-hidden">

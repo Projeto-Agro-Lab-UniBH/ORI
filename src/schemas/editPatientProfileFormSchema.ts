@@ -22,11 +22,7 @@ export const editPatientProfileFormSchema = z
     undefined_race: z.boolean(),
     gender: z.any(),
     weight: z.string(),
-    prognosis: z.any(),
-    diagnosis: z.any(),
     physical_shape: z.any(),
-    entry_date: z.string().nonempty({ message: "Selecione a data de entrada" }),
-    departure_date: z.string().optional(),
   })
   .superRefine((field, ctx) => {
     const addCustomIssue = (path: string[], message: string) => {

@@ -151,7 +151,7 @@ const EditUserProfileModal: React.FC<EditUserProfileModalProps> = ({ id, childre
               <Cross1Icon width={24} height={24} />
             </Dialog.Close>
           </div>
-          {isLoading && 
+          {(isLoading || updating) && 
             <div className="w-full h-full absolute z-20">
               <div className="w-full h-full bg-[#f9fafb8b]">
                 <SpinnerLoad
@@ -163,18 +163,6 @@ const EditUserProfileModal: React.FC<EditUserProfileModalProps> = ({ id, childre
               </div>
             </div>
           }
-          {updating && 
-            <div className="w-full h-full absolute z-20">
-              <div className="w-full h-full bg-[#f9fafb8b]">
-                <SpinnerLoad
-                  divProps={{
-                    className:
-                      "w-full h-[488px] relative flex items-center justify-center bg-gray-500-50",
-                  }}
-                />
-              </div>
-            </div>
-          }  
           <div className="w-full px-6 py-6">
             <form
               onSubmit={handleSubmit(send)}

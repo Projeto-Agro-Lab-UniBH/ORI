@@ -14,6 +14,7 @@ import { useMutation, useQuery } from "react-query";
 import * as Dialog from "@radix-ui/react-dialog";
 
 import styles from '../styles.module.css';
+import VerticalScrollbar from "../../Scrollbar/VerticalScrollbar";
 
 type EditPatientReportModalProps = {
   id: string;
@@ -114,7 +115,7 @@ const EditPatientReportModal: React.FC<EditPatientReportModalProps> = ({ id, pat
     enabled: callRequest,
   });
 
-  const { isLoading: savingChanges, mutate } = useMutation({
+  const { isLoading: isUpdating, mutate } = useMutation({
     mutationKey: ["update-patient-report"],
     mutationFn: async (data: editReportFormData) => {
       if (attachedFile != undefined && fecthedAttachment === "") {
@@ -149,7 +150,7 @@ const EditPatientReportModal: React.FC<EditPatientReportModalProps> = ({ id, pat
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["list-all-reports"] });
-      if (savingChanges != true) {
+      if (isUpdating != true) {
         setOpen(false);
       }
     },
@@ -251,45 +252,20 @@ const EditPatientReportModal: React.FC<EditPatientReportModalProps> = ({ id, pat
               <Cross1Icon width={24} height={24} />
             </Dialog.Close>
           </div>
-          {isLoading && (
+          {(isLoading || isUpdating || isRemovingRecord) && (
             <div className="w-full h-full absolute z-20">
               <div className="w-full h-full bg-[#f9fafb8b]">
                 <SpinnerLoad
                   divProps={{
                     className:
-                      "w-full h-[488px] relative flex items-center justify-center bg-gray-500-50",
+                      "w-full h-[402px] relative flex items-center justify-center bg-gray-500-50",
                   }}
                 />
               </div>
             </div>
           )}
-          {savingChanges && (
-            <div className="w-full h-full absolute z-20">
-              <div className="w-full h-full bg-[#f9fafb8b]">
-                <SpinnerLoad
-                  divProps={{
-                    className:
-                      "w-full h-[488px] relative flex items-center justify-center bg-gray-500-50",
-                  }}
-                />
-              </div>
-            </div>
-          )}
-          {isRemovingRecord && (
-            <div className="w-full h-full absolute z-20">
-              <div className="w-full h-full bg-[#f9fafb8b]">
-                <SpinnerLoad
-                  divProps={{
-                    className:
-                      "w-full h-[488px] relative flex items-center justify-center bg-gray-500-50",
-                  }}
-                />
-              </div>
-            </div>
-          )}
-          <div
-            id={styles.modalScroll}
-            className="w-full h-[402px] px-6 py-6 overflow-y-scroll"
+          <VerticalScrollbar
+            styleViewportArea="w-full h-[402px] px-6 py-6"
           >
             <form
               onSubmit={handleSubmit(send)}
@@ -565,7 +541,7 @@ const EditPatientReportModal: React.FC<EditPatientReportModalProps> = ({ id, pat
                 </div>
               </div>
             </form>
-          </div>
+          </VerticalScrollbar>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

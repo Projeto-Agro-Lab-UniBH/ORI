@@ -6,9 +6,9 @@ import { Option } from "../../../interfaces/Option";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { CopyIcon, CameraIcon, PlusIcon, DashIcon } from "@radix-ui/react-icons";
 import { Exams } from "../../../@types/exams";
+import PatientProfileRecordModal from "../../Modal/PatientProfileRecordModal";
 
 import styles from './styles.module.css';
-import PatientClipboard from "../../Clipboard";
 
 type PatientCardProps = {
   id: string;
@@ -37,7 +37,6 @@ const PatientCard: React.FC<PatientCardProps> = ({
   physical_shape,
   exams,
 }) => {
-  const [open, setOpen] = useState<boolean>(false);
   const [openMoreDiagnosis, setOpenMoreDiagnosis] = useState<boolean>(false);
   const [openMoreExams, setOpenMoreExams] = useState<boolean>(false);
   const [copyArea, setCopyArea] = useState<string>(id);
@@ -84,7 +83,7 @@ const PatientCard: React.FC<PatientCardProps> = ({
               </div>
             </div>
             <div className="w-[238.6px] h-full flex items-center">
-              <PatientClipboard patientId={id} open={open} setOpen={setOpen}>
+              <PatientProfileRecordModal patientId={id}>
                 <div className="w-full flex items-center gap-4">
                   <div className="w-16 h-16 flex items-center">
                     <Avatar.Root className="w-16 h-16 flex items-center justify-center rounded-full overflow-hidden">
@@ -115,7 +114,7 @@ const PatientCard: React.FC<PatientCardProps> = ({
                     </div>
                   </div>
                 </div>
-              </PatientClipboard>
+              </PatientProfileRecordModal>
             </div>
           </div>
           <div className="flex gap-9">

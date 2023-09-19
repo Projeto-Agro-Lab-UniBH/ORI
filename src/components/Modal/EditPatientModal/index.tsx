@@ -1,6 +1,7 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import * as Avatar from "@radix-ui/react-avatar";
 import Select from "react-select";
+import VerticalScrollbar from "../../Scrollbar/VerticalScrollbar";
 import SpinnerLoad from "../../Load/SpinnerLoad";
 import { api } from "../../../providers/Api";
 import { z } from "zod";
@@ -12,8 +13,6 @@ import { Option } from "../../../interfaces/Option";
 import { ChangeEvent, useEffect, useState } from "react";
 import { useController, useForm } from "react-hook-form";
 import { GetPatientEditResponse, PatchPatientResponse, UploadImageResponse } from "../../../@types/ApiResponse";
-
-import styles from '../styles.module.css';
 
 const genderOptions: Option[] = [
   { label: "Macho", value: "Macho" },
@@ -203,9 +202,8 @@ const EditPatientModal = ({ patientId }: { patientId: string }) => {
               </div>
             </div>
           )}
-          <div
-            id={styles.modalScroll}
-            className="w-full h-[488px] px-6 py-6 overflow-y-scroll"
+          <VerticalScrollbar
+            styleViewportArea="w-full h-[488px] px-6 py-6"
           >
             <form
               className="w-full flex flex-col gap-10"
@@ -599,7 +597,7 @@ const EditPatientModal = ({ patientId }: { patientId: string }) => {
                 </button>
               </div>
             </form>
-          </div>
+          </VerticalScrollbar>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

@@ -13,7 +13,7 @@ import { formatFileSize } from "../../../functions/formatBytes";
 import { queryClient } from "../../../providers/QueryClient";
 import { z } from "zod";
 
-import styles from '../styles.module.css';
+import VerticalScrollbar from "../../Scrollbar/VerticalScrollbar";
 
 type RegisterPatientReportProps = {
   patientId: string | null;
@@ -158,7 +158,7 @@ const RegisterPatientReportModal: React.FC<RegisterPatientReportProps> = ({ pati
     setNumPages(numPages);
   };
 
-  const send = (data: registerReportFormData) => {
+  const onSubmit = (data: registerReportFormData) => {
     const request = {
       ...data,
     };
@@ -193,12 +193,11 @@ const RegisterPatientReportModal: React.FC<RegisterPatientReportProps> = ({ pati
               </div>
             </div>
           )}
-          <div
-            id={styles.modalScroll}
-            className="w-full h-[402px] px-6 py-6 overflow-y-scroll"
+          <VerticalScrollbar
+            styleViewportArea="w-full h-[402px] px-6 py-6"
           >
             <form
-              onSubmit={handleSubmit(send)}
+              onSubmit={handleSubmit(onSubmit)}
               className="w-full flex flex-col h-360 gap-6"
             >
               <div className="w-full flex flex-col gap-6">
@@ -407,7 +406,7 @@ const RegisterPatientReportModal: React.FC<RegisterPatientReportProps> = ({ pati
                 </div>
               </div>
             </form>
-          </div>
+          </VerticalScrollbar>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
