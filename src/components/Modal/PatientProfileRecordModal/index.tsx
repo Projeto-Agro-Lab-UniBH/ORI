@@ -18,11 +18,20 @@ import { ChangeEvent, KeyboardEventHandler, useEffect, useState } from "react";
 import { useController, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FileCard } from "../../Cards/FileCard";
-import { PatientProfileRecordModalProps, TabContentProps } from "../@types/PatientProfileRecordModal";
-import { GetPatientResponse, ListExamsResponse, ListFilesResponse, ListReportsResponse, PatchPatientResponse, UploadImageResponse } from "../../../@types/ApiResponse";
+import { GetPatientEditResponse, ListExamsResponse, ListFilesResponse, ListReportsResponse, PatchPatientResponse, UploadImageResponse } from "../../../@types/ApiResponse";
 import { editPatientProfileFormData, editPatientProfileFormSchema } from "../../../schemas/editPatientProfileFormSchema";
 
 import styles from '../styles.module.css';
+
+export type PatientProfileRecordModalProps = {
+  patientId: string;
+  children: React.ReactNode;
+};
+
+export type TabContentProps = {
+  patientId: string;
+  isOpen: boolean;
+};
 
 const PatientProfileRecordModal: React.FC<PatientProfileRecordModalProps> = ({ patientId, children }) => {
   const [open, setOpen] = useState<boolean>(false);
@@ -187,11 +196,11 @@ const PatientTabContentProfile: React.FC<TabContentProps> = ({ patientId, isOpen
     queryKey: ["get-patient-by-id"],
     queryFn: async () => {
       setIsLoading(true);
-      await api.get<GetPatientResponse>(`/patient/${patientId}`)
+      await api.get<GetPatientEditResponse>(`/patient/${patientId}`)
         .then((res) => {
-          if ((res.data as GetPatientResponse).diagnosis.length > 0) {
+          if ((res.data as GetPatientEditResponse).diagnosis.length > 0) {
             setValueDiagnosis(
-              (res.data as GetPatientResponse).diagnosis
+              (res.data as GetPatientEditResponse).diagnosis
             );
           }
           reset(res.data);

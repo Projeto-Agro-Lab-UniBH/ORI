@@ -205,7 +205,13 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const { query } = ctx;
   const { page, prognosis, physical_shape, gender, search } = query;
   
-  const response = await api.get<DashboardPatientDataResponse>(`/patient/search/filters?page=${page || 1}&prognosis=${prognosis || ''}&physical_shape=${physical_shape || ''}&gender=${gender || ''}&search=${search || ''}`);
+  const response = await api.get<DashboardPatientDataResponse>(
+    `/patient/search/filters?page=${page || 1}&prognosis=${
+      prognosis || ""
+    }&physical_shape=${physical_shape || ""}&gender=${gender || ""}&search=${
+      search || ""
+    }`
+  );
   const data = response.data;
 
   return {

@@ -1,7 +1,9 @@
-export function Badges({ data }: any) {
+const Badges = ({ data }: any) => {
   return (
-    <span className="bg-shark-950 px-2 py-[2px] text-sm font-normal text-white text-ellipsis whitespace-nowrap overflow-hidden max-w-[204px] border-none rounded">
+    <div className="whitespace-nowrap text-sm font-normal text-white text-ellipsis overflow-hidden max-w-[204px] border-none rounded px-2 py-[2px] bg-shark-950">
       {data}
-    </span>
+    </div>
   );
 }
+
+export default Badges;

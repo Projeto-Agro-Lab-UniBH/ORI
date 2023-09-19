@@ -7,6 +7,7 @@ export type Patient = {
   id: string;
   profile_photo?: string;
   name: string;
+  owner: string;
   race: string;
   specie: string;
   gender: string;
@@ -14,6 +15,8 @@ export type Patient = {
   prognosis: string;
   diagnosis: Option[];
   physical_shape: string;
+  entry_date: string;
+  departure_date: string;
   reports: Reports[];
   exams: Exams[];
   files: Files[];

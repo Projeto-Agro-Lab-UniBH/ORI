@@ -1,7 +1,6 @@
 import * as Avatar from "@radix-ui/react-avatar";
 import * as Collapsible from '@radix-ui/react-collapsible';
-import PatientProfileRecordModal from "../../Modal/PatientProfileRecordModal";
-import { Badges } from "../../Badges";
+import Badges from "../../Badges";
 import { useEffect, useState } from "react";
 import { Option } from "../../../interfaces/Option";
 import { CopyToClipboard } from "react-copy-to-clipboard";
@@ -9,6 +8,7 @@ import { CopyIcon, CameraIcon, PlusIcon, DashIcon } from "@radix-ui/react-icons"
 import { Exams } from "../../../@types/exams";
 
 import styles from './styles.module.css';
+import PatientClipboard from "../../Clipboard";
 
 type PatientCardProps = {
   id: string;
@@ -37,6 +37,7 @@ const PatientCard: React.FC<PatientCardProps> = ({
   physical_shape,
   exams,
 }) => {
+  const [open, setOpen] = useState<boolean>(false);
   const [openMoreDiagnosis, setOpenMoreDiagnosis] = useState<boolean>(false);
   const [openMoreExams, setOpenMoreExams] = useState<boolean>(false);
   const [copyArea, setCopyArea] = useState<string>(id);
@@ -49,8 +50,8 @@ const PatientCard: React.FC<PatientCardProps> = ({
     index === self.findIndex((e) => e.type_of_exam === exam.type_of_exam)
   );
 
-  const renderBadges = (data: string | undefined, defaultValue: string) => (
-    <Badges data={data ?? defaultValue} />
+  const renderBadges = (data: string | undefined, defaultValue: string, key?: number) => (
+    <Badges key={key} data={data ?? defaultValue} />
   );
 
   const renderExams = (exam: Exams) => (
@@ -83,7 +84,7 @@ const PatientCard: React.FC<PatientCardProps> = ({
               </div>
             </div>
             <div className="w-[238.6px] h-full flex items-center">
-              <PatientProfileRecordModal patientId={id}>
+              <PatientClipboard patientId={id} open={open} setOpen={setOpen}>
                 <div className="w-full flex items-center gap-4">
                   <div className="w-16 h-16 flex items-center">
                     <Avatar.Root className="w-16 h-16 flex items-center justify-center rounded-full overflow-hidden">
@@ -114,7 +115,7 @@ const PatientCard: React.FC<PatientCardProps> = ({
                     </div>
                   </div>
                 </div>
-              </PatientProfileRecordModal>
+              </PatientClipboard>
             </div>
           </div>
           <div className="flex gap-9">
@@ -138,7 +139,7 @@ const PatientCard: React.FC<PatientCardProps> = ({
             </div>
             <div className="flex items-center flex-col gap-2">
               <span className="w-full whitespace-nowrap text-lg font-semibold text-shark-950">
-                Diagnóstico / Suspeita Clínica:
+                Diagnóstico / Suspeita clínica:
               </span>
               <Collapsible.Root
                 open={openMoreDiagnosis}
@@ -147,9 +148,9 @@ const PatientCard: React.FC<PatientCardProps> = ({
               >
                 {diagnosis.length >= 4 ? (
                   <div className="w-full flex flex-row items-center gap-2">
-                    {diagnosis.slice(0, 3).map((data) => renderBadges(data.value, ""))}
+                    {diagnosis.slice(0, 3).map((data, i) => renderBadges(data.value, "", i))}
                     <Collapsible.Content className="flex flex-row items-center gap-2">
-                      {diagnosis.slice(3).map((data) => renderBadges(data.value, ""))}
+                      {diagnosis.slice(3).map((data, i) => renderBadges(data.value, "", i))}
                     </Collapsible.Content>
                     <Collapsible.Trigger asChild>
                       <button className="w-6 h-6 flex items-center justify-center hover:border hover:rounded hover:border-gray-200 cursor-pointer">
@@ -166,7 +167,7 @@ const PatientCard: React.FC<PatientCardProps> = ({
                     {diagnosis.length === 0 ? (
                       <Badges data={"Não cadastrado"} />
                     ) : (
-                      diagnosis.map((data) => renderBadges(data.value, ""))
+                      diagnosis.map((data, i) => renderBadges(data.value, "", i))
                     )}
                   </div>
                 )}
