@@ -8,7 +8,7 @@ const VerticalScrollbar = ({
   children: React.ReactNode;
 }) => {
   return (
-    <ScrollArea.Root className="overflow-hidden">
+    <ScrollArea.Root>
       <ScrollArea.Viewport className={styleViewportArea}>
         {children}
       </ScrollArea.Viewport>

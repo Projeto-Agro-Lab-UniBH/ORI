@@ -14,7 +14,7 @@ export default function useSearch({
   setIsLoading: Dispatch<SetStateAction<boolean>>;
 }) {
   return useQuery<SearchPatientResponse[]>(
-    ["searchForInput", searchInputValue],
+    ["searchValue", searchInputValue],
     async () => {
       const { prognosis, physical_shape, gender } = router.query;
       setIsLoading(true);

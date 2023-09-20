@@ -5,21 +5,24 @@ import DotsLoad from "../../Load/DotsLoad";
 import useSearch from "../../../hooks/useSearch";
 import SearchPatientResultItem from "../../Items/SearchPatientResultItem";
 
-type SearchInputProps = {
+const SearchInput = ({
+  value,
+  setValue,
+  onChange,
+  onClick,
+}: {
   value: string;
   setValue: Dispatch<SetStateAction<string>>;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onClick: () => void;
-};
-
-const SearchInput: React.FC<SearchInputProps> = ({ value, setValue, onChange, onClick }) => {
+}) => {
   const router = useRouter();
   const [isListOpen, setIsListOpen] = useState(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
 
-  const { data } = useSearch({ router, searchInputValue: value, setIsLoading })
+  const { data } = useSearch({ router, searchInputValue: value, setIsLoading });
 
   // Fecha a lista quando o usuário clica fora dela
   useEffect(() => {
@@ -48,7 +51,7 @@ const SearchInput: React.FC<SearchInputProps> = ({ value, setValue, onChange, on
 
   const clearInput = async () => {
     setValue("");
-    
+
     if (router.query.search != "") {
       const query = { ...router.query, ["search"]: "", page: "1" };
 
@@ -56,10 +59,8 @@ const SearchInput: React.FC<SearchInputProps> = ({ value, setValue, onChange, on
         pathname: router.pathname,
         query,
       });
-
-      router.reload();
     }
-  }
+  };
 
   return (
     <div className="w-[592px] flex">
@@ -166,8 +167,9 @@ const SearchInput: React.FC<SearchInputProps> = ({ value, setValue, onChange, on
                     </ul>
                     {data && data.length >= 3 && (
                       <button
-                        onClick={onClick} 
-                        className="w-full h-10 font-normal text-sm">
+                        onClick={onClick}
+                        className="w-full h-10 font-normal text-sm"
+                      >
                         Ver todos os resultados
                       </button>
                     )}
