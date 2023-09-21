@@ -9,10 +9,8 @@ import { queryClient } from "../../../providers/QueryClient";
 import { CameraIcon, Cross1Icon, PlusIcon } from "@radix-ui/react-icons";
 import { Option } from "../../../interfaces/Option";
 import { useController, useForm } from "react-hook-form";
-import { useState, KeyboardEventHandler, useEffect, ChangeEvent } from "react";
+import { useState, useEffect, ChangeEvent } from "react";
 import { useMutation } from "react-query";
-
-import styles from '../styles.module.css';
 import VerticalScrollbar from "../../Scrollbar/VerticalScrollbar";
 
 type UploadImageResponse = {
@@ -51,8 +49,6 @@ const registerPatientFormSchema = z.object({
   undefined_race: z.boolean(),
   gender: z.any(),
   weight: z.string(),
-  prognosis: z.any(),
-  diagnosis: z.any(),
   physical_shape: z.any(),
   entry_date: z.string().nonempty({ message: "Selecione a data de entrada" }),
   departure_date: z.string().optional(),
@@ -122,6 +118,9 @@ const RegisterPatientModal = () => {
     }
   };
 
+  console.log(selectPhysicalShapeValue)
+  console.log(selectGenderValue)
+
   const { isLoading, mutate } = useMutation({
     mutationKey: ["create-patient"],
     mutationFn: async (data: registerPatientFormData) => {
@@ -168,12 +167,12 @@ const RegisterPatientModal = () => {
       <Dialog.Portal>
         <Dialog.Overlay className="bg-black/60 inset-0 fixed z-10" />
         <Dialog.Content className="w-[720px] rounded-lg border-none bg-white fixed overflow-hidden pt-4 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
-          <div className="w-full px-6 pb-4 border-b-[1px] border-gray-200 flex items-center flex-row justify-between">
-            <Dialog.Title className="font-semibold text-2xl">
+          <div className="w-full px-6 pb-4 border-b-[1px] border-slate-200 flex items-center flex-row justify-between">
+            <Dialog.Title className="font-semibold text-2xl text-slate-700">
               Cadastrar paciente
             </Dialog.Title>
-            <Dialog.Close className="w-8 h-w-8 flex justify-center items-center">
-              <Cross1Icon width={24} height={24} />
+            <Dialog.Close className="w-8 h-8 bg-transparent flex justify-center items-center">
+              <Cross1Icon className="text-slate-400 hover:text-slate-500" width={24} height={24} />
             </Dialog.Close>
           </div>
           {isLoading && (
@@ -188,25 +187,23 @@ const RegisterPatientModal = () => {
               </div>
             </div>
           )}
-          <VerticalScrollbar
-            styleViewportArea="w-full h-[488px] px-6 py-6"
-          >
+          <VerticalScrollbar styleViewportArea="w-full h-[488px] px-6 py-6">
             <form
               onSubmit={handleSubmit(onSubmit)}
-              className="w-full flex flex-col gap-10"
+              className="w-full flex flex-col gap-[64px]"
             >
               <div className="w-full flex flex-col gap-6">
                 <div className="w-full flex items-center gap-4">
                   <div className="w-[72px] h-full flex items-center flex-col gap-2">
                     <div className="w-full flex items-center justify-center">
-                      <span className="text-sm font-semibold text-shark-950">
+                      <span className="font-medium text-sm text-slate-700">
                         Foto
                       </span>
                     </div>
                     <div className="w-full flex items-center justify-center">
                       <Avatar.Root
                         className={`w-16 h-16 flex items-center justify-center ${
-                          previewImage ? "" : "border border-gray-200"
+                          previewImage ? "" : "border border-slate-300"
                         } rounded-full overflow-hidden`}
                       >
                         {previewImage ? (
@@ -215,7 +212,7 @@ const RegisterPatientModal = () => {
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <CameraIcon width={16} height={16} color="#e5e7eb" />
+                          <CameraIcon width={16} height={16} color="#cbd5e1" />
                         )}
                       </Avatar.Root>
                     </div>
@@ -237,10 +234,10 @@ const RegisterPatientModal = () => {
                       />
                       <div className="w-full">
                         <div className="w-[516px] flex flex-col">
-                          <p className="w-16 text-shark-950 font-semibold text-sm">
+                          <p className="w-16 font-medium text-sm text-slate-700">
                             Dica:
                           </p>
-                          <p className="w-[500px] text-gray-500 font-normal text-sm whitespace-nowrap">
+                          <p className="w-[500px] font-normal text-sm text-slate-400 whitespace-nowrap">
                             Uma foto de perfil do paciente o ajuda a ser
                             reconhecido na plataforma.
                           </p>
@@ -255,22 +252,22 @@ const RegisterPatientModal = () => {
                       <div className="w-[368px] flex flex-col gap-3">
                         <label
                           htmlFor="name"
-                          className="w-full text-sm font-normal text-shark-950"
+                          className="w-full font-medium text-sm text-slate-700"
                         >
                           Nome do paciente
                         </label>
                         <input
                           type="text"
-                          className={`w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal bg-white rounded border border-solid ${
+                          className={`w-full h-10 px-3 py-3 font-normal text-sm text-shark-950 bg-white rounded border border-solid ${
                             errors.name
-                              ? "border-red-200  hover:border-red-500"
-                              : "border-gray-200 hover:border-[#b3b3b3]"
+                              ? "border-red-300 hover:border-red-400 focus:outline-none placeholder:text-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                              : "border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
                           }`}
                           {...register("name")}
                         />
                       </div>
                       {errors.name && (
-                        <span className={"text-xs font-normal text-red-500"}>
+                        <span className={"font-normal text-xs text-red-400"}>
                           {errors.name.message}
                         </span>
                       )}
@@ -281,14 +278,14 @@ const RegisterPatientModal = () => {
                       <div className="w-full flex flex-col gap-3">
                         <label
                           htmlFor="specie"
-                          className="w-full text-sm font-normal text-shark-950"
+                          className="w-full font-medium text-sm text-slate-700"
                         >
                           Espécie
                         </label>
                         {watch("undefined_specie") == true ? (
                           <input
                             type="text"
-                            className="w-full h-10 px-3 py-3 text-gray-100 bg-gray-100 border border-gray-200 rounded cursor-not-allowed"
+                            className="w-full h-10 px-3 py-3 text-slate-200 bg-slate-200 border border-solid border-slate-300 rounded cursor-not-allowed"
                             disabled
                           />
                         ) : (
@@ -296,8 +293,8 @@ const RegisterPatientModal = () => {
                             type="text"
                             className={`w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal bg-white rounded border border-solid ${
                               errors.specie
-                                ? "border-red-200  hover:border-red-500"
-                                : "border-gray-200 hover:border-[#b3b3b3]"
+                                ? "border-red-300 hover:border-red-400 focus:outline-none placeholder:text-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                                : "border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
                             }`}
                             {...register("specie")}
                           />
@@ -307,8 +304,8 @@ const RegisterPatientModal = () => {
                         <span
                           className={
                             watch("undefined_specie") == false
-                              ? "text-xs font-normal text-red-500"
-                              : "hidden text-xs font-normal text-red-500"
+                              ? "font-normal text-xs text-red-400"
+                              : "hidden font-normal text-xs text-red-400"
                           }
                         >
                           {errors.specie.message}
@@ -322,7 +319,7 @@ const RegisterPatientModal = () => {
                         ></input>
                         <label
                           htmlFor="checkbox2"
-                          className="text-xs font-normal text-gray-500"
+                          className="font-normal text-xs text-slate-400"
                         >
                           Sem espécie definida.
                         </label>
@@ -336,14 +333,14 @@ const RegisterPatientModal = () => {
                       <div className="w-[368px] flex flex-col gap-3">
                         <label
                           htmlFor="owner"
-                          className="w-full text-sm font-normal text-shark-950"
+                          className="w-full font-medium text-sm text-slate-700"
                         >
                           Nome do tutor(a)
                         </label>
                         {watch("ownerless_patient") == true ? (
                           <input
                             type="text"
-                            className="w-full h-10 px-3 py-3 text-gray-100 bg-gray-100 border border-gray-200 rounded cursor-not-allowed"
+                            className="w-full h-10 px-3 py-3 text-slate-200 bg-slate-200 border border-solid border-slate-300 rounded cursor-not-allowed"
                             disabled
                           />
                         ) : (
@@ -351,8 +348,8 @@ const RegisterPatientModal = () => {
                             type="text"
                             className={`w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal bg-white rounded border border-solid ${
                               errors.owner
-                                ? "border-red-200  hover:border-red-500"
-                                : "border-gray-200 hover:border-[#b3b3b3]"
+                                ? "border-red-300 hover:border-red-400 focus:outline-none placeholder:text-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                                : "border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
                             }`}
                             {...register("owner")}
                           />
@@ -362,8 +359,8 @@ const RegisterPatientModal = () => {
                         <span
                           className={
                             watch("ownerless_patient") == false
-                              ? "text-xs font-normal text-red-500"
-                              : "hidden text-xs font-normal text-red-500"
+                              ? "font-normal text-xs text-red-400"
+                              : "hidden font-normal text-xs text-red-400"
                           }
                         >
                           {errors.owner.message}
@@ -377,7 +374,7 @@ const RegisterPatientModal = () => {
                         ></input>
                         <label
                           htmlFor="checkbox3"
-                          className="text-xs font-normal text-gray-500"
+                          className="font-normal text-xs text-slate-400"
                         >
                           Não foi identificado o tutor do paciente.
                         </label>
@@ -389,14 +386,14 @@ const RegisterPatientModal = () => {
                       <div className="w-full flex flex-col gap-3">
                         <label
                           htmlFor="race"
-                          className="w-full text-sm font-normal text-shark-950"
+                          className="w-full font-medium text-sm text-slate-700"
                         >
                           Raça
                         </label>
                         {watch("undefined_race") == true ? (
                           <input
                             type="text"
-                            className="w-full h-10 px-3 py-3 text-gray-100 bg-gray-100 border border-gray-200 rounded cursor-not-allowed"
+                            className="w-full h-10 px-3 py-3 text-slate-200 bg-slate-200 border border-solid border-slate-300 rounded cursor-not-allowed"
                             disabled
                           />
                         ) : (
@@ -404,8 +401,8 @@ const RegisterPatientModal = () => {
                             type="text"
                             className={`w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal bg-white rounded border border-solid ${
                               errors.race
-                                ? "border-red-200  hover:border-red-500"
-                                : "border-gray-200 hover:border-[#b3b3b3]"
+                                ? "border-red-300 hover:border-red-400 focus:outline-none placeholder:text-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                                : "border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
                             }`}
                             {...register("race")}
                           />
@@ -415,8 +412,8 @@ const RegisterPatientModal = () => {
                         <span
                           className={
                             watch("undefined_race") == false
-                              ? "text-xs font-normal text-red-500"
-                              : "hidden text-xs font-normal text-red-500"
+                              ? "font-normal text-xs text-red-400"
+                              : "hidden font-normal text-xs text-red-400"
                           }
                         >
                           {errors.race.message}
@@ -430,7 +427,7 @@ const RegisterPatientModal = () => {
                         ></input>
                         <label
                           htmlFor="checkbox4"
-                          className="text-xs font-normal text-gray-500"
+                          className="font-normal text-xs text-slate-400"
                         >
                           Sem raça definida.
                         </label>
@@ -444,7 +441,7 @@ const RegisterPatientModal = () => {
                       <div className="w-full flex flex-col gap-3">
                         <label
                           htmlFor="physical_shape"
-                          className="w-full text-sm font-normal text-shark-950"
+                          className="w-full font-medium text-sm text-slate-700"
                         >
                           Porte físico
                         </label>
@@ -455,14 +452,36 @@ const RegisterPatientModal = () => {
                               width: "100%",
                               height: 40,
                               borderColor: state.isFocused
-                                ? "#e2e8f0"
-                                : "#e2e8f0",
+                                ? "#64748b"
+                                : "#cbd5e1",
                               whiteSpace: "nowrap",
                               textOverflow: "ellipsis",
-                              fontFamily: "Inter",
                               fontWeight: 400,
+                              fontFamily: "Inter",
                               fontSize: "0.875rem",
                               lineHeight: "1.25rem",
+                            }),
+                            input: (styles) => ({
+                              ...styles,
+                              fontWeight: 400,
+                              fontFamily: "Inter",
+                              borderColor: "#cbd5e1",
+                              ":hover": { borderColor: "#94a3b8" },
+                            }),
+                            dropdownIndicator: (styles) => ({
+                              ...styles,
+                              color: "#94a3b8",
+                              ":hover": { color: "#64748b" },
+                            }),
+                            indicatorSeparator: (styles) => ({
+                              ...styles,
+                              backgroundColor: "#94a3b8"
+                            }),
+                            placeholder: (styles) => ({
+                              ...styles,
+                              fontWeight: 400,
+                              fontFamily: "Inter",
+                              color: "#94a3b8",
                             }),
                           }}
                           theme={(theme) => ({
@@ -470,13 +489,12 @@ const RegisterPatientModal = () => {
                             borderRadius: 4,
                             colors: {
                               ...theme.colors,
-                              primary75: "#cbd5e1",
-                              primary50: "##e2e8f0",
+                              primary50: "#f8fafc",
                               primary25: "#f8fafc",
-                              primary: "#212529",
+                              primary: "#0f172a",
                             },
                           })}
-                          placeholder="Selecione"
+                          placeholder="Selecione o porte"
                           isSearchable={false}
                           options={physicalShapeOptions}
                           value={
@@ -501,13 +519,13 @@ const RegisterPatientModal = () => {
                       <div className="w-full flex flex-col gap-3">
                         <label
                           htmlFor="weight"
-                          className="w-full text-sm font-normal text-shark-950"
+                          className="w-full font-medium text-sm text-slate-700"
                         >
                           Peso
                         </label>
                         <input
                           type="text"
-                          className="w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                          className="w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal bg-white rounded border border-solid border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
                           {...register("weight")}
                         />
                       </div>
@@ -518,7 +536,7 @@ const RegisterPatientModal = () => {
                       <div className="w-full flex flex-col gap-3">
                         <label
                           htmlFor="gender"
-                          className="w-full text-sm font-normal text-shark-950"
+                          className="w-full font-medium text-sm text-slate-700"
                         >
                           Gênero
                         </label>
@@ -529,14 +547,36 @@ const RegisterPatientModal = () => {
                               width: "100%",
                               height: 40,
                               borderColor: state.isFocused
-                                ? "#e2e8f0"
-                                : "#e2e8f0",
+                                ? "#64748b"
+                                : "#cbd5e1",
                               whiteSpace: "nowrap",
                               textOverflow: "ellipsis",
-                              fontFamily: "Inter",
                               fontWeight: 400,
+                              fontFamily: "Inter",
                               fontSize: "0.875rem",
                               lineHeight: "1.25rem",
+                            }),
+                            input: (styles) => ({
+                              ...styles,
+                              fontWeight: 400,
+                              fontFamily: "Inter",
+                              borderColor: "#cbd5e1",
+                              ":hover": { borderColor: "#94a3b8" },
+                            }),
+                            dropdownIndicator: (styles) => ({
+                              ...styles,
+                              color: "#94a3b8",
+                              ":hover": { color: "#64748b" },
+                            }),
+                            indicatorSeparator: (styles) => ({
+                              ...styles,
+                              backgroundColor: "#94a3b8"
+                            }),
+                            placeholder: (styles) => ({
+                              ...styles,
+                              fontWeight: 400,
+                              fontFamily: "Inter",
+                              color: "#94a3b8",
                             }),
                           }}
                           theme={(theme) => ({
@@ -544,10 +584,9 @@ const RegisterPatientModal = () => {
                             borderRadius: 4,
                             colors: {
                               ...theme.colors,
-                              primary75: "#cbd5e1",
-                              primary50: "##e2e8f0",
+                              primary50: "#f8fafc",
                               primary25: "#f8fafc",
-                              primary: "#212529",
+                              primary: "#0f172a",
                             },
                           })}
                           placeholder="Selecione o sexo do paciente"
@@ -561,7 +600,9 @@ const RegisterPatientModal = () => {
                               : selectGenderValue
                           }
                           onChange={(option) =>
-                            selectGenderOnChange(option ? option.value : option)
+                            selectGenderOnChange(
+                              option ? option.value : option
+                            )
                           }
                           {...restSelectGender}
                         />
@@ -573,7 +614,7 @@ const RegisterPatientModal = () => {
               <div className="w-full h-10 flex items-center justify-end">
                 <button
                   type="submit"
-                  className="w-24 h-10 border border-gray-200 rounded font-medium text-base text-shark-950 bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500"
+                  className="w-24 h-10 border border-slate-300 rounded font-medium text-base text-slate-700 bg-white hover:border-none hover:text-white hover:bg-blue-500"
                 >
                   Cadastrar
                 </button>
