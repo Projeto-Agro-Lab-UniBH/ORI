@@ -32,43 +32,43 @@ const PatientProfileRecordModal = ({ patientId, children }: { patientId: string;
         <Dialog.Overlay className="bg-black/60 inset-0 fixed z-10" />
         <Dialog.Content className="w-[720px] rounded-lg border-none bg-white fixed overflow-hidden pt-4 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
           <div className="w-full px-6 mb-6 flex items-center flex-row justify-between">
-            <Dialog.Title className="font-semibold text-2xl">
+            <Dialog.Title className="font-semibold text-2xl text-slate-700">
               Ficha do paciente
             </Dialog.Title>
-            <Dialog.Close className="w-[32px] h-[32px] flex justify-center items-center">
-              <Cross1Icon width={24} height={24} />
+            <Dialog.Close className="h-8 bg-transparent flex justify-center items-center">
+              <Cross1Icon className="text-slate-400 hover:text-slate-500" width={24} height={24} />
             </Dialog.Close>
           </div>
           <Tabs.Root defaultValue="profile">
             <div className="w-full">
-              <Tabs.List className="w-full h-10 pl-6 flex flex-wrap -mb-px text-sm font-medium text-center border-b border-gray-200">
+              <Tabs.List className="w-full h-10 pl-6 flex flex-wrap -mb-px text-sm font-medium text-center border-b border-slate-300">
                 <Tabs.Trigger
                   value="profile"
-                  className="inline-block px-[12px] pt-[6px] pb-3 rounded-t-lg border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 data-[state=active]:text-shark-950 data-[state=active]:border-b-shark-950"
+                  className="inline-block px-[12px] pt-[6px] pb-3 rounded-t-lg border-b-2 border-transparent text-slate-400 hover:text-gray-500 hover:border-slate-400 data-[state=active]:text-slate-700 data-[state=active]:border-b-slate-700 focus:outline-none"
                 >
                   Perfil
                 </Tabs.Trigger>
                 <Tabs.Trigger
                   value="attachments"
-                  className="inline-block px-[12px] pt-[6px] pb-3 rounded-t-lg border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 data-[state=active]:text-shark-950 data-[state=active]:border-b-shark-950"
+                  className="inline-block px-[12px] pt-[6px] pb-3 rounded-t-lg border-b-2 border-transparent text-slate-400 hover:text-gray-500 hover:border-slate-400 data-[state=active]:text-slate-700 data-[state=active]:border-b-slate-700"
                 >
                   Arquivos
                 </Tabs.Trigger>
                 <Tabs.Trigger
                   value="exams"
-                  className="inline-block px-[12px] pt-[6px] pb-3 rounded-t-lg border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 data-[state=active]:text-shark-950 data-[state=active]:border-b-shark-950"
+                  className="inline-block px-[12px] pt-[6px] pb-3 rounded-t-lg border-b-2 border-transparent text-slate-400 hover:text-gray-500 hover:border-slate-400 data-[state=active]:text-slate-700 data-[state=active]:border-b-slate-700"
                 >
                   Exames
                 </Tabs.Trigger>
                 <Tabs.Trigger
                   value="hospitalizations"
-                  className="inline-block px-[12px] pt-[6px] pb-3 rounded-t-lg border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 data-[state=active]:text-shark-950 data-[state=active]:border-b-shark-950"
+                  className="inline-block px-[12px] pt-[6px] pb-3 rounded-t-lg border-b-2 border-transparent text-slate-400 hover:text-gray-500 hover:border-slate-400 data-[state=active]:text-slate-700 data-[state=active]:border-b-slate-700"
                 >
                   Internações
                 </Tabs.Trigger>
                 <Tabs.Trigger
                   value="reports"
-                  className="inline-block px-[12px] pt-[6px] pb-3 rounded-t-lg border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 data-[state=active]:text-shark-950 data-[state=active]:border-b-shark-950"
+                  className="inline-block px-[12px] pt-[6px] pb-3 rounded-t-lg border-b-2 border-transparent text-slate-400 hover:text-gray-500 hover:border-slate-400 data-[state=active]:text-slate-700 data-[state=active]:border-b-slate-700"
                 >
                   Relatórios
                 </Tabs.Trigger>
@@ -220,7 +220,7 @@ const TabContentProfile = ({ patientId, isOpen }: { patientId: string; isOpen: b
       )}
       <VerticalScrollbar styleViewportArea="w-full h-[488px] px-6 py-6">
         <form
-          className="w-full flex flex-col gap-10"
+          className="w-full flex flex-col gap-[64px]"
           onSubmit={handleSubmit(onSubmit)}
         >
           <div className="w-full flex flex-col gap-6">
@@ -228,7 +228,7 @@ const TabContentProfile = ({ patientId, isOpen }: { patientId: string; isOpen: b
               <div className="w-full flex items-center gap-4">
                 <div className="w-[72px] flex items-center flex-col gap-2">
                   <div className="w-full flex items-center justify-center">
-                    <span className="text-sm font-normal text-shark-950">
+                    <span className="font-medium text-sm text-slate-700">
                       Foto
                     </span>
                   </div>
@@ -239,10 +239,10 @@ const TabContentProfile = ({ patientId, isOpen }: { patientId: string; isOpen: b
                         className="w-full h-full object-cover"
                       />
                       <Avatar.Fallback
-                        className="w-16 h-16 border border-gray-200 flex items-center justify-center rounded-full overflow-hidden"
+                        className="w-16 h-16 border border-slate-300 flex items-center justify-center rounded-full overflow-hidden"
                         delayMs={600}
                       >
-                        <CameraIcon width={16} height={16} color="#e5e7eb" />
+                        <CameraIcon width={16} height={16} color="#cbd5e1" />
                       </Avatar.Fallback>
                     </Avatar.Root>
                   </div>
@@ -264,10 +264,10 @@ const TabContentProfile = ({ patientId, isOpen }: { patientId: string; isOpen: b
                     />
                     <div className="w-full">
                       <div className="w-[516px] flex flex-col">
-                        <p className="w-16 text-sm font-normal text-shark-950 ">
+                        <p className="w-16 font-medium text-sm text-slate-700">
                           Dica:
                         </p>
-                        <p className="w-[500px] text-gray-500 font-normal text-sm whitespace-nowrap">
+                        <p className="w-[500px] font-normal text-sm text-slate-400 whitespace-nowrap">
                           Uma foto de perfil do paciente o ajuda a ser
                           reconhecido na plataforma.
                         </p>
@@ -283,22 +283,22 @@ const TabContentProfile = ({ patientId, isOpen }: { patientId: string; isOpen: b
                   <div className="w-[368px] flex flex-col gap-3">
                     <label
                       htmlFor="name"
-                      className="w-full text-sm font-normal text-shark-950"
+                      className="w-full font-medium text-sm text-slate-700"
                     >
                       Nome do paciente
                     </label>
                     <input
                       type="text"
-                      className={`w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal bg-white rounded border border-solid ${
+                      className={`w-full h-10 px-3 py-3 font-normal text-sm text-shark-950 bg-white rounded border border-solid ${
                         errors.name
-                          ? "border-red-200  hover:border-red-500"
-                          : "border-gray-200 hover:border-[#b3b3b3]"
+                          ? "border-red-300 hover:border-red-400 focus:outline-none placeholder:text-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                          : "border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
                       }`}
                       {...register("name")}
                     />
                   </div>
                   {errors.name && (
-                    <span className={"text-xs font-normal text-red-500"}>
+                    <span className={"font-normal text-xs text-red-400"}>
                       {errors.name.message}
                     </span>
                   )}
@@ -309,14 +309,14 @@ const TabContentProfile = ({ patientId, isOpen }: { patientId: string; isOpen: b
                   <div className="w-full flex flex-col gap-3">
                     <label
                       htmlFor="specie"
-                      className="w-full text-sm font-normal text-shark-950"
+                      className="font-medium text-sm text-slate-700"
                     >
                       Espécie
                     </label>
                     {watch("undefined_specie") == true ? (
                       <input
                         type="text"
-                        className="w-full h-10 px-3 py-3 text-gray-100 bg-gray-100 border border-gray-200 rounded cursor-not-allowed"
+                        className="w-full h-10 px-3 py-3 text-slate-200 bg-slate-200 border border-solid border-slate-300 rounded cursor-not-allowed"
                         disabled
                       />
                     ) : (
@@ -324,8 +324,8 @@ const TabContentProfile = ({ patientId, isOpen }: { patientId: string; isOpen: b
                         type="text"
                         className={`w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal bg-white rounded border border-solid ${
                           errors.specie
-                            ? "border-red-200  hover:border-red-500"
-                            : "border-gray-200 hover:border-[#b3b3b3]"
+                            ? "border-red-300 hover:border-red-400 focus:outline-none placeholder:text-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                            : "border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
                         }`}
                         {...register("specie")}
                       />
@@ -335,8 +335,8 @@ const TabContentProfile = ({ patientId, isOpen }: { patientId: string; isOpen: b
                     <span
                       className={
                         watch("undefined_specie") == false
-                          ? "text-xs font-normal text-red-500"
-                          : "hidden text-xs font-normal text-red-500"
+                          ? "font-normal text-xs text-red-400"
+                          : "hidden font-normal text-xs text-red-400"
                       }
                     >
                       {errors.specie.message}
@@ -350,7 +350,7 @@ const TabContentProfile = ({ patientId, isOpen }: { patientId: string; isOpen: b
                     ></input>
                     <label
                       htmlFor="checkbox2"
-                      className="text-xs font-normal text-gray-500"
+                      className="font-normal text-xs text-slate-400"
                     >
                       Sem espécie definida.
                     </label>
@@ -364,14 +364,14 @@ const TabContentProfile = ({ patientId, isOpen }: { patientId: string; isOpen: b
                   <div className="w-[368px] flex flex-col gap-3">
                     <label
                       htmlFor="owner"
-                      className="w-full text-sm font-normal text-shark-950"
+                      className="w-full font-medium text-sm text-slate-700"
                     >
                       Nome do tutor(a)
                     </label>
                     {watch("ownerless_patient") == true ? (
                       <input
                         type="text"
-                        className="w-full h-10 px-3 py-3 text-gray-100 bg-gray-100 border border-gray-200 rounded cursor-not-allowed"
+                        className="w-full h-10 px-3 py-3 text-slate-200 bg-slate-200 border border-solid border-slate-300 rounded cursor-not-allowed"
                         disabled
                       />
                     ) : (
@@ -379,8 +379,8 @@ const TabContentProfile = ({ patientId, isOpen }: { patientId: string; isOpen: b
                         type="text"
                         className={`w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal bg-white rounded border border-solid ${
                           errors.owner
-                            ? "border-red-200  hover:border-red-500"
-                            : "border-gray-200 hover:border-[#b3b3b3]"
+                            ? "border-red-300 hover:border-red-400 focus:outline-none placeholder:text-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                            : "border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
                         }`}
                         {...register("owner")}
                       />
@@ -390,8 +390,8 @@ const TabContentProfile = ({ patientId, isOpen }: { patientId: string; isOpen: b
                     <span
                       className={
                         watch("ownerless_patient") == false
-                          ? "text-xs font-normal text-red-500"
-                          : "hidden text-xs font-normal text-red-500"
+                          ? "font-normal text-xs text-red-400"
+                          : "hidden font-normal text-xs text-red-400"
                       }
                     >
                       {errors.owner.message}
@@ -405,7 +405,7 @@ const TabContentProfile = ({ patientId, isOpen }: { patientId: string; isOpen: b
                     ></input>
                     <label
                       htmlFor="checkbox3"
-                      className="text-xs font-normal text-gray-500"
+                      className="font-normal text-xs text-slate-400"
                     >
                       Não foi identificado o tutor do paciente.
                     </label>
@@ -417,14 +417,14 @@ const TabContentProfile = ({ patientId, isOpen }: { patientId: string; isOpen: b
                   <div className="w-full flex flex-col gap-3">
                     <label
                       htmlFor="race"
-                      className="w-full text-sm font-normal text-shark-950"
+                      className="w-full font-medium text-sm text-slate-700"
                     >
                       Raça
                     </label>
                     {watch("undefined_race") == true ? (
                       <input
                         type="text"
-                        className="w-full h-10 px-3 py-3 text-gray-100 bg-gray-100 border border-gray-200 rounded cursor-not-allowed"
+                        className="w-full h-10 px-3 py-3 text-slate-200 bg-slate-200 border border-solid border-slate-300 rounded cursor-not-allowed"
                         disabled
                       />
                     ) : (
@@ -432,8 +432,8 @@ const TabContentProfile = ({ patientId, isOpen }: { patientId: string; isOpen: b
                         type="text"
                         className={`w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal bg-white rounded border border-solid ${
                           errors.race
-                            ? "border-red-200  hover:border-red-500"
-                            : "border-gray-200 hover:border-[#b3b3b3]"
+                            ? "border-red-300 hover:border-red-400 focus:outline-none placeholder:text-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                            : "border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
                         }`}
                         {...register("race")}
                       />
@@ -443,8 +443,8 @@ const TabContentProfile = ({ patientId, isOpen }: { patientId: string; isOpen: b
                     <span
                       className={
                         watch("undefined_race") == false
-                          ? "text-xs font-normal text-red-500"
-                          : "hidden text-xs font-normal text-red-500"
+                          ? "font-normal text-xs text-red-400"
+                          : "hidden font-normal text-xs text-red-400"
                       }
                     >
                       {errors.race.message}
@@ -458,7 +458,7 @@ const TabContentProfile = ({ patientId, isOpen }: { patientId: string; isOpen: b
                     ></input>
                     <label
                       htmlFor="checkbox4"
-                      className="text-xs font-normal text-gray-500"
+                      className="font-normal text-xs text-slate-400"
                     >
                       Sem raça definida.
                     </label>
@@ -472,7 +472,7 @@ const TabContentProfile = ({ patientId, isOpen }: { patientId: string; isOpen: b
                   <div className="w-full flex flex-col gap-3">
                     <label
                       htmlFor="physical_shape"
-                      className="w-full text-sm font-normal text-shark-950"
+                      className="w-full font-medium text-sm text-slate-700"
                     >
                       Porte físico
                     </label>
@@ -482,24 +482,45 @@ const TabContentProfile = ({ patientId, isOpen }: { patientId: string; isOpen: b
                           ...baseStyles,
                           width: "100%",
                           height: 40,
-                          borderColor: state.isFocused ? "#e2e8f0" : "#e2e8f0",
-                          borderRadius: 4,
+                          borderColor: state.isFocused ? "#64748b" : "#cbd5e1",
                           whiteSpace: "nowrap",
                           textOverflow: "ellipsis",
-                          fontFamily: "Inter",
                           fontWeight: 400,
+                          fontFamily: "Inter",
                           fontSize: "0.875rem",
                           lineHeight: "1.25rem",
+                        }),
+                        input: (styles) => ({
+                          ...styles,
+                          fontWeight: 400,
+                          fontFamily: "Inter",
+                          borderColor: "#cbd5e1",
+                          ":hover": { borderColor: "#94a3b8" },
+                        }),
+                        dropdownIndicator: (styles) => ({
+                          ...styles,
+                          color: "#94a3b8",
+                          ":hover": { color: "#64748b" },
+                        }),
+                        indicatorSeparator: (styles) => ({
+                          ...styles,
+                          backgroundColor: "#94a3b8",
+                        }),
+                        placeholder: (styles) => ({
+                          ...styles,
+                          fontWeight: 400,
+                          fontFamily: "Inter",
+                          color: "#94a3b8",
                         }),
                       }}
                       theme={(theme) => ({
                         ...theme,
+                        borderRadius: 4,
                         colors: {
                           ...theme.colors,
-                          primary75: "#cbd5e1",
-                          primary50: "##e2e8f0",
+                          primary50: "#f8fafc",
                           primary25: "#f8fafc",
-                          primary: "#212529",
+                          primary: "#0f172a",
                         },
                       })}
                       placeholder="Selecione"
@@ -527,13 +548,13 @@ const TabContentProfile = ({ patientId, isOpen }: { patientId: string; isOpen: b
                   <div className="w-full flex flex-col gap-3">
                     <label
                       htmlFor="weight"
-                      className="w-full text-sm font-normal text-shark-950"
+                      className="w-full font-medium text-sm text-slate-700"
                     >
                       Peso
                     </label>
                     <input
                       type="text"
-                      className="w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                      className="w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal bg-white rounded border border-solid border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
                       {...register("weight")}
                     />
                   </div>
@@ -544,7 +565,7 @@ const TabContentProfile = ({ patientId, isOpen }: { patientId: string; isOpen: b
                   <div className="w-full flex flex-col gap-3">
                     <label
                       htmlFor="gender"
-                      className="w-full text-sm font-normal text-shark-950"
+                      className="w-full font-medium text-sm text-slate-700"
                     >
                       Gênero
                     </label>
@@ -554,24 +575,45 @@ const TabContentProfile = ({ patientId, isOpen }: { patientId: string; isOpen: b
                           ...baseStyles,
                           width: "100%",
                           height: 40,
-                          borderColor: state.isFocused ? "#e2e8f0" : "#e2e8f0",
-                          borderRadius: 4,
+                          borderColor: state.isFocused ? "#64748b" : "#cbd5e1",
                           whiteSpace: "nowrap",
                           textOverflow: "ellipsis",
-                          fontFamily: "Inter",
                           fontWeight: 400,
+                          fontFamily: "Inter",
                           fontSize: "0.875rem",
                           lineHeight: "1.25rem",
+                        }),
+                        input: (styles) => ({
+                          ...styles,
+                          fontWeight: 400,
+                          fontFamily: "Inter",
+                          borderColor: "#cbd5e1",
+                          ":hover": { borderColor: "#94a3b8" },
+                        }),
+                        dropdownIndicator: (styles) => ({
+                          ...styles,
+                          color: "#94a3b8",
+                          ":hover": { color: "#64748b" },
+                        }),
+                        indicatorSeparator: (styles) => ({
+                          ...styles,
+                          backgroundColor: "#94a3b8",
+                        }),
+                        placeholder: (styles) => ({
+                          ...styles,
+                          fontWeight: 400,
+                          fontFamily: "Inter",
+                          color: "#94a3b8",
                         }),
                       }}
                       theme={(theme) => ({
                         ...theme,
+                        borderRadius: 4,
                         colors: {
                           ...theme.colors,
-                          primary75: "#cbd5e1",
-                          primary50: "##e2e8f0",
+                          primary50: "#f8fafc",
                           primary25: "#f8fafc",
-                          primary: "#212529",
+                          primary: "#0f172a",
                         },
                       })}
                       placeholder="Selecione o sexo do paciente"
@@ -597,7 +639,7 @@ const TabContentProfile = ({ patientId, isOpen }: { patientId: string; isOpen: b
           <div className="w-full h-10 flex items-center justify-end">
             <button
               type="submit"
-              className="w-[152px] h-10 border border-gray-200 rounded font-medium text-base text-shark-950 bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500"
+              className="w-[152px] h-10 border border-slate-300 rounded font-medium text-base text-slate-700 bg-white hover:border-none hover:text-white hover:bg-blue-500"
             >
               Salvar alterações
             </button>

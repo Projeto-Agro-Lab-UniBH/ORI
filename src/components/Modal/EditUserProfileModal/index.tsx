@@ -142,13 +142,13 @@ const EditUserProfileModal: React.FC<EditUserProfileModalProps> = ({ id, childre
       </div>
       <Dialog.Portal>
         <Dialog.Overlay className="bg-black/60 inset-0 fixed z-10" />
-        <Dialog.Content className="w-[720px] rounded-lg border border-gray-200 bg-white fixed overflow-hidden pt-4 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
-          <div className="w-full px-6 pb-4 border-b-[1px] border-gray-200 flex items-center flex-row justify-between">
-            <Dialog.Title className="font-semibold text-2xl">
+        <Dialog.Content className="w-[720px] rounded-lg border bg-white fixed overflow-hidden pt-4 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+          <div className="w-full px-6 pb-4 border-b-[1px] border-slate-200 flex items-center flex-row justify-between">
+            <Dialog.Title className="font-semibold text-2xl text-slate-700">
               Editar dados do seu perfil
             </Dialog.Title>
-            <Dialog.Close className="w-[32px] h-[32px] flex justify-center items-center border-none">
-              <Cross1Icon width={24} height={24} />
+            <Dialog.Close className="h-8 bg-transparent flex justify-center items-center">
+              <Cross1Icon className="text-slate-400 hover:text-slate-500" width={24} height={24} />
             </Dialog.Close>
           </div>
           {(isLoading || updating) && 
@@ -172,7 +172,7 @@ const EditUserProfileModal: React.FC<EditUserProfileModalProps> = ({ id, childre
                 <div className="w-full flex items-center gap-4">
                   <div className="w-[72px] h-full flex items-center flex-col gap-2">
                     <div className="w-full flex items-center justify-center">
-                      <span className="text-sm font-semibold text-shark-950">
+                      <span className="font-medium text-sm text-slate-700">
                         Foto
                       </span>
                     </div>
@@ -205,12 +205,11 @@ const EditUserProfileModal: React.FC<EditUserProfileModalProps> = ({ id, childre
                       />
                       <div className="w-full">
                         <div className="w-[516px] flex flex-col">
-                          <p className="w-16 text-shark-950 font-semibold text-sm">
+                          <p className="w-16 font-medium text-sm text-slate-700">
                             Dica:
                           </p>
-                          <p className="w-[500px] text-gray-500 font-normal text-sm whitespace-nowrap">
-                            Uma foto de perfil do paciente o ajuda a ser
-                            reconhecido na plataforma.
+                          <p className="w-[500px] font-normal text-sm text-slate-400 whitespace-nowrap">
+                            Uma foto de perfil do paciente o ajuda a ser reconhecido na plataforma.
                           </p>
                         </div>
                       </div>
@@ -220,20 +219,24 @@ const EditUserProfileModal: React.FC<EditUserProfileModalProps> = ({ id, childre
                 <div className="w-full flex flex-row gap-4">
                   <div className="w-full">
                     <div className="w-full flex flex-col gap-3">
-                      <label htmlFor="username" className="w-full text-sm font-normal text-shark-950">Nome completo</label>
+                      <label htmlFor="username" className="w-full font-medium text-sm text-slate-700">
+                        Nome completo
+                      </label>
                       <input
                         type="text"
-                        className="w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                        className="w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal bg-white rounded border border-solid border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
                         {...register("username")}
                       />
                     </div>
                   </div>
                   <div className="w-full">
                     <div className="w-full flex flex-col gap-3">
-                      <label htmlFor="email" className="w-full text-sm font-normal text-shark-950">E-mail</label>
+                      <label htmlFor="email" className="w-full font-medium text-sm text-slate-700">
+                        E-mail
+                      </label>
                       <input
                         type="text"
-                        className="w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
+                        className="w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal bg-white rounded border border-solid border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
                         {...register("email")}
                       />
                     </div>
@@ -241,7 +244,7 @@ const EditUserProfileModal: React.FC<EditUserProfileModalProps> = ({ id, childre
                 </div>
               </div>
               <div className="w-full flex justify-end">
-                <button className="border border-gray-200 px-3 py-[6px] rounded text-base text-shark-950 font-medium bg-white hover:bg-gray-50">
+                <button className="w-[152px] h-10 border border-slate-300 rounded font-medium text-base text-slate-700 bg-white hover:border-none hover:text-white hover:bg-blue-500">
                   Salvar alterações
                 </button>
               </div>
