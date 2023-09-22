@@ -58,7 +58,7 @@ const PatientCard = ({
   );
 
   return (
-    <div className="w-[1280px] h-[104px] px-4 py-2 border border-gray-200 rounded-lg">
+    <div className="w-[1280px] h-[104px] px-4 py-2 border border-slate-200 rounded-lg">
       <ScrollArea.Root className="w-[1248px] h-[88px] flex items-center overflow-hidden">
         <ScrollArea.Viewport className="w-full border-none rounded-lg">
           <div className="h-20 flex items-center gap-[46px]">
@@ -74,8 +74,8 @@ const PatientCard = ({
                     </span>
                   </div>
                   <CopyToClipboard text={copyArea}>
-                    <button className="w-6 h-6 flex items-center justify-center hover:border hover:rounded hover:border-gray-200 cursor-pointer">
-                      <CopyIcon color="#212529" width={15} height={15} />
+                    <button className="w-6 h-6 flex items-center justify-center hover:border hover:rounded hover:border-slate-300 cursor-pointer">
+                      <CopyIcon color="#475569" width={16} height={16} />
                     </button>
                   </CopyToClipboard>
                 </div>
@@ -154,11 +154,11 @@ const PatientCard = ({
                           .map((data, i) => renderBadges(data.value, "", i))}
                       </Collapsible.Content>
                       <Collapsible.Trigger asChild>
-                        <button className="w-6 h-6 flex items-center justify-center hover:border hover:rounded hover:border-gray-200 cursor-pointer">
+                        <button className="w-6 h-6 flex items-center justify-center hover:border hover:rounded hover:border-slate-300 cursor-pointer">
                           {openMoreDiagnosis ? (
-                            <DashIcon color="#212529" width={15} height={15} />
+                            <DashIcon color="#64748b" width={16} height={16} />
                           ) : (
-                            <PlusIcon color="#212529" width={15} height={15} />
+                            <PlusIcon color="#64748b" width={16} height={16} />
                           )}
                         </button>
                       </Collapsible.Trigger>
@@ -219,7 +219,7 @@ const PatientCard = ({
           orientation="horizontal"
           className="flex data-[orientation=horizontal]:flex-col data-[orientation=horizontal]:h-[6px]"
         >
-          <ScrollArea.Thumb className="flex-1 hover:bg-[#cbd3d6] rounded-[50px]" />
+          <ScrollArea.Thumb className="flex-1 hover:bg-slate-300 rounded-[50px]" />
         </ScrollArea.Scrollbar>
       </ScrollArea.Root>
     </div>
