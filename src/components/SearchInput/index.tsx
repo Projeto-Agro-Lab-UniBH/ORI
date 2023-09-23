@@ -1,12 +1,12 @@
 import * as Dialog from "@radix-ui/react-dialog";
-import DotsLoad from "../../Load/DotsLoad";
-import VerticalScrollbarContainer from "../../Scrollbar/VerticalScrollbar";
-import SearchPatientResultItem from "../../Items/SearchPatientResultItem";
-import { api } from "../../../providers/Api";
+import DotsLoad from "../Load/DotsLoad";
+import VerticalScrollbarContainer from "../Scrollbar/VerticalScrollbar";
+import SearchPatientResultItem from "../Items/SearchPatientResultItem";
+import { api } from "../../providers/Api";
 import { useQuery } from "react-query";
 import { Cross2Icon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { Dispatch, SetStateAction, useState } from "react";
-import { SearchPatientResponse } from "../../../@types/ApiResponse";
+import { SearchPatientResponse } from "../../@types/ApiResponse";
 
 const SearchInput = ({ 
   value, 
