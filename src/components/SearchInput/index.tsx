@@ -1,12 +1,13 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import DotsLoad from "../Load/DotsLoad";
-import VerticalScrollbarContainer from "../Scrollbar/VerticalScrollbar";
 import SearchPatientResultItem from "../Items/SearchPatientResultItem";
 import { api } from "../../providers/Api";
 import { useQuery } from "react-query";
 import { Cross2Icon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { Dispatch, SetStateAction, useState } from "react";
-import { SearchPatientResponse } from "../../@types/ApiResponse";
+import { SearchResponse } from "../../@types/ApiResponse";
+
+import styles from "./styles.module.css"
 
 const SearchInput = ({ 
   value, 
@@ -20,12 +21,12 @@ const SearchInput = ({
   const [open, setOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const { data } = useQuery<SearchPatientResponse[]>(
-    ["searchByInputValue", value],
+  const { data } = useQuery<SearchResponse[]>(
+    ["searchByName", value],
     async () => {
       setIsLoading(true);
-      const response = await api.get<SearchPatientResponse[]>(
-        `/patient/search/by/values?search=${value || ""}`
+      const response = await api.get<SearchResponse[]>(
+        `/patient/search/by/name?search=${value || ""}`
       );
       setIsLoading(false);
       return response.data;
@@ -38,13 +39,13 @@ const SearchInput = ({
 
   return (
     <Dialog.Root onOpenChange={setOpen} open={open}>
-      <Dialog.Trigger className="w-[592px] h-10 border border-slate-300 rounded px-3 p-3 gap-2 flex items-center hover:hover:border-slate-400 hover:bg-slate-200/20 focus:outline-none">
+      <Dialog.Trigger className="w-[592px] border border-slate-300 rounded-lg p-2.5 gap-2 flex items-center hover:hover:border-slate-400 hover:bg-slate-200/20 focus:outline-none">
         <MagnifyingGlassIcon color="#94a3b8" width={16} height={16} />
         <span className="text-sm text-slate-400">Pesquisar um paciente</span>
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className="bg-black/60 inset-0 fixed z-10" />
-        <Dialog.Content className="w-[592px] rounded border-none fixed overflow-hidden top-12 left-1/2 -translate-x-1/2 z-10">
+        <Dialog.Content className="w-[592px] rounded-lg border-none fixed overflow-hidden top-12 left-1/2 -translate-x-1/2 z-10">
           <div className="w-full flex">
             <div className="w-full flex flex-col">
               <div className="w-full relative">
@@ -53,7 +54,7 @@ const SearchInput = ({
                 </div>
                 <input
                   type="text"
-                  className="w-full h-10 pl-10 p-3 block bg-white border-b border-slate-200 rounded-t font-normal text-shark-950 text-sm placeholder:text-slate-400 focus:outline-none"
+                  className="w-full pl-10 p-2.5 block bg-white border-b border-slate-200 rounded-t font-normal text-shark-950 text-sm placeholder:text-slate-400 focus:outline-none"
                   placeholder="Pesquisar um paciente"
                   value={value}
                   onChange={onChange}
@@ -72,7 +73,9 @@ const SearchInput = ({
                   </button>
                 )}
               </div>
-              <VerticalScrollbarContainer styleViewportArea="w-full bg-white max-h-[488px] overflow-y-scroll">
+              <div
+                id={styles.containerScroll}
+                className="w-full bg-white max-h-[488px] overflow-y-scroll">
                 {(value !== "" || isLoading) &&
                   (isLoading ? (
                     <div className="w-full h-12 px-4 py-4 flex justify-center items-center">
@@ -105,7 +108,7 @@ const SearchInput = ({
                       )}
                     </ul>
                   ))}
-              </VerticalScrollbarContainer>
+              </div>
             </div>
           </div>
         </Dialog.Content>

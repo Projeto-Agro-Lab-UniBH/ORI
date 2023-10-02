@@ -1,31 +1,32 @@
 import Select from "react-select";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { Option } from "../../interfaces/Option";
 
 const SelectFilter = ({
+  width,
   field,
   value,
   placeholder,
   options,
   onChange,
 }: {
+  width: string;
   field: string;
   value: Option | null;
   placeholder: string;
   options: Option[];
   onChange: (option: Option | null) => void;
 }) => {
-  const [instanceId] = useState(Math.random().toString());
-  
   return (
-    <div className={`w-[200px]`}>
+    <div className={width}>
       <Select
-        instanceId={instanceId}
+        instanceId={useId()}
         styles={{
           control: (baseStyles, state) => ({
             ...baseStyles,
             width: "100%",
-            height: 40,
+            height: 41.6,
+            borderRadius: 8,
             borderColor: state.isFocused
               ? "#64748b"
               : "#cbd5e1",
@@ -38,6 +39,7 @@ const SelectFilter = ({
           }),
           input: (styles) => ({
             ...styles,
+            borderRadius: 8,
             fontWeight: 400,
             fontFamily: "Inter",
             borderColor: "#cbd5e1",
@@ -66,7 +68,7 @@ const SelectFilter = ({
         }}
         theme={(theme) => ({
           ...theme,
-          borderRadius: 4,
+          borderRadius: 8,
           colors: {
             ...theme.colors,
             primary50: "#f8fafc",

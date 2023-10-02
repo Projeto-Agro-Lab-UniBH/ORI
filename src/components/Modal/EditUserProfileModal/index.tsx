@@ -157,7 +157,7 @@ const EditUserProfileModal: React.FC<EditUserProfileModalProps> = ({ id, childre
                 <SpinnerLoad
                   divProps={{
                     className:
-                      "w-full h-[488px] relative flex items-center justify-center bg-gray-500-50",
+                      "w-full h-[488px] relative flex items-center justify-center bg-slate-500-50",
                   }}
                 />
               </div>
@@ -224,7 +224,7 @@ const EditUserProfileModal: React.FC<EditUserProfileModalProps> = ({ id, childre
                       </label>
                       <input
                         type="text"
-                        className="w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal bg-white rounded border border-solid border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
+                        className="w-full block p-2.5 text-sm text-shark-950 font-normal bg-white rounded-lg border border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
                         {...register("username")}
                       />
                     </div>
@@ -236,7 +236,7 @@ const EditUserProfileModal: React.FC<EditUserProfileModalProps> = ({ id, childre
                       </label>
                       <input
                         type="text"
-                        className="w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal bg-white rounded border border-solid border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
+                        className="w-full block p-2.5 text-sm text-shark-950 font-normal bg-white rounded-lg border border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
                         {...register("email")}
                       />
                     </div>
@@ -244,7 +244,10 @@ const EditUserProfileModal: React.FC<EditUserProfileModalProps> = ({ id, childre
                 </div>
               </div>
               <div className="w-full flex justify-end">
-                <button className="w-[152px] h-10 border border-slate-300 rounded font-medium text-base text-slate-700 bg-white hover:border-none hover:text-white hover:bg-blue-500">
+                <button
+                  type="submit"
+                  className="w-[152px] h-10 border border-slate-300 rounded-lg font-medium text-base text-slate-700 bg-white hover:border-none hover:text-white hover:bg-blue-500"
+                >
                   Salvar alterações
                 </button>
               </div>
