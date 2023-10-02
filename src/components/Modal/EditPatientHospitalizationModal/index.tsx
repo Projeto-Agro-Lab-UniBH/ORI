@@ -1,18 +1,18 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { Cross1Icon } from "@radix-ui/react-icons";
 import { useEffect, useState } from "react";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod"; 
 import { useForm } from "react-hook-form";
-import { useMutation } from "react-query";
+import { useMutation, useQuery } from "react-query";
 
-import { useAuthContext } from "../../../contexts/AuthContext";
 import { api } from "../../../providers/Api";
 import { queryClient } from "../../../providers/QueryClient";
 import SpinnerLoad from "../../Load/SpinnerLoad";
 import styles from "./styles.module.css";
+import { GetHospitalizationResponse, PatchHospitalizationResponse } from "../../../@types/ApiResponse";
 
-const registerHospitalizationFormSchema = z.object({
+const editHospitalizationFormSchema = z.object({
   entry_date: z.string().nonempty("Selecione a data do início da internação do paciente."),
   departure_date: z.string(),
   reason: z.string().nonempty("Digite o motivo do paciente estar internado"), 
@@ -20,28 +20,37 @@ const registerHospitalizationFormSchema = z.object({
   notes: z.string().max(1000, { message: "O texto não pode conter mais do que 1000 caracteres."})
 })
 
-type registerHospitalizationFormData = z.infer<typeof registerHospitalizationFormSchema>
+type editHospitalizationFormData = z.infer<typeof editHospitalizationFormSchema>
 
-type RegisterPatientHospitalizationModalProps = {
+type EditPatientHospitalizationModalProps = {
   id: string;
-} 
+}
 
-const RegisterPatientHospitalizationModal: React.FC<RegisterPatientHospitalizationModalProps> = ({ id: patientId }) => {
-  const { user } = useAuthContext();
-  const { reset, register, handleSubmit, formState: { errors } } = useForm<registerHospitalizationFormData>({
-    resolver: zodResolver(registerHospitalizationFormSchema),
+const EditPatientHospitalizationModal: React.FC<EditPatientHospitalizationModalProps> = ({ id }) => {
+  const { reset, register, handleSubmit, formState: { errors } } = useForm<editHospitalizationFormData>({
+    resolver: zodResolver(editHospitalizationFormSchema),
   });
   
   const [open, setOpen] = useState<boolean>(false);
+  const [callRequest, setCallRequest] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const { isLoading, mutate } = useMutation({
-    mutationKey: ["register-hospitalization"],
-    mutationFn: async (data: registerHospitalizationFormData) => {
-      await api.post("/hospitalizations", {
-        ...data,
-        patientId: patientId,
-        username: user?.username,
+  useQuery({ 
+    queryKey: ["get-hospitalization-by-id"],
+    queryFn: async () => {
+      setIsLoading(true)
+      await api.get<GetHospitalizationResponse>(`/hospitalizations/${id}`).then((res) => {
+        reset(res.data);
       });
+      setIsLoading(false)
+    },
+    enabled: callRequest,
+  });
+
+  const { isLoading: isUpdating, mutate } = useMutation({
+    mutationKey: ["update-patient-hospitalization"],
+    mutationFn: async (data: editHospitalizationFormData) => {
+      await api.patch<PatchHospitalizationResponse>(`/hospitalizations/${id}`, { ...data })
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["get-patient-by-id"] });
@@ -53,14 +62,19 @@ const RegisterPatientHospitalizationModal: React.FC<RegisterPatientHospitalizati
   });
 
   useEffect(() => {
-    if (open != true) reset();
-  }, [open, reset]);
+    if (open != true) {
+      setCallRequest(false);
+      reset();
+    } else {
+      setCallRequest(true);
+    }
+  }, [open, setCallRequest, reset]);
 
-  const onSubmit = (data: registerHospitalizationFormData) => {
+  const onSubmit = (data: editHospitalizationFormData) => {
     mutate(data);
   };
 
-  const loadingSpinner = isLoading && (
+  const loadingSpinner = (isLoading || isUpdating) && (
     <div className="w-full h-full absolute z-20">
       <div className="w-full h-full bg-[#f9fafb8b]">
         <SpinnerLoad
@@ -72,18 +86,18 @@ const RegisterPatientHospitalizationModal: React.FC<RegisterPatientHospitalizati
       </div>
     </div>
   );
-  
+
   return (
     <Dialog.Root onOpenChange={setOpen} open={open}>
-      <Dialog.Trigger className="w-[172px] h-10 flex justify-center items-center border border-slate-300 rounded-lg font-medium text-base text-slate-700 bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500">
-        Registrar internação
+      <Dialog.Trigger className="w-full p-1 flex items-center text-center justify-center text-[12px] leading-none text-slate-700 font-normal hover:font-semibold hover:text-[14px]">
+        Editar  
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className="bg-black/60 inset-0 fixed z-20" />
         <Dialog.Content className="w-[608px] rounded-lg border-none bg-white fixed overflow-hidden pt-4 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
           <div className="w-full px-6 pb-4 border-b-[1px] border-slate-300 flex items-center flex-row justify-between">
             <Dialog.Title className="font-semibold text-2xl text-slate-700">
-              Registrar internação
+              Editar internação
             </Dialog.Title>
             <Dialog.Close className="h-8 bg-transparent flex justify-center items-center">
               <Cross1Icon className="text-slate-400 hover:text-slate-500" width={24} height={24} />
@@ -192,6 +206,7 @@ const RegisterPatientHospitalizationModal: React.FC<RegisterPatientHospitalizati
                     )}
                   </div>
                 </div>
+                
                 <div className="w-full flex flex-col gap-2">
                   <div className="w-full flex flex-col gap-3">
                     <label
@@ -221,12 +236,12 @@ const RegisterPatientHospitalizationModal: React.FC<RegisterPatientHospitalizati
               <div className="w-full h-10 flex justify-end">
                 <button
                   type="submit"
-                  className="w-[172px] h-10 border border-slate-300 rounded-lg font-medium text-base text-slate-700 bg-white hover:border-none hover:text-white hover:bg-blue-500"
+                  className="w-[152px] h-10 border border-slate-300 rounded-lg font-medium text-base text-slate-700 bg-white hover:border-none hover:text-white hover:bg-blue-500"
                 >
-                  Registrar internação
+                  Salvar alterações
                 </button>
               </div>
-            </form>    
+            </form>
           </div>
         </Dialog.Content>
       </Dialog.Portal>
@@ -234,4 +249,4 @@ const RegisterPatientHospitalizationModal: React.FC<RegisterPatientHospitalizati
   )
 }
 
-export default RegisterPatientHospitalizationModal;
+export default EditPatientHospitalizationModal;

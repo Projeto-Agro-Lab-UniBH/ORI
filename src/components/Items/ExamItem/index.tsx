@@ -1,122 +1,211 @@
-import { DownloadIcon } from "@radix-ui/react-icons";
+import { DotsHorizontalIcon, DownloadIcon } from "@radix-ui/react-icons";
 import EditPatientExamModal from "../../Modal/EditPatientExamModal";
-import { Document, Page } from "react-pdf";
-import { useEffect, useState } from "react";
+import { Option } from "../../../interfaces/Option";
+import { format } from 'date-fns';
+import * as locale from 'date-fns/locale';
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
+import DeleteExamModal from "../../Modal/DeleteExamModal/DeleteExamModal";
 
 type ExamItemProps = {
   id: string;
-  patientId: string;
-  date: string;
-  author: string;
+  username: string;
+  execution_date: string;
+  runtime: string;
+  execution_period: string;
+  responsible_person: string;
   type_of_exam: string;
-  annotations: string;
-  filename: string;
-  fileUrl: string;
-  fileSize: number;
-  createdAt: string;
-  updatedAt: string;
+  exam_name: string;
+  diagnosis: Option[];
+  prognosis: string;
+  description_of_treatment: string;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 const ExamItem: React.FC<ExamItemProps> = ({
   id,
-  patientId,
-  date,
-  author,
+  username,
+  execution_date,
+  runtime,
+  execution_period,
+  responsible_person,
   type_of_exam,
-  annotations,
-  filename,
-  fileUrl,
-  fileSize,
+  exam_name,
+  diagnosis,
+  prognosis,
+  description_of_treatment,
   createdAt,
   updatedAt,
 }) => {
-  const [numPages, setNumPages] = useState<number | undefined>(undefined);
-  const [attachedFile, setAttachedFile] = useState<string | undefined>(
-    undefined
-  );
-  const [textNotes, setTextNotes] = useState<string | undefined>(undefined);
-  const [download, setDownload] = useState<any>({} as any);
+  const formattedCreatedAt = createdAt ? format(new Date(createdAt), "dd/MM/yy", { locale: locale.ptBR }) : "";
+  const formattedTimeItCreated = createdAt ? format(new Date(createdAt), "HH:mm", { locale: locale.ptBR }) : "";
 
-  useEffect(() => {
-    if (fileUrl != null) {
-      setAttachedFile(fileUrl);
-    }
-
-    if (annotations != null) {
-      setTextNotes(annotations);
-    }
-  }, [annotations, fileUrl, setAttachedFile, setTextNotes]);
-
-  useEffect(() => {
-    if (fileUrl) {
-      const downloadLink = document.createElement("a");
-      downloadLink.href = `${fileUrl}`;
-      setDownload(downloadLink);
-    }
-  }, [fileUrl]);
-
-  const onDocumentLoadSuccess = ({ numPages }: any) => {
-    setNumPages(numPages);
-  };
+  const formattedExecutionDate = execution_date ? format(new Date(execution_date), "dd/MM/yy", { locale: locale.ptBR }) : "";
 
   return (
-    <div className="w-full flex flex-col items-center gap-6 pb-6 border-b border-gray-200">
-      <div className="w-full flex flex-col items-center gap-3">
-        <div className="w-full flex flex-col items-center gap-2">
-          <div className="w-full flex flex-row items-center justify-between">
-            <div className="w-[504px] items-center flex">
-              <span className="w-[504px] whitespace-nowrap text-2xl text-shark-950 font-semibold overflow-hidden text-ellipsis">
-                {type_of_exam}
-              </span>
-            </div>
-            <EditPatientExamModal id={id} patientId={patientId} />
+    <div className="w-full flex flex-col">
+      <div className="w-full flex flex-row justify-between items-center mb-[13px]">
+        <div className="w-full flex flex-col">
+          <span className="font-normal text-xs text-slate-500 mb-1">
+            Informações de quem fez a postagem
+          </span>
+          <div className="w-full flex flex-row items-center text-center gap-1">
+            <span className="font-medium text-base text-slate-700">
+              {username}
+            </span>
+            {createdAt && (
+              <>
+                <span className="text-[10px] leading-6 font-light text-slate-400">
+                  •
+                </span>
+                <span className="font-base text-sm leading-6 text-slate-400">
+                  {formattedCreatedAt}
+                </span>
+                <span className="text-[10px] leading-6 font-light text-slate-400">
+                  •
+                </span>
+                <span className="font-base text-sm leading-6 text-slate-400">
+                  {formattedTimeItCreated}
+                </span>
+              </>
+            )}
+            {updatedAt !== createdAt && (
+              <>
+                <span className="text-[10px] leading-6 font-light text-slate-400">
+                  •
+                </span>
+                <span className="font-base text-sm leading-6 text-slate-400">
+                  Editado
+                </span>
+              </>
+            )}
           </div>
-          <div className="w-full font-light text-shark-950">
-            {author}
-          </div>
-          <div className="w-full flex-row flex items-center gap-5">
-            <div className="flex items-center gap-1">
-              <span className="text-sm text-shark-950 font-semibold">
-                Data de realização do exame:
-              </span>
-              <p className="text-base font-normal text-shark-950">
-                {date}
-              </p>
-            </div>
-          </div>
-          {attachedFile && (
-            <div className="w-[664.8px] border rounded border-gray-200 overflow-hidden flex flex-col items-center">
-              <div className="w-[664.8px] h-44 overflow-hidden">
-                <div className="w-[664.8px] h-44 flex px-2 py-2 rounded justify-end absolute z-10">
-                  <div className="flex flex-col gap-2">
-                    <button
-                      onClick={() => download.click()}
-                      className="w-[26px] h-[26px] flex justify-center items-center bg-white border rounded border-gray-200 overflow-hidden cursor-pointer"
-                    >
-                      <DownloadIcon color="#212529" width={16} height={16} />
-                    </button>
-                  </div>
-                </div>
-                <Document
-                  file={attachedFile}
-                  onLoadSuccess={onDocumentLoadSuccess}
-                >
-                  <Page pageNumber={1} width={664.8} />
-                </Document>
-              </div>
-            </div>
-          )}
-          {textNotes && (
-            <div className="w-full">
-              <p className="text-base font-normal text-shark-950">
-                {textNotes}
-              </p>
-            </div>
-          )}
         </div>
+        <div className="flex items-center justify-center">
+          <Options id={id} />
+        </div>
+      </div>
+      <div className="w-full flex flex-col">
+        <div className="w-full flex flex-row mb-[13px] justify-between">
+          <div className="flex flex-col">
+            <span className="font-normal text-xs text-slate-500">
+              Nome do exame
+            </span>
+            <span className="font-semibold text-2xl text-slate-700">
+              {exam_name}
+            </span>
+          </div>
+          <div className="w-[432px] flex flex-col">
+            <span className="font-normal text-xs text-slate-500">
+              Nome do responsável
+            </span>
+            <span className="font-semibold text-lg text-slate-700">
+              {responsible_person}
+            </span>
+          </div>
+        </div>
+        <div className="w-full flex flex-row mb-[13px] justify-between">
+          <div className="flex flex-col">
+            <span className="font-normal text-xs text-slate-500">
+              Tipo de exame
+            </span>
+            <span className="font-semibold text-base text-slate-700">
+              {type_of_exam}
+            </span>
+          </div>
+          <div className="w-[432px] flex flex-row gap-6">
+            <div className="flex flex-col">
+              <span className="font-normal text-xs text-slate-500">
+                Data de realização
+              </span>
+              <span className="font-semibold text-base text-slate-700">
+                {formattedExecutionDate}
+              </span>
+            </div>
+            <div className="flex flex-col">
+              <span className="font-normal text-xs text-slate-500">
+                Tempo de execução
+              </span>
+              <span className="font-semibold text-base text-slate-700">
+                {runtime}
+              </span>
+            </div>
+            <div className="flex flex-col">
+              <span className="font-normal text-xs text-slate-500">
+                Período
+              </span>
+              <span className="font-semibold text-base text-slate-700">
+                {execution_period}
+              </span>
+            </div>
+          </div>
+        </div>
+        <div className="w-full flex flex-row mb-[13px] justify-between">
+          {diagnosis && (
+            <div className="w-[204px] flex flex-col">
+              <span className="font-normal text-xs text-slate-500">
+                Diagnóstico / Suspeita Clínica
+              </span>
+              <ul className="font-semibold text-base text-slate-700">
+                {diagnosis.map((data, i) => (
+                  <li key={i} className="break-words">{data.value}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          <div className="w-[432px] flex flex-col">
+            <span className="font-normal text-xs text-slate-500">
+              Prognóstico
+            </span>
+            <span className="font-semibold text-base text-slate-700">
+              {prognosis}
+            </span>
+          </div>
+        </div>
+        {description_of_treatment && (
+          <div className="w-full flex flex-row mb-[13px]">
+            <div className="flex flex-col">
+              <span className="font-normal text-xs text-slate-500 mb-[6px]">
+                Descrição do tratamento
+              </span>
+              <p className="whitespace-pre-line font-normal text-sm text-slate-700">
+                {description_of_treatment}
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
 export default ExamItem;
+
+type OptionsProps = {
+  id: string;
+}
+
+const Options = ({ id: examId }: OptionsProps) => {
+  return (
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger asChild>
+        <button>
+          <DotsHorizontalIcon width={18} height={18} />
+        </button>
+      </DropdownMenu.Trigger>
+
+      <DropdownMenu.Portal>
+        <DropdownMenu.Content className="w-20 border rounded-md flex flex-col bg-white shadow-md z-10 py-2 px-2">
+          <ul role="list" className="divide-y divide-slate-200">
+            <li className="p-1 first:pt-0 last:pb-0">
+              <EditPatientExamModal id={examId} />
+            </li>
+            <li className="p-1 first:pt-0 last:pb-0">
+              <DeleteExamModal id={examId} />
+            </li>
+          </ul>
+        </DropdownMenu.Content>
+      </DropdownMenu.Portal>
+    </DropdownMenu.Root>
+  )
+}

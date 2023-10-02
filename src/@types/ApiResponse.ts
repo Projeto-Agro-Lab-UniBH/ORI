@@ -1,121 +1,255 @@
 import { Page } from "./page";
-import { Patient } from "./patient";
 import { Option } from "../interfaces/Option";
 import { Exams } from "./exams";
 import { Files } from "./file";
 import { Reports } from "./reports";
+import { Hospitalizations } from "./hospitalizations";
+import { Surgery } from "./surgery";
 
-export type DashboardPatientDataResponse = Page<
-  Pick<
-    Patient,
-    | "id"
-    | "profile_photo"
-    | "name"
-    | "specie"
-    | "race"
-    | "gender"
-    | "weight"
-    | "prognosis"
-    | "diagnosis"
-    | "physical_shape"
-    | "exams"
-  >
->;
-
-export type SearchPatientResponse = {
-  id: string;
-  profile_photo: string;
-  name: string;
-  specie: string;
-  race: string;
-}
-
-export type GetPatientClipboardResponse = {
+type DashboardPatientData = {
   id: string;
   profile_photo?: string;
   name: string;
-  owner: string;
   race: string;
   specie: string;
   gender: string;
-  weight: string;
-  prognosis: string;
-  diagnosis: Option[];
   physical_shape: string;
-  entry_date: string;
-  departure_date: string;
-  reports: Reports[];
-  exams: Exams[];
-  files: Files[];
+  current_weight: string;
+  status: string;
+  _count: {
+    exams: number,
+    surgery: number,
+    hospitalizations: number,
+    reports: number
+  }
 }
 
-export type GetPatientEditResponse = {
+export type DashboardPatientDataResponse = Page<DashboardPatientData>;
+
+export type SearchResponse = {
+  id: string;
   profile_photo: string;
   name: string;
-  owner: string;
   specie: string;
   race: string;
+}
+
+export type GetPatientResponse = {
+  id: string;
+  profile_photo?: string;
+  age: string;          
+  date_of_birth: string;
+  pedigree_RGA: string; 
+  chip_number: string;  
+  name: string;
+  owner: string;
+  ownerless_patient: boolean;
+  specie: string;
+  undefined_specie: boolean;
+  race: string;
+  undefined_race: boolean;
+  status: string;
   gender: string;
-  weight: string;
-  prognosis: string;
-  diagnosis: Option[];
   physical_shape: string;
-  entry_date: string;
-  departure_date: string;
+  starting_weight: string;
+  current_weight: string;
+  notes: string;
+  createdAt: Date;
+  updatedAt: Date;
+  files: Files[];
+  exams: Exams[];
+  surgery: Surgery[];
+  reports: Reports[];
+  hospitalizations: Hospitalizations[];
 };
 
 export type PatchPatientResponse = {
   id: string;
-  profile_photo: string;
+  profile_photo?: string;
+  age: string;          
+  date_of_birth: string;
+  pedigree_RGA: string; 
+  chip_number: string;  
   name: string;
   owner: string;
+  ownerless_patient: boolean;
   specie: string;
+  undefined_specie: boolean;
   race: string;
+  undefined_race: boolean;
+  status: string;
   gender: string;
-  weight: string;
-  prognosis: string;
-  diagnosis: Option[];
   physical_shape: string;
-  entry_date: string;
-  departure_date: string;
+  starting_weight: string;
+  current_weight: string;
+  notes: string;
+  createdAt: Date;
+  updatedAt: Date;
+  files: Files[];
+  exams: Exams[];
+  reports: Reports[];
+  hospitalizations: Hospitalizations[];
 };
-
-export type ListReportsResponse = {
-	id: string;
-	patientId: string;
-	shift: string;
-	author: string;
-	title: string;
-	report_text: string;
-	filename: string;
-  fileUrl: string;
-  fileSize: number;
-	createdAt: string;
-	updatedAt: string;
-};
-
-export type ListExamsResponse = {
-  id: string;
-  patientId: string;
-  date: string;
-  author: string;
-  type_of_exam: string;
-  annotations: string;
-  filename: string;
-  fileUrl: string;
-  fileSize: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export type ListFilesResponse = {
-  id: string;
-  patientId: string;
-  filename: string;
-  fileUrl: string;
-  fileSize: number;
-}
 
 export type UploadImageResponse = {
   imageUrl: string;
 };
+
+export type GetReportResponse = {
+  id: string;
+  username: string;
+  title: string;
+  text: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type PostReportResponse = {
+  id: string;
+  username: string;
+  title: string;
+  text: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export type PatchReportResponse = {
+  id: string;
+  username: string;
+  title: string;
+  text: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export type GetExamResponse = {
+  id: string;
+  patientId: string;
+  username: string;
+  execution_date: string;
+  runtime: string;
+  execution_period: string;
+  responsible_person: string;
+  type_of_exam: string;
+  exam_name: string;
+  diagnosis: Option[];
+  prognosis: string;
+  description_of_treatment: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export type PatchExamResponse = {
+  id: string;
+  patientId: string;
+  username: string;
+  execution_date: string;
+  runtime: string;
+  execution_period: string;
+  responsible_person: string;
+  type_of_exam: string;
+  exam_name: string;
+  diagnosis: Option[];
+  prognosis: string;
+  description_of_treatment: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type PostExamResponse = {
+  id: string;
+  patientId: string;
+  username: string;
+  execution_date: string;
+  runtime: string;
+  execution_period: string;
+  responsible_person: string;
+  type_of_exam: string;
+  exam_name: string;
+  diagnosis: Option[];
+  prognosis: string;
+  description_of_treatment: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type GetHospitalizationResponse = {
+  id: string;            
+  patientId: string;
+  username: string;
+  reason: string;      
+  prognosis: string;      
+  entry_date: string;     
+  departure_date: string; 
+  notes: string;          
+  createdAt: Date;      
+  updatedAt: Date;      
+}
+
+export type PostHospitalizationResponse = {
+  id: string;            
+  patientId: string;
+  username: string;
+  reason: string;      
+  prognosis: string;      
+  entry_date: string;     
+  departure_date: string; 
+  notes: string;          
+  createdAt: Date;      
+  updatedAt: Date;      
+}
+
+export type PatchHospitalizationResponse = {
+  id: string;            
+  patientId: string;
+  username: string;
+  reason: string;      
+  prognosis: string;      
+  entry_date: string;     
+  departure_date: string; 
+  notes: string;          
+  createdAt: Date;      
+  updatedAt: Date;      
+}
+
+export type GetSurgeryResponse = {
+  id: string;
+  patientId: string;            
+  username: string;        
+  name_of_surgery: string; 
+  risk_level: string;      
+  execution_date: string;  
+  duration: string;        
+  period: string;          
+  notes: string;           
+  createdAt: Date;       
+  updatedAt: Date; 
+}
+
+export type PatchSurgeryResponse = {
+  id: string;
+  patientId: string;            
+  username: string;        
+  name_of_surgery: string; 
+  risk_level: string;      
+  execution_date: string;  
+  duration: string;        
+  period: string;          
+  notes: string;           
+  createdAt: Date;       
+  updatedAt: Date; 
+}
+
+export type PostSurgeryResponse = {
+  id: string;
+  patientId: string;            
+  username: string;        
+  name_of_surgery: string; 
+  risk_level: string;      
+  execution_date: string;  
+  duration: string;        
+  period: string;          
+  notes: string;           
+  createdAt: Date;       
+  updatedAt: Date;  
+}

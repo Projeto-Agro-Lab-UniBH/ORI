@@ -1,110 +1,89 @@
+import { DotsHorizontalIcon } from "@radix-ui/react-icons";
+import { format } from 'date-fns';
+import * as locale from 'date-fns/locale';
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import EditPatientReportModal from "../../Modal/EditPatientReportModal";
-import { DownloadIcon } from "@radix-ui/react-icons";
-import { useEffect, useState } from "react";
+import DeleteReportModal from "../../Modal/DeleteReportModal";
 
 type ReportItemProps = {
   id: string;
-  patientId: string;
-  shift: string;
-  author: string;
+  username: string;
   title: string;
-  report_text: string;
-  filename: string;
-  fileUrl: string;
-  createdAt: string;
-  updatedAt: string;
+  text: string;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
-const ReportItem: React.FC<ReportItemProps> = ({ 
+const ReportItem = ({
   id,
-  patientId,
-  shift,
-  author,
+  username,
   title,
-  report_text,
-  filename,
-  fileUrl,
+  text,
   createdAt,
-  updatedAt 
-}) => {
-  const [download, setDownload] = useState<any>({} as any);
-
-  useEffect(() => {
-    if (fileUrl) {
-      const downloadLink = document.createElement("a");
-      downloadLink.href = `${fileUrl}`;
-      setDownload(downloadLink);
-    }
-  }, [fileUrl]);
-
-  const downloadFile = (event: any) => {
-    event.preventDefault();
-    download.click();
-  }
+  updatedAt,
+}: ReportItemProps) => {
+  const formattedCreatedAt = createdAt ? format(new Date(createdAt), 'dd/MM/yy', { locale: locale.ptBR }) : '';
+  const formattedTimeItCreated = createdAt ? format(new Date(createdAt), 'HH:mm', { locale: locale.ptBR }) : '';
 
   return (
-    <div className="w-full flex flex-col items-center gap-6">
-      <div className="w-full flex flex-col items-center gap-3 pb-6 border-b border-gray-200">
-        <div className="w-full flex flex-col items-center gap-2">
-          <div className="w-full flex flex-row items-center justify-between">
-            <div className="w-[504px] items-center flex">
-              <span className="w-[504px] whitespace-nowrap text-2xl text-shark-950 font-semibold overflow-hidden text-ellipsis">
-                {title}
-              </span>
-            </div>
-            <div className="flex items-center gap-4">
-              <EditPatientReportModal
-                id={id}
-                patientId={patientId}
-              />
-            </div>
-          </div>
-          <div className="w-full font-light text-shark-950">
-            {author}
-          </div>
-          <div className="w-full flex-row flex justify-between items-center">
-            <div className="w-full flex-row flex items-center gap-5">
-              <div className="flex items-center gap-1">
-                <span className="text-sm text-shark-950 font-semibold">
-                  Turno:
+    <div className="w-full flex flex-col">
+      <div className="w-full flex flex-row justify-between items-center mb-[13px]">
+        <div className="w-full flex flex-col">
+          <span className="font-normal text-xs text-slate-500 mb-1">
+            Informações de quem fez a postagem
+          </span> 
+          <div className="w-full flex flex-row items-center text-center gap-1">
+            <span className="font-medium text-base text-slate-700">
+              {username}
+            </span>
+            {createdAt && (
+              <>
+                <span className="text-[10px] leading-6 font-light text-slate-400">
+                  •
                 </span>
-                <p className="text-base font-normal text-shark-950">
-                  {shift}
-                </p>
-              </div>
-              <div className="flex items-center gap-1">
-                <span className="text-sm text-shark-950 font-semibold">
-                  Data de criação:
+                <span className="font-base text-sm leading-6 text-slate-400">
+                  {formattedCreatedAt}
                 </span>
-                <p className="text-base font-normal text-shark-950">
-                  {createdAt}
-                </p>
-              </div>
-              <div className="flex items-center gap-1">
-                <span className="text-sm text-shark-950 font-semibold">
-                  Data da última edição:
+                <span className="text-[10px] leading-6 font-light text-slate-400">
+                  •
                 </span>
-                <p className="text-base font-normal text-shark-950">
-                  {updatedAt}
-                </p>
-              </div>
-            </div>
+                <span className="font-base text-sm leading-6 text-slate-400">
+                  {formattedTimeItCreated}
+                </span>
+              </>
+            )}
+            {updatedAt !== createdAt && (
+              <>
+                <span className="text-[10px] leading-6 font-light text-slate-400">
+                  •
+                </span>
+                <span className="font-base text-sm leading-6 text-slate-400">
+                  Editado
+                </span>
+              </>
+            )}
           </div>
-          {fileUrl && (
-            <div className="w-full flex gap-2 items-center">
-              <button
-                onClick={downloadFile}
-                className="px-2 py-1 border border-gray-200 rounded hover:border-[#b3b3b3] flex items-center text-shark-950 font-semibold gap-1"
-              >
-                Baixar anexo <DownloadIcon />
-              </button>
-            </div>
-          )}
         </div>
-        <div className="w-full">
-          <p className="text-base font-normal text-shark-950">
-            {report_text}
-          </p>
+        <div className="flex items-center justify-center">
+          <Options id={id} />
+        </div>
+      </div>
+      <div className="w-full flex flex-col">
+        <div className="w-full flex flex-col mb-[13px]">
+          <span className="font-normal text-xs text-slate-500">
+            Título
+          </span>  
+          <span className="break-words font-semibold text-2xl text-slate-700">
+            {title}
+          </span>
+        </div>
+        <div className="w-full flex flex-col">
+          <span className="font-normal text-xs text-slate-500 mb-[6px]">
+            Texto do relatório
+          </span> 
+          <p className="whitespace-pre-line font-normal text-sm text-slate-700">
+            {text}
+          </p>    
         </div>
       </div>
     </div>
@@ -112,3 +91,32 @@ const ReportItem: React.FC<ReportItemProps> = ({
 };
 
 export default ReportItem;
+
+type OptionsProps = {
+  id: string;
+}
+
+const Options = ({ id: reportId }: OptionsProps) => {
+  return (
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger asChild>
+        <button>
+          <DotsHorizontalIcon width={18} height={18} />
+        </button>
+      </DropdownMenu.Trigger>
+
+      <DropdownMenu.Portal>
+        <DropdownMenu.Content className="w-20 border rounded-md flex flex-col bg-white shadow-md z-10 py-2 px-2">
+          <ul role="list" className="divide-y divide-slate-200">
+            <li className="p-1 first:pt-0 last:pb-0">
+              <EditPatientReportModal id={reportId} />
+            </li>
+            <li className="p-1 first:pt-0 last:pb-0">
+              <DeleteReportModal id={reportId} />
+            </li>
+          </ul>
+        </DropdownMenu.Content>
+      </DropdownMenu.Portal>
+    </DropdownMenu.Root>
+  )
+}

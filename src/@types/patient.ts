@@ -1,23 +1,35 @@
-import { Option } from "../interfaces/Option";
 import { Exams } from "./exams";
 import { Files } from "./file";
+import { Hospitalizations } from "./hospitalizations";
 import { Reports } from "./reports";
+import { Surgery } from "./surgery";
 
 export type Patient = {
   id: string;
   profile_photo?: string;
+  age: string;          
+  date_of_birth: string;
+  pedigree_RGA: string; 
+  chip_number: string;  
   name: string;
   owner: string;
-  race: string;
+  ownerless_patient: boolean;
   specie: string;
+  undefined_specie: boolean;
+  race: string;
+  undefined_race: boolean;
+  status: string;
   gender: string;
-  weight: string;
-  prognosis: string;
-  diagnosis: Option[];
   physical_shape: string;
-  entry_date: string;
-  departure_date: string;
-  reports: Reports[];
-  exams: Exams[];
+  starting_weight: string;
+  current_weight: string;
+  notes: string;
+  createdAt: Date;
+  updatedAt: Date;
   files: Files[];
+  exams: Exams[];
+  surgery: Surgery[];
+  hospitalizations: Hospitalizations[]
+  reports: Reports[];
 }
+         

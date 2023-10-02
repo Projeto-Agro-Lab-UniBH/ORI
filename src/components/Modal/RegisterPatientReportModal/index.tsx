@@ -1,123 +1,44 @@
-import Image from "next/image";
 import SpinnerLoad from "../../Load/SpinnerLoad";
-import Select from "react-select";
 import * as Dialog from "@radix-ui/react-dialog";
-import { Cross1Icon, TrashIcon } from "@radix-ui/react-icons";
-import { useController, useForm } from "react-hook-form";
-import { ChangeEvent, useEffect, useState } from "react";
+import { Cross1Icon } from "@radix-ui/react-icons";
+import { useForm } from "react-hook-form";
+import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "react-query";
 import { api } from "../../../providers/Api";
-import { Document, Page } from "react-pdf";
-import { formatFileSize } from "../../../functions/formatBytes";
 import { queryClient } from "../../../providers/QueryClient";
 import { z } from "zod";
+import { PostReportResponse } from "../../../@types/ApiResponse";
+import { useAuthContext } from "../../../contexts/AuthContext";
 
-import VerticalScrollbar from "../../Scrollbar/VerticalScrollbar";
+import styles from "./styles.module.css";
 
-type RegisterPatientReportProps = {
-  patientId: string | null;
-};
-
-type UploadFileResponse = {
-  fileUrl: string;
-};
-
-type MutationReportResponse = {
-  id: string;
+type RegisterPatientReportModalProps = {
   patientId: string;
-  shift: string;
-  author: string;
-  title: string;
-  report_text: string;
-  filename: string;
-  fileUrl: string;
-  fileSize: number;
-  createdAt: string;
-  updatedAt: string;
-};
-
-const turnOptions = [
-  { label: "Matutino", value: "Matutino" },
-  { label: "Diurno", value: "Diurno" },
-  { label: "Noturno", value: "Noturno" },
-];
+}
 
 const registerReportFormSchema = z.object({
-  shift: z.any(),
-  author: z
-    .string()
-    .nonempty("Preencha o seu nome completo.")
-    .transform((name) => {
-      return name
-        .trim()
-        .split(" ")
-        .map((word) => {
-          return word[0].toLocaleUpperCase().concat(word.substring(1));
-        })
-        .join(" ");
-    }),
   title: z.string().nonempty("O relatório precisa ter um título."),
-  report_text: z.string().optional(),
+  text: z.string().max(1000, { message: "O texto do relatório não pode conter mais do que 1000 caracteres."}).nonempty("O relatório precisa ter um texto."),
 });
 
 type registerReportFormData = z.infer<typeof registerReportFormSchema>;
 
-const RegisterPatientReportModal: React.FC<RegisterPatientReportProps> = ({ patientId }) => {
-  const {
-    reset,
-    register,
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<registerReportFormData>({
+const RegisterPatientReportModal: React.FC<RegisterPatientReportModalProps> = ({ patientId }) => {
+  const { reset, register, handleSubmit, formState: { errors } } = useForm<registerReportFormData>({
     resolver: zodResolver(registerReportFormSchema),
   });
 
+  const { user } = useAuthContext();
   const [open, setOpen] = useState<boolean>(false);
-  const [hasAttachment, setHasAttachment] = useState<boolean>(false);
-  const [numPages, setNumPages] = useState<number | undefined>(undefined);
-  const [attachedFile, setAttachedFile] = useState<File | undefined>();
-  const [filename, setFilename] = useState<string>("");
-
-  const { field: selectShift } = useController({ name: "shift", control });
-  const {
-    value: selectShiftValue,
-    onChange: selectShiftOnChange,
-    ...restSelectShift
-  } = selectShift;
 
   const { isLoading, mutate } = useMutation({
     mutationKey: ["create-report"],
     mutationFn: async (data: registerReportFormData) => {
-      if (attachedFile != undefined) {
-        const formData = new FormData();
-        formData.append("file", attachedFile);
-
-        const upload = await api.post<UploadFileResponse>(
-          "uploads/file/",
-          formData
-        );
-
-        await api.post<MutationReportResponse>("/reports", {
-          ...data,
-          patientId: patientId,
-          filename: filename,
-          fileUrl: upload.data.fileUrl,
-          fileSize: attachedFile.size,
-        });
-      } else {
-        await api.post<MutationReportResponse>("/reports", {
-          ...data,
-          patientId: patientId,
-          filename: "",
-          fileUrl: "",
-          fileSize: 0,
-        });
-      }
+      await api.post<PostReportResponse>('/reports', { ...data, patientId: patientId, username: user?.username })
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["list-all-reports"] });
+      queryClient.invalidateQueries({ queryKey: ["get-patient-by-id"] });
       if (isLoading != true) {
         reset();
         setOpen(false);
@@ -127,74 +48,51 @@ const RegisterPatientReportModal: React.FC<RegisterPatientReportProps> = ({ pati
 
   useEffect(() => {
     if (open != true) {
-      setAttachedFile(undefined);
-      setFilename("");
       reset();
     }
   }, [open, reset]);
 
-  useEffect(() => {
-    if (attachedFile) {
-      setHasAttachment(true);
-    } else {
-      setHasAttachment(false);
-    }
-  }, [attachedFile, setHasAttachment]);
-
-  const handleFile = (event: ChangeEvent<HTMLInputElement>) => {
-    if (event?.target?.files?.[0]) {
-      const file = event.target.files[0];
-      setAttachedFile(file);
-      setFilename(String(file.name));
-    }
-  };
-
-  const removeAttachment = () => {
-    setAttachedFile(undefined);
-    setFilename("");
-  };
-
-  const onDocumentLoadSuccess = ({ numPages }: any) => {
-    setNumPages(numPages);
-  };
-
   const onSubmit = (data: registerReportFormData) => {
-    const request = {
-      ...data,
-    };
-    mutate(request);
+    mutate(data);
   };
+
+  const loadingSpinner = isLoading && (
+    <div className="w-full h-full absolute z-20">
+      <div className="w-full h-full bg-[#f9fafb8b]">
+        <SpinnerLoad
+          divProps={{
+            className:
+              "w-full h-[402px] relative flex items-center justify-center bg-slate-500-50",
+          }}
+        />
+      </div>
+    </div>
+  ); 
 
   return (
     <Dialog.Root onOpenChange={setOpen} open={open}>
-      <Dialog.Trigger className="w-[164px] h-10 border border-gray-200 rounded font-medium text-base text-shark-950 bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500">
+      <Dialog.Trigger className="w-[164px] h-10 border border-slate-300 rounded-lg font-medium text-base text-slate-700 bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500">
         Criar novo relatório
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className="bg-black/60 inset-0 fixed z-20" />
         <Dialog.Content className="w-[608px] rounded-lg border-none bg-white fixed overflow-hidden pt-4 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
-          <div className="w-full px-6 pb-4 border-b-[1px] border-gray-200 flex items-center flex-row justify-between">
-            <Dialog.Title className="font-semibold text-2xl">
+          <div className="w-full px-6 pb-4 border-b-[1px] border-slate-300 flex items-center flex-row justify-between">
+            <Dialog.Title className="font-semibold text-2xl text-slate-700">
               Criar novo relatório
             </Dialog.Title>
-            <Dialog.Close className="w-[32px] h-[32px] flex justify-center items-center">
-              <Cross1Icon width={24} height={24} />
+            <Dialog.Close className="h-8 bg-transparent flex justify-center items-center">
+              <Cross1Icon
+                className="text-slate-400 hover:text-slate-500"
+                width={24}
+                height={24}
+              />
             </Dialog.Close>
           </div>
-          {isLoading && (
-            <div className="w-full h-full absolute z-20">
-              <div className="w-full h-full bg-[#f9fafb8b]">
-                <SpinnerLoad
-                  divProps={{
-                    className:
-                      "w-full h-[488px] relative flex items-center justify-center bg-gray-500-50",
-                  }}
-                />
-              </div>
-            </div>
-          )}
-          <VerticalScrollbar
-            styleViewportArea="w-full h-[402px] px-6 py-6"
+          {loadingSpinner}
+          <div
+            id={styles.modalScroll}
+            className="w-full h-[402px] px-6 py-6 overflow-y-scroll"
           >
             <form
               onSubmit={handleSubmit(onSubmit)}
@@ -202,211 +100,68 @@ const RegisterPatientReportModal: React.FC<RegisterPatientReportProps> = ({ pati
             >
               <div className="w-full flex flex-col gap-6">
                 <div className="w-full flex flex-row gap-3">
-                  <div className="w-[184px] flex flex-col gap-3">
-                    <label
-                      htmlFor="shift"
-                      className="w-full text-sm font-normal text-shark-950"
-                    >
-                      Turno
-                    </label>
-                    <Select
-                      styles={{
-                        control: (baseStyles, state) => ({
-                          ...baseStyles,
-                          width: 184,
-                          height: 40,
-                          borderColor: state.isFocused ? "#e2e8f0" : "#e2e8f0",
-                          whiteSpace: "nowrap",
-                          textOverflow: "ellipsis",
-                          fontFamily: "Inter",
-                          fontWeight: 400,
-                          fontSize: "0.875rem",
-                          lineHeight: "1.25rem",
-                        }),
-                      }}
-                      theme={(theme) => ({
-                        ...theme,
-                        borderRadius: 4,
-                        colors: {
-                          ...theme.colors,
-                          primary75: "#cbd5e1",
-                          primary50: "##e2e8f0",
-                          primary25: "#f8fafc",
-                          primary: "#212529",
-                        },
-                      })}
-                      placeholder="Selecione o turno"
-                      isSearchable={false}
-                      options={turnOptions}
-                      value={
-                        selectShiftValue
-                          ? turnOptions.find(
-                              (x) => x.value === selectShiftValue
-                            )
-                          : selectShiftValue
-                      }
-                      onChange={(option) =>
-                        selectShiftOnChange(option ? option.value : option)
-                      }
-                      {...restSelectShift}
-                    />
-                  </div>
                   <div className="w-full flex flex-col gap-2">
                     <div className="w-full flex flex-col gap-3">
                       <label
-                        htmlFor="author"
-                        className="w-full text-sm font-normal text-shark-950"
+                        htmlFor="title"
+                        className="w-full font-medium text-sm text-slate-900"
                       >
-                        Nome do responsável
+                        Título
                       </label>
                       <input
                         type="text"
-                        className={
-                          errors.author
-                            ? "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
-                            : "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                        }
-                        {...register("author")}
+                        className={`w-full block p-2.5 font-normal text-sm text-slate-900 bg-white rounded-lg border ${
+                          errors.title
+                            ? "border-red-300 hover:border-red-400 focus:outline-none placeholder:text-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                            : "border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
+                        }`}
+                        {...register("title")}
                       />
                     </div>
-                    {errors.author && (
-                      <span className="text-xs font-normal text-red-500">
-                        {errors.author.message}
+                    {errors.title && (
+                      <span className="font-normal text-xs text-red-400">
+                        {errors.title.message}
                       </span>
                     )}
                   </div>
                 </div>
-                <div className="w-full flex flex-col gap-2">
+                <div className="w-full flex flex-col gap-3">
                   <div className="w-full flex flex-col gap-3">
                     <label
-                      htmlFor="author"
-                      className="w-full text-sm font-normal text-shark-950"
+                      htmlFor="text"
+                      className="flex font-medium text-sm text-slate-900"
                     >
-                      Título
+                      Relatório
                     </label>
-                    <input
-                      type="text"
-                      className={
-                        errors.title
-                          ? "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
-                          : "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                      }
-                      {...register("title")}
-                    />
+                    <textarea
+                      id={styles.textareaScroll}
+                      rows={12}
+                      placeholder="Digite o seu relatório"
+                      className={`resize-none block w-full rounded-lg border-0 p-[12px] text-sm text-slate-900 ring-1 ring-inset ${
+                        errors.text
+                          ? "ring-red-300 placeholder:text-red-400 focus:outline-red-500 focus:ring-1 focus:ring-inset focus:ring-red-500"
+                          : "ring-slate-300 placeholder:text-slate-400 focus:outline-slate-500 focus:ring-1 focus:ring-inset focus:ring-slate-500"
+                      }`}
+                      {...register("text")}
+                    ></textarea>
                   </div>
-                  {errors.title && (
-                    <span className="text-xs font-normal text-red-500">
-                      {errors.title.message}
+                  {errors.text && (
+                    <span className="font-normal text-xs text-red-400">
+                      {errors.text.message}
                     </span>
                   )}
                 </div>
-                <div className="w-full flex flex-col gap-3">
-                  <label
-                    htmlFor="report_text"
-                    className="w-full text-sm font-normal text-shark-950"
-                  >
-                    Descrição / Relatório
-                  </label>
-                  <div>
-                    <textarea
-                      cols={30}
-                      rows={10}
-                      className="w-full px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                      {...register("report_text")}
-                    ></textarea>
-                  </div>
-                </div>
-                {attachedFile && (
-                  <div className="w-[552.8px] border rounded border-gray-200 overflow-hidden flex flex-col items-center">
-                    <div className="w-[552.8px] h-44 overflow-hidden">
-                      <Document
-                        file={attachedFile}
-                        onLoadSuccess={onDocumentLoadSuccess}
-                      >
-                        <Page pageNumber={1} width={552.8} />
-                      </Document>
-                    </div>
-                    <div className="w-[552.8px] h-14 border-t-[1px] border-gray-200 flex items-center p-2 gap-2">
-                      <Image
-                        src="/pdf-svgrepo-com.svg"
-                        alt="pdf-icon"
-                        width={24}
-                        height={24}
-                      />
-                      <div className="w-80 flex flex-col items-center justify-center">
-                        <div className="w-80 whitespace-nowrap overflow-hidden text-ellipsis">
-                          <p className="max-w-80 whitespace-nowrap overflow-hidden text-ellipsis font-semibold text-[14.8px]">
-                            {filename.split(".").slice(0, -1).join(".")}
-                          </p>
-                        </div>
-                        <div className="w-80 flex flex-row items-center text-center gap-1">
-                          <span className="text-[10px] font-light">
-                            {numPages} páginas
-                          </span>
-                          <span className="text-[10px] font-light">•</span>
-                          <span className="text-[10px] font-light">
-                            {filename.split(".").pop()?.toUpperCase()}
-                          </span>
-                          <span className="text-[10px] font-light">•</span>
-                          <span className="text-[10px] font-light">
-                            {formatFileSize(attachedFile.size)}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="w-[176.8px] flex justify-end">
-                        <button
-                          onClick={removeAttachment}
-                          className="w-7 h-7 flex justify-center items-center bg-white border rounded border-gray-200 overflow-hidden cursor-pointer"
-                        >
-                          <TrashIcon color="#ef4444" width={16} height={16} />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
               </div>
-              <div className="w-full flex justify-between">
-                {hasAttachment === true ? undefined : (
-                  <div className="w-full flex">
-                    <label
-                      htmlFor="patient-photo-file"
-                      className="border border-gray-200 flex items-center px-3 py-[6px] gap-1 rounded text-base text-shark-950 font-medium bg-white hover:border-[#b3b3b3] cursor-pointer"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="#212529"
-                        className="w-5 h-5"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"
-                        />
-                      </svg>
-                      Adicionar um anexo
-                    </label>
-                    <input
-                      type="file"
-                      accept=".pdf"
-                      id="patient-photo-file"
-                      className="hidden"
-                      onChange={handleFile}
-                    />
-                  </div>
-                )}
-                <div className="w-full h-10 flex justify-end">
-                  <button
-                    type="submit"
-                    className="w-[132px] h-10 border border-gray-200 rounded font-medium text-base text-shark-950 bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500"
-                  >
-                    Salvar relatório
-                  </button>
-                </div>
+              <div className="w-full h-10 flex justify-end">
+                <button
+                  type="submit"
+                  className="w-[132px] h-10 border border-slate-300 rounded-lg font-medium text-base text-slate-700 bg-white hover:border-none hover:text-white hover:bg-blue-500"
+                >
+                  Salvar relatório
+                </button>
               </div>
             </form>
-          </VerticalScrollbar>
+          </div>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

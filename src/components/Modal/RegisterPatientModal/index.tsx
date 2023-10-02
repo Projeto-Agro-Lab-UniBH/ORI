@@ -11,7 +11,8 @@ import { Option } from "../../../interfaces/Option";
 import { useController, useForm } from "react-hook-form";
 import { useState, useEffect, ChangeEvent } from "react";
 import { useMutation } from "react-query";
-import VerticalScrollbar from "../../Scrollbar/VerticalScrollbar";
+
+import styles from './styles.module.css';
 
 type UploadImageResponse = {
   imageUrl: string;
@@ -28,6 +29,13 @@ const physicalShapeOptions: Option[] = [
   { value: "Pequeno porte", label: "Pequeno porte" },
 ];
 
+const healthConditionOptions: Option[] = [
+  { label: "Vivo", value: "Vivo" },
+  { label: "Favorável", value: "Favorável" },
+  { label: "Risco", value: "Risco" },
+  { label: "Alto risco", value: "Alto risco" },
+]
+
 const registerPatientFormSchema = z.object({
   name: z
     .string()
@@ -41,17 +49,22 @@ const registerPatientFormSchema = z.object({
         })
         .join(" ");
     }),
+  age: z.string(),           
+  date_of_birth: z.string(), 
+  pedigree_RGA: z.string(),  
+  chip_number: z.string(),  
   owner: z.string(),
   ownerless_patient: z.boolean(),
   specie: z.string(),
   undefined_specie: z.boolean(),
   race: z.string(),
   undefined_race: z.boolean(),
+  status: z.any(),
   gender: z.any(),
-  weight: z.string(),
   physical_shape: z.any(),
-  entry_date: z.string().nonempty({ message: "Selecione a data de entrada" }),
-  departure_date: z.string().optional(),
+  starting_weight: z.string(),
+  current_weight: z.string(), 
+  notes: z.string().max(1000, { message: "O texto não pode conter mais do que 1000 caracteres."}),          
 })
 .superRefine((field, ctx) => {
   const addCustomIssue = (path: string[], message: string) => {
@@ -102,6 +115,9 @@ const RegisterPatientModal = () => {
   const { field: selectGender } = useController({ name: "gender", control });
   const { value: selectGenderValue, onChange: selectGenderOnChange, ...restSelectGender } = selectGender;
 
+  const { field: selectHealthCondition } = useController({ name: "status", control });
+  const { value: selectHealthConditionValue, onChange: selectHealthConditionOnChange, ...restSelectHealthCondition } = selectHealthCondition;
+
   useEffect(() => {
     if (isOpen != true) {
       setSelectedImage(undefined);
@@ -117,9 +133,6 @@ const RegisterPatientModal = () => {
       setPreviewImage(URL.createObjectURL(file));
     }
   };
-
-  console.log(selectPhysicalShapeValue)
-  console.log(selectGenderValue)
 
   const { isLoading, mutate } = useMutation({
     mutationKey: ["create-patient"],
@@ -161,7 +174,7 @@ const RegisterPatientModal = () => {
 
   return (
     <Dialog.Root onOpenChange={setIsOpen} open={isOpen}>
-      <Dialog.Trigger className="w-10 h-10 rounded flex justify-center items-center bg-blue-500 hover:bg-blue-600">
+      <Dialog.Trigger className="w-[41.6px] h-[41.6px] rounded-lg flex justify-center items-center bg-blue-500 hover:bg-blue-600">
         <PlusIcon color="#ffff" width={20} height={20} />
       </Dialog.Trigger>
       <Dialog.Portal>
@@ -172,7 +185,11 @@ const RegisterPatientModal = () => {
               Cadastrar paciente
             </Dialog.Title>
             <Dialog.Close className="h-8 bg-transparent flex justify-center items-center">
-              <Cross1Icon className="text-slate-400 hover:text-slate-500" width={24} height={24} />
+              <Cross1Icon
+                className="text-slate-400 hover:text-slate-500"
+                width={24}
+                height={24}
+              />
             </Dialog.Close>
           </div>
           {isLoading && (
@@ -181,16 +198,18 @@ const RegisterPatientModal = () => {
                 <SpinnerLoad
                   divProps={{
                     className:
-                      "w-full h-[488px] relative flex items-center justify-center bg-gray-500-50",
+                      "w-full h-[488px] relative flex items-center justify-center bg-slate-500-50",
                   }}
                 />
               </div>
             </div>
           )}
-          <VerticalScrollbar styleViewportArea="w-full h-[488px] px-6 py-6">
+          <div 
+            id={styles.containerScroll}
+            className="w-full h-[488px] overflow-y-scroll px-6 py-6">
             <form
               onSubmit={handleSubmit(onSubmit)}
-              className="w-full flex flex-col gap-[64px]"
+              className="w-full flex flex-col gap-10"
             >
               <div className="w-full flex flex-col gap-6">
                 <div className="w-full flex items-center gap-4">
@@ -247,6 +266,59 @@ const RegisterPatientModal = () => {
                   </div>
                 </div>
                 <div className="w-full flex flex-row gap-4">
+                  <div className="w-44">
+                    <div className="w-44 flex flex-col gap-6">
+                      <div className="w-full flex flex-col gap-3">
+                        <label
+                          htmlFor="date_of_birth"
+                          className="w-full font-medium text-sm text-slate-700"
+                        >
+                          Data de nascimento
+                        </label>
+                        <input
+                          type="date"
+                          className="w-full block p-2.5 text-sm text-shark-950 font-normal bg-white rounded-lg border border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
+                          {...register("date_of_birth")}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="w-44">
+                    <div className="w-44 flex flex-col gap-6">
+                      <div className="w-full flex flex-col gap-3">
+                        <label
+                          htmlFor="age"
+                          className="w-full font-medium text-sm text-slate-700"
+                        >
+                          Idade
+                        </label>
+                        <input
+                          type="text"
+                          className="w-full block p-2.5 text-sm text-shark-950 font-normal bg-white rounded-lg border border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
+                          {...register("age")}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="w-full">
+                    <div className="w-full flex flex-col gap-2">
+                      <div className="w-full flex flex-col gap-3">
+                        <label
+                          htmlFor="pedigree_RGA"
+                          className="w-full font-medium text-sm text-slate-700"
+                        >
+                          Nº do Pedigree/RGA
+                        </label>
+                        <input
+                          type="text"
+                          className="w-full block p-2.5 text-sm text-shark-950 font-normal bg-white rounded-lg border border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
+                          {...register("pedigree_RGA")}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="w-full flex flex-row gap-4">
                   <div className="w-[368px]">
                     <div className="w-[368px] flex flex-col gap-2">
                       <div className="w-[368px] flex flex-col gap-3">
@@ -254,11 +326,11 @@ const RegisterPatientModal = () => {
                           htmlFor="name"
                           className="w-full font-medium text-sm text-slate-700"
                         >
-                          Nome do paciente
+                          Nome
                         </label>
                         <input
                           type="text"
-                          className={`w-full h-10 px-3 py-3 font-normal text-sm text-shark-950 bg-white rounded border border-solid ${
+                          className={`w-full block p-2.5 font-normal text-sm text-shark-950 bg-white rounded-lg border ${
                             errors.name
                               ? "border-red-300 hover:border-red-400 focus:outline-none placeholder:text-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
                               : "border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
@@ -277,6 +349,25 @@ const RegisterPatientModal = () => {
                     <div className="w-full flex flex-col gap-2">
                       <div className="w-full flex flex-col gap-3">
                         <label
+                          htmlFor="chip_number"
+                          className="w-full font-medium text-sm text-slate-700"
+                        >
+                          Nº do chip
+                        </label>
+                        <input
+                          type="text"
+                          className="w-full block p-2.5 text-sm text-shark-950 font-normal bg-white rounded-lg border border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
+                          {...register("chip_number")}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="w-full flex flex-row gap-4">
+                  <div className="w-full">
+                    <div className="w-full flex flex-col gap-2">
+                      <div className="w-full flex flex-col gap-3">
+                        <label
                           htmlFor="specie"
                           className="w-full font-medium text-sm text-slate-700"
                         >
@@ -285,13 +376,13 @@ const RegisterPatientModal = () => {
                         {watch("undefined_specie") == true ? (
                           <input
                             type="text"
-                            className="w-full h-10 px-3 py-3 text-slate-200 bg-slate-200 border border-solid border-slate-300 rounded cursor-not-allowed"
+                            className="w-full h-[41.6px] text-slate-200 bg-slate-200 border border-slate-300 rounded-lg cursor-not-allowed"
                             disabled
                           />
                         ) : (
                           <input
                             type="text"
-                            className={`w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal bg-white rounded border border-solid ${
+                            className={`w-full block p-2.5 text-sm text-shark-950 font-normal bg-white rounded-lg border ${
                               errors.specie
                                 ? "border-red-300 hover:border-red-400 focus:outline-none placeholder:text-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
                                 : "border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
@@ -326,61 +417,6 @@ const RegisterPatientModal = () => {
                       </div>
                     </div>
                   </div>
-                </div>
-                <div className="w-full flex flex-row gap-4">
-                  <div className="w-[368px]">
-                    <div className="w-[368px] flex flex-col gap-2">
-                      <div className="w-[368px] flex flex-col gap-3">
-                        <label
-                          htmlFor="owner"
-                          className="w-full font-medium text-sm text-slate-700"
-                        >
-                          Nome do tutor(a)
-                        </label>
-                        {watch("ownerless_patient") == true ? (
-                          <input
-                            type="text"
-                            className="w-full h-10 px-3 py-3 text-slate-200 bg-slate-200 border border-solid border-slate-300 rounded cursor-not-allowed"
-                            disabled
-                          />
-                        ) : (
-                          <input
-                            type="text"
-                            className={`w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal bg-white rounded border border-solid ${
-                              errors.owner
-                                ? "border-red-300 hover:border-red-400 focus:outline-none placeholder:text-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                                : "border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
-                            }`}
-                            {...register("owner")}
-                          />
-                        )}
-                      </div>
-                      {errors.owner && (
-                        <span
-                          className={
-                            watch("ownerless_patient") == false
-                              ? "font-normal text-xs text-red-400"
-                              : "hidden font-normal text-xs text-red-400"
-                          }
-                        >
-                          {errors.owner.message}
-                        </span>
-                      )}
-                      <div className="w-full flex items-center gap-1">
-                        <input
-                          type="checkbox"
-                          id="checkbox3"
-                          {...register("ownerless_patient")}
-                        ></input>
-                        <label
-                          htmlFor="checkbox3"
-                          className="font-normal text-xs text-slate-400"
-                        >
-                          Não foi identificado o tutor do paciente.
-                        </label>
-                      </div>
-                    </div>
-                  </div>
                   <div className="w-full">
                     <div className="w-full flex flex-col gap-2">
                       <div className="w-full flex flex-col gap-3">
@@ -393,13 +429,13 @@ const RegisterPatientModal = () => {
                         {watch("undefined_race") == true ? (
                           <input
                             type="text"
-                            className="w-full h-10 px-3 py-3 text-slate-200 bg-slate-200 border border-solid border-slate-300 rounded cursor-not-allowed"
+                            className="w-full h-[41.6px] text-slate-200 bg-slate-200 border border-slate-300 rounded-lg cursor-not-allowed"
                             disabled
                           />
                         ) : (
                           <input
                             type="text"
-                            className={`w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal bg-white rounded border border-solid ${
+                            className={`w-full block p-2.5 text-sm text-shark-950 font-normal bg-white rounded-lg border ${
                               errors.race
                                 ? "border-red-300 hover:border-red-400 focus:outline-none placeholder:text-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
                                 : "border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
@@ -436,98 +472,119 @@ const RegisterPatientModal = () => {
                   </div>
                 </div>
                 <div className="w-full flex flex-row gap-4">
-                  <div className="w-44">
-                    <div className="w-44 flex flex-col gap-6">
-                      <div className="w-full flex flex-col gap-3">
+                  <div className="w-[128px]">
+                    <div className="w-[128px] flex flex-col gap-6">
+                      <div className="w-[128px] flex flex-col gap-3">
                         <label
-                          htmlFor="physical_shape"
+                          htmlFor="starting_weight"
                           className="w-full font-medium text-sm text-slate-700"
                         >
-                          Porte físico
+                          Peso inícial
                         </label>
-                        <Select
-                          styles={{
-                            control: (baseStyles, state) => ({
-                              ...baseStyles,
-                              width: "100%",
-                              height: 40,
-                              borderColor: state.isFocused
-                                ? "#64748b"
-                                : "#cbd5e1",
-                              whiteSpace: "nowrap",
-                              textOverflow: "ellipsis",
-                              fontWeight: 400,
-                              fontFamily: "Inter",
-                              fontSize: "0.875rem",
-                              lineHeight: "1.25rem",
-                            }),
-                            input: (styles) => ({
-                              ...styles,
-                              fontWeight: 400,
-                              fontFamily: "Inter",
-                              borderColor: "#cbd5e1",
-                              ":hover": { borderColor: "#94a3b8" },
-                            }),
-                            dropdownIndicator: (styles) => ({
-                              ...styles,
-                              color: "#94a3b8",
-                              ":hover": { color: "#64748b" },
-                            }),
-                            indicatorSeparator: (styles) => ({
-                              ...styles,
-                              backgroundColor: "#94a3b8"
-                            }),
-                            placeholder: (styles) => ({
-                              ...styles,
-                              fontWeight: 400,
-                              fontFamily: "Inter",
-                              color: "#94a3b8",
-                            }),
-                          }}
-                          theme={(theme) => ({
-                            ...theme,
-                            borderRadius: 4,
-                            colors: {
-                              ...theme.colors,
-                              primary50: "#f8fafc",
-                              primary25: "#f8fafc",
-                              primary: "#0f172a",
-                            },
-                          })}
-                          placeholder="Selecione o porte"
-                          isSearchable={false}
-                          options={physicalShapeOptions}
-                          value={
-                            selectPhysicalShapeValue
-                              ? physicalShapeOptions.find(
-                                  (x) => x.value === selectPhysicalShapeValue
-                                )
-                              : selectPhysicalShapeValue
-                          }
-                          onChange={(option) =>
-                            selectPhysicalShapeOnChange(
-                              option ? option.value : option
-                            )
-                          }
-                          {...restSelectPhysicalShape}
+                        <input
+                          type="text"
+                          className="w-full block p-2.5 text-sm text-shark-950 font-normal bg-white rounded-lg border border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
+                          {...register("starting_weight")}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="w-[128px]">
+                    <div className="w-[128px] flex flex-col gap-6">
+                      <div className="w-[128px] flex flex-col gap-3">
+                        <label
+                          htmlFor="current_weight"
+                          className="w-full font-medium text-sm text-slate-700"
+                        >
+                          Peso atual
+                        </label>
+                        <input
+                          type="text"
+                          className="w-full block p-2.5 text-sm text-shark-950 font-normal bg-white rounded-lg border border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
+                          {...register("current_weight")}
                         />
                       </div>
                     </div>
                   </div>
                   <div className="w-44">
-                    <div className="w-44 flex flex-col gap-6">
-                      <div className="w-full flex flex-col gap-3">
-                        <label
-                          htmlFor="weight"
-                          className="w-full font-medium text-sm text-slate-700"
-                        >
-                          Peso
-                        </label>
-                        <input
-                          type="text"
-                          className="w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal bg-white rounded border border-solid border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
-                          {...register("weight")}
-                        />
+                    <div className="w-44">
+                      <div className="w-44 flex flex-col gap-6">
+                        <div className="w-full flex flex-col gap-3">
+                          <label
+                            htmlFor="physical_shape"
+                            className="w-full font-medium text-sm text-slate-700"
+                          >
+                            Porte físico
+                          </label>
+                          <Select
+                            styles={{
+                              control: (baseStyles, state) => ({
+                                ...baseStyles,
+                                width: "100%",
+                                height: 41.6,
+                                borderRadius: 8,
+                                borderColor: state.isFocused
+                                  ? "#64748b"
+                                  : "#cbd5e1",
+                                whiteSpace: "nowrap",
+                                textOverflow: "ellipsis",
+                                fontWeight: 400,
+                                fontFamily: "Inter",
+                                fontSize: "0.875rem",
+                                lineHeight: "1.25rem",
+                              }),
+                              input: (styles) => ({
+                                ...styles,
+                                borderRadius: 8,
+                                fontWeight: 400,
+                                fontFamily: "Inter",
+                                borderColor: "#cbd5e1",
+                                ":hover": { borderColor: "#94a3b8" },
+                              }),
+                              dropdownIndicator: (styles) => ({
+                                ...styles,
+                                color: "#94a3b8",
+                                ":hover": { color: "#64748b" },
+                              }),
+                              indicatorSeparator: (styles) => ({
+                                ...styles,
+                                backgroundColor: "#94a3b8",
+                              }),
+                              placeholder: (styles) => ({
+                                ...styles,
+                                fontWeight: 400,
+                                fontFamily: "Inter",
+                                color: "#94a3b8",
+                              }),
+                            }}
+                            theme={(theme) => ({
+                              ...theme,
+                              borderRadius: 8,
+                              colors: {
+                                ...theme.colors,
+                                primary50: "#f8fafc",
+                                primary25: "#f8fafc",
+                                primary: "#0f172a",
+                              },
+                            })}
+                            placeholder="Selecione o porte"
+                            isSearchable={false}
+                            options={physicalShapeOptions}
+                            value={
+                              selectPhysicalShapeValue
+                                ? physicalShapeOptions.find(
+                                    (x) => x.value === selectPhysicalShapeValue
+                                  )
+                                : selectPhysicalShapeValue
+                            }
+                            onChange={(option) =>
+                              selectPhysicalShapeOnChange(
+                                option ? option.value : option
+                              )
+                            }
+                            {...restSelectPhysicalShape}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -538,14 +595,15 @@ const RegisterPatientModal = () => {
                           htmlFor="gender"
                           className="w-full font-medium text-sm text-slate-700"
                         >
-                          Gênero
+                          Sexo
                         </label>
                         <Select
                           styles={{
                             control: (baseStyles, state) => ({
                               ...baseStyles,
                               width: "100%",
-                              height: 40,
+                              height: 41.6,
+                              borderRadius: 8,
                               borderColor: state.isFocused
                                 ? "#64748b"
                                 : "#cbd5e1",
@@ -558,6 +616,7 @@ const RegisterPatientModal = () => {
                             }),
                             input: (styles) => ({
                               ...styles,
+                              borderRadius: 8,
                               fontWeight: 400,
                               fontFamily: "Inter",
                               borderColor: "#cbd5e1",
@@ -570,7 +629,7 @@ const RegisterPatientModal = () => {
                             }),
                             indicatorSeparator: (styles) => ({
                               ...styles,
-                              backgroundColor: "#94a3b8"
+                              backgroundColor: "#94a3b8",
                             }),
                             placeholder: (styles) => ({
                               ...styles,
@@ -581,7 +640,7 @@ const RegisterPatientModal = () => {
                           }}
                           theme={(theme) => ({
                             ...theme,
-                            borderRadius: 4,
+                            borderRadius: 8,
                             colors: {
                               ...theme.colors,
                               primary50: "#f8fafc",
@@ -589,7 +648,7 @@ const RegisterPatientModal = () => {
                               primary: "#0f172a",
                             },
                           })}
-                          placeholder="Selecione o sexo do paciente"
+                          placeholder="Selecione o sexo"
                           isSearchable={false}
                           options={genderOptions}
                           value={
@@ -600,9 +659,7 @@ const RegisterPatientModal = () => {
                               : selectGenderValue
                           }
                           onChange={(option) =>
-                            selectGenderOnChange(
-                              option ? option.value : option
-                            )
+                            selectGenderOnChange(option ? option.value : option)
                           }
                           {...restSelectGender}
                         />
@@ -610,17 +667,177 @@ const RegisterPatientModal = () => {
                     </div>
                   </div>
                 </div>
+                <div className="w-full flex flex-row gap-4">
+                  <div className="w-[272px]">
+                    <div className="w-[272px] flex flex-col gap-2">
+                      <div className="w-[272px] flex flex-col gap-3">
+                        <label
+                          htmlFor="status"
+                          className="w-full font-medium text-sm text-slate-700"
+                        >
+                          Status
+                        </label>
+                        <Select
+                          styles={{
+                            control: (baseStyles, state) => ({
+                              ...baseStyles,
+                              width: "100%",
+                              height: 41.6,
+                              borderRadius: 8,
+                              borderColor: state.isFocused
+                                ? "#64748b"
+                                : "#cbd5e1",
+                              whiteSpace: "nowrap",
+                              textOverflow: "ellipsis",
+                              fontWeight: 400,
+                              fontFamily: "Inter",
+                              fontSize: "0.875rem",
+                              lineHeight: "1.25rem",
+                            }),
+                            input: (styles) => ({
+                              ...styles,
+                              borderRadius: 8,
+                              fontWeight: 400,
+                              fontFamily: "Inter",
+                              borderColor: "#cbd5e1",
+                              ":hover": { borderColor: "#94a3b8" },
+                            }),
+                            dropdownIndicator: (styles) => ({
+                              ...styles,
+                              color: "#94a3b8",
+                              ":hover": { color: "#64748b" },
+                            }),
+                            indicatorSeparator: (styles) => ({
+                              ...styles,
+                              backgroundColor: "#94a3b8",
+                            }),
+                            placeholder: (styles) => ({
+                              ...styles,
+                              fontWeight: 400,
+                              fontFamily: "Inter",
+                              color: "#94a3b8",
+                            }),
+                          }}
+                          theme={(theme) => ({
+                            ...theme,
+                            borderRadius: 8,
+                            colors: {
+                              ...theme.colors,
+                              primary50: "#f8fafc",
+                              primary25: "#f8fafc",
+                              primary: "#0f172a",
+                            },
+                          })}
+                          placeholder="Selecione o status do paciente"
+                          isSearchable={false}
+                          options={healthConditionOptions}
+                          value={
+                            selectHealthConditionValue
+                              ? healthConditionOptions.find(
+                                  (x) => x.value === selectHealthConditionValue
+                                )
+                              : selectHealthConditionValue
+                          }
+                          onChange={(option) =>
+                            selectPhysicalShapeOnChange(
+                              option ? option.value : option
+                            )
+                          }
+                          {...restSelectHealthCondition}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="w-full">
+                    <div className="w-full flex flex-col gap-2">
+                      <div className="w-full flex flex-col gap-3">
+                        <label
+                          htmlFor="owner"
+                          className="w-full font-medium text-sm text-slate-700"
+                        >
+                          Nome do proprietário(a)
+                        </label>
+                        {watch("ownerless_patient") == true ? (
+                          <input
+                            type="text"
+                            className="w-full h-[41.6px] text-slate-200 bg-slate-200 border border-slate-300 rounded-lg cursor-not-allowed"
+                            disabled
+                          />
+                        ) : (
+                          <input
+                            type="text"
+                            className={`w-full block p-2.5 text-sm text-shark-950 font-normal bg-white rounded-lg border ${
+                              errors.owner
+                                ? "border-red-300 hover:border-red-400 focus:outline-none placeholder:text-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                                : "border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
+                            }`}
+                            {...register("owner")}
+                          />
+                        )}
+                      </div>
+                      {errors.owner && (
+                        <span
+                          className={
+                            watch("ownerless_patient") == false
+                              ? "font-normal text-xs text-red-400"
+                              : "hidden font-normal text-xs text-red-400"
+                          }
+                        >
+                          {errors.owner.message}
+                        </span>
+                      )}
+                      <div className="w-full flex items-center gap-1">
+                        <input
+                          type="checkbox"
+                          id="checkbox3"
+                          {...register("ownerless_patient")}
+                        ></input>
+                        <label
+                          htmlFor="checkbox3"
+                          className="font-normal text-xs text-slate-400"
+                        >
+                          Não foi identificado o tutor do paciente.
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="w-full flex flex-col gap-2">
+                  <div className="w-full flex flex-col gap-3">
+                    <label
+                      htmlFor="notes"
+                      className="w-full font-medium text-sm text-slate-700"
+                    >
+                      Observações
+                    </label>
+                    <textarea
+                      rows={10}
+                      placeholder="Relate um ponto interessante sobre o animal"
+                      className={`resize-none block w-full rounded-lg border-0 p-[12px] text-sm text-slate-900 ring-1 ring-inset ${
+                        errors.notes
+                          ? "ring-red-300 placeholder:text-red-400 focus:outline-red-500 focus:ring-1 focus:ring-inset focus:ring-red-500"
+                          : "ring-slate-300 placeholder:text-slate-400 focus:outline-slate-500 focus:ring-1 focus:ring-inset focus:ring-slate-500"
+                      }`}
+                      {...register("notes")}
+                    ></textarea>
+                  </div>
+                  {errors.notes && (
+                    <span className="font-normal text-xs text-red-400">
+                      {errors.notes.message}
+                    </span>
+                  )}         
+                </div>
               </div>
               <div className="w-full h-10 flex items-center justify-end">
                 <button
                   type="submit"
-                  className="w-24 h-10 border border-slate-300 rounded font-medium text-base text-slate-700 bg-white hover:border-none hover:text-white hover:bg-blue-500"
+                  className="w-24 h-10 border border-slate-300 rounded-lg font-medium text-base text-slate-700 bg-white hover:border-none hover:text-white hover:bg-blue-500"
                 >
                   Cadastrar
                 </button>
               </div>
             </form>
-          </VerticalScrollbar>
+          </div>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

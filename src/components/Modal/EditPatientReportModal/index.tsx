@@ -1,116 +1,47 @@
-import Image from "next/image";
 import SpinnerLoad from "../../Load/SpinnerLoad";
-import Select from "react-select";
 import { api } from "../../../providers/Api";
 import { z } from "zod";
-import { Document, Page } from "react-pdf";
-import { formatFileSize } from "../../../functions/formatBytes";
 import { queryClient } from "../../../providers/QueryClient";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChangeEvent, Dispatch, SetStateAction, useEffect, useState } from "react";
-import { useController, useForm } from "react-hook-form";
-import { Cross1Icon, DownloadIcon, ExclamationTriangleIcon, Pencil2Icon, TrashIcon } from "@radix-ui/react-icons";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { Cross1Icon } from "@radix-ui/react-icons";
 import { useMutation, useQuery } from "react-query";
 import * as Dialog from "@radix-ui/react-dialog";
+import { GetReportResponse, PatchReportResponse } from "../../../@types/ApiResponse";
+import { format } from "date-fns";
+import * as locale from 'date-fns/locale';
 
-import styles from '../styles.module.css';
-import VerticalScrollbar from "../../Scrollbar/VerticalScrollbar";
+import styles from "./styles.module.css";
 
 type EditPatientReportModalProps = {
   id: string;
-  patientId: string;
-};
-
-type UploadFileResponse = {
-  fileUrl: string;
-};
-
-type ReportData = {
-  id: string;
-  filename: string;
-  fileUrl: string;
-  fileSize: number;
-  createdAt: string;
-  updatedAt: string;
-};
-
-type ReportResponse = {
-  id: string;
-  patientId: string;
-  shift: string;
-  author: string;
-  report_text: string;
-  filename: string;
-  fileUrl: string;
-  fileSize: number;
-  createdAt: string;
-  updatedAt: string;
-};
-
-const turnOptions = [
-  { label: "Matutino", value: "Matutino" },
-  { label: "Diurno", value: "Diurno" },
-  { label: "Noturno", value: "Noturno" },
-];
+}
 
 const editReportFormSchema = z.object({
-  shift: z.any(),
-  author: z
-    .string()
-    .nonempty("Preencha o seu nome completo.")
-    .transform((name) => {
-      return name
-        .trim()
-        .split(" ")
-        .map((word) => {
-          return word[0].toLocaleUpperCase().concat(word.substring(1));
-        })
-        .join(" ");
-    }),
   title: z.string().nonempty("O relatório precisa ter um título."),
-  report_text: z.string().optional(),
+  text: z.string().max(1000, { message: "O texto do relatório não pode conter mais do que 1000 caracteres." }).nonempty("O relatório precisa ter um texto."),
 });
 
 type editReportFormData = z.infer<typeof editReportFormSchema>;
 
-const EditPatientReportModal: React.FC<EditPatientReportModalProps> = ({ id, patientId }) => {
-  const {
-    reset,
-    register,
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<editReportFormData>({
+const EditPatientReportModal = ({ id: reportId }: EditPatientReportModalProps) => {
+  const { reset, register, handleSubmit, formState: { errors } } = useForm<editReportFormData>({
     resolver: zodResolver(editReportFormSchema),
   });
 
   const [open, setOpen] = useState<boolean>(false);
-  const [data, setData] = useState<ReportData>({} as ReportData);
   const [callRequest, setCallRequest] = useState<boolean>(false);
-  const [numPages, setNumPages] = useState<number | undefined>(undefined);
-  const [download, setDownload] = useState<any>({} as any);
-  const [hasAttachment, setHasAttachment] = useState<boolean>(false);
-  const [filename, setFilename] = useState<string>("");
-  const [fecthedFilename, setFetchedFilename] = useState<string>("");
-  const [fecthedAttachment, setFecthedAttachment] = useState<string>("");
-  const [attachedFile, setAttachedFile] = useState<File | undefined>();
-  const [attachment, setAttachment] = useState<File | undefined>();
-  const [isRemovingRecord, setIsRemovingRecord] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const { field: selectShift } = useController({ name: "shift", control });
-  const {
-    value: selectShiftValue,
-    onChange: selectShiftOnChange,
-    ...restSelectShift
-  } = selectShift;
-
-  const { isLoading } = useQuery({
+  useQuery({ 
     queryKey: ["get-report-by-id"],
     queryFn: async () => {
-      await api.get<ReportResponse>(`/reports/${id}`).then((res) => {
+      setIsLoading(true)
+      await api.get<GetReportResponse>(`/reports/${reportId}`).then((res) => {
         reset(res.data);
-        setData(res.data);
       });
+      setIsLoading(false)
     },
     enabled: callRequest,
   });
@@ -118,38 +49,10 @@ const EditPatientReportModal: React.FC<EditPatientReportModalProps> = ({ id, pat
   const { isLoading: isUpdating, mutate } = useMutation({
     mutationKey: ["update-patient-report"],
     mutationFn: async (data: editReportFormData) => {
-      if (attachedFile != undefined && fecthedAttachment === "") {
-        const formData = new FormData();
-        formData.append("file", attachedFile);
-
-        const upload = await api.post<UploadFileResponse>(
-          "uploads/file/",
-          formData
-        );
-
-        await api.patch<ReportResponse>(`/reports/${id}`, {
-          ...data,
-          filename: filename,
-          fileUrl: upload.data.fileUrl,
-          fileSize: attachedFile.size,
-        });
-      }
-      if (fecthedAttachment != "" && attachedFile === undefined) {
-        await api.patch<ReportResponse>(`/reports/${id}`, {
-          ...data,
-        });
-      }
-      if (fecthedAttachment === "" && attachedFile === undefined) {
-        await api.patch<ReportResponse>(`/reports/${id}`, {
-          ...data,
-          filename: "",
-          fileUrl: "",
-          fileSize: 0,
-        });
-      }
+      await api.patch<PatchReportResponse>(`/reports/${reportId}`, { ...data });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["list-all-reports"] });
+      queryClient.invalidateQueries({ queryKey: ["get-patient-by-id"] });
       if (isUpdating != true) {
         setOpen(false);
       }
@@ -159,389 +62,153 @@ const EditPatientReportModal: React.FC<EditPatientReportModalProps> = ({ id, pat
   useEffect(() => {
     if (open != true) {
       setCallRequest(false);
-      setAttachedFile(undefined);
-      setFecthedAttachment("");
-      setAttachment(undefined);
       reset();
     } else {
       setCallRequest(true);
     }
-  }, [open, setCallRequest, setAttachedFile, reset]);
+  }, [open, setCallRequest, reset]);
 
-  useEffect(() => {
-    if (data.filename != null || "") {
-      setFetchedFilename(data.filename);
-    }
-    if (data.fileUrl != null || "") {
-      setFecthedAttachment(data.fileUrl);
-    }
-  }, [data, setFetchedFilename, setFecthedAttachment]);
-
-  useEffect(() => {
-    if (attachedFile) {
-      setFetchedFilename("");
-      setFecthedAttachment("");
-    }
-  }, [attachment, setAttachment, fecthedAttachment, attachedFile]);
-
-  useEffect(() => {
-    if (data.fileUrl) {
-      const downloadLink = document.createElement("a");
-      downloadLink.href = `${data.fileUrl}`;
-      setDownload(downloadLink);
-    }
-  }, [data]);
-
-  useEffect(() => {
-    if (fecthedAttachment || attachedFile) {
-      setHasAttachment(true);
-    } else {
-      setHasAttachment(false);
-    }
-  }, [fecthedAttachment, attachedFile, setHasAttachment]);
-
-  const handleFile = (event: ChangeEvent<HTMLInputElement>) => {
-    if (event?.target?.files?.[0]) {
-      const file = event.target.files[0];
-      setAttachedFile(file);
-      setFilename(file.name);
-    }
+  const onSubmit = (data: editReportFormData) => {
+    mutate(data);
   };
 
-  const downloadFile = (event: any) => {
-    event.preventDefault();
-    download.click();
-  };
-
-  const removeFecthedAttachment = () => {
-    setFetchedFilename("");
-    setFecthedAttachment("");
-  };
-
-  const removeAttachment = () => {
-    setAttachedFile(undefined);
-    setFilename("");
-  };
-
-  const onDocumentLoadSuccess = ({ numPages }: any) => {
-    setNumPages(numPages);
-  };
-
-  const send = (data: editReportFormData) => {
-    const request = {
-      ...data,
-    };
-    mutate(request);
-  };
+  const loadingSpinner = (isLoading || isUpdating) && (
+    <div className="w-full h-full absolute z-20">
+      <div className="w-full h-full bg-[#f9fafb8b]">
+        <SpinnerLoad
+          divProps={{
+            className:
+              "w-full h-[402px] relative flex items-center justify-center bg-slate-500-50",
+          }}
+        />
+      </div>
+    </div>
+  ); 
+  
+  // const formattedCreatedAt = data.createdAt ? format(new Date(data.createdAt), 'dd MMMM yyyy', { locale: locale.ptBR }) : '';
+  // const formattedTimeItCreated = data.createdAt ? format(new Date(data.createdAt), 'HH:mm', { locale: locale.ptBR }) : '';
+  // const formattedUpdatedAt = data.updatedAt ? format(new Date(data.updatedAt), 'dd MMMM yyyy', { locale: locale.ptBR }) : '';
+  // const formattedTimeItUpdated = data.updatedAt ? format(new Date(data.updatedAt), 'HH:mm', { locale: locale.ptBR }) : '';
 
   return (
     <Dialog.Root onOpenChange={setOpen} open={open}>
-      <div className="px-2 py-1 border border-gray-200 rounded hover:border-[#b3b3b3] flex items-center text-shark-950 font-semibold gap-1">
-        <Dialog.Trigger className="w-16 flex items-center gap-1 text-shark-950 font-semibold">
-          <Pencil2Icon /> Editar
-        </Dialog.Trigger>
-      </div>
+      <Dialog.Trigger className="w-full p-1 flex items-center text-center justify-center text-[12px] leading-none text-slate-700 font-normal hover:font-semibold hover:text-[14px]">
+        Editar  
+      </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className="bg-black/60 inset-0 fixed z-20" />
         <Dialog.Content className="w-[608px] rounded-lg border-none bg-white fixed overflow-hidden pt-4 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
-          <div className="w-full px-6 pb-4 border-b-[1px] border-gray-200 flex items-center flex-row justify-between">
-            <Dialog.Title className="font-semibold text-2xl">
+          <div className="w-full px-6 pb-4 border-b-[1px] border-slate-300 flex items-center flex-row justify-between">
+            <Dialog.Title className="font-semibold text-2xl text-slate-700">
               Editar relatório
             </Dialog.Title>
-            <Dialog.Close className="w-[32px] h-[32px] flex justify-center items-center">
-              <Cross1Icon width={24} height={24} />
+            <Dialog.Close className="h-8 bg-transparent flex justify-center items-center">
+              <Cross1Icon className="text-slate-400 hover:text-slate-500" width={24} height={24} />
             </Dialog.Close>
           </div>
-          {(isLoading || isUpdating || isRemovingRecord) && (
-            <div className="w-full h-full absolute z-20">
-              <div className="w-full h-full bg-[#f9fafb8b]">
-                <SpinnerLoad
-                  divProps={{
-                    className:
-                      "w-full h-[402px] relative flex items-center justify-center bg-gray-500-50",
-                  }}
-                />
-              </div>
-            </div>
-          )}
-          <VerticalScrollbar
-            styleViewportArea="w-full h-[402px] px-6 py-6"
+          {loadingSpinner}
+          <div 
+            id={styles.modalScroll}
+            className="w-full h-[402px] px-6 py-6 overflow-y-scroll"
           >
-            <form
-              onSubmit={handleSubmit(send)}
-              className="w-full flex flex-col h-360 gap-6"
-            >
-              <div className="w-full flex flex-col gap-6">
-                <div className="w-full flex flex-row gap-3">
-                  <div className="w-[184px] flex flex-col gap-3">
-                    <label
-                      htmlFor="shift"
-                      className="w-full text-sm font-normal text-shark-950"
-                    >
-                      Turno
-                    </label>
-                    <Select
-                      styles={{
-                        control: (baseStyles, state) => ({
-                          ...baseStyles,
-                          width: 184,
-                          height: 40,
-                          borderColor: state.isFocused ? "#e2e8f0" : "#e2e8f0",
-                          whiteSpace: "nowrap",
-                          textOverflow: "ellipsis",
-                          fontFamily: "Inter",
-                          fontWeight: 400,
-                          fontSize: "0.875rem",
-                          lineHeight: "1.25rem",
-                        }),
-                      }}
-                      theme={(theme) => ({
-                        ...theme,
-                        borderRadius: 4,
-                        colors: {
-                          ...theme.colors,
-                          primary75: "#cbd5e1",
-                          primary50: "##e2e8f0",
-                          primary25: "#f8fafc",
-                          primary: "#212529",
-                        },
-                      })}
-                      placeholder="Selecione o turno"
-                      isSearchable={false}
-                      options={turnOptions}
-                      value={
-                        selectShiftValue
-                          ? turnOptions.find(
-                              (x) => x.value === selectShiftValue
-                            )
-                          : selectShiftValue
-                      }
-                      onChange={(option) =>
-                        selectShiftOnChange(option ? option.value : option)
-                      }
-                      {...restSelectShift}
-                    />
+            <div className="w-full flex flex-col gap-6">
+              {/* <div className="flex flex-col gap-4">
+                <div className="flex flex-col">
+                  <span className="font-normal text-xs text-slate-500">Usuário que realizou a postagem</span>      
+                  <span className="font-medium text-base text-slate-700">{data.username}</span>  
+                </div>
+                <div className="flex flex-row gap-6">
+                  <div className="flex flex-col">
+                    <span className="font-normal text-xs text-slate-500">Data de criação</span>      
+                    <span className="font-medium text-base text-slate-700">{formattedCreatedAt}</span>  
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="font-normal text-xs text-slate-500">Hora da postagem</span>      
+                    <span className="font-medium text-base text-slate-700">{formattedTimeItCreated}</span>  
+                  </div>
+                </div>
+                {data.updatedAt && (
+                  <div className="flex flex-row gap-6">
+                  <div className="flex flex-col">
+                    <span className="font-normal text-xs text-slate-500">Data da ultima edição</span>      
+                    <span className="font-medium text-base text-slate-700">{formattedUpdatedAt}</span>  
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="font-normal text-xs text-slate-500">Hora da postagem editada</span>      
+                    <span className="font-medium text-base text-slate-700">{formattedTimeItUpdated}</span>  
+                  </div>
+                </div>
+                )}
+              </div>   */}
+              <form
+                onSubmit={handleSubmit(onSubmit)}
+                className="w-full flex flex-col h-360 gap-6"
+              >
+                <div className="w-full flex flex-col gap-6">
+                  <div className="w-full flex flex-row gap-3">
+                    <div className="w-full flex flex-col gap-2">
+                      <div className="w-full flex flex-col gap-3">
+                        <label
+                          htmlFor="title"
+                          className="w-full font-medium text-sm text-slate-900"
+                        >
+                          Título
+                        </label>
+                        <input
+                          type="text"
+                          className={`w-full block p-2.5 font-normal text-sm text-slate-900 bg-white rounded-lg border ${
+                            errors.title
+                              ? "border-red-300 hover:border-red-400 focus:outline-none placeholder:text-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                              : "border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
+                          }`}
+                          {...register("title")}
+                        />
+                      </div>
+                      {errors.title && (
+                        <span className="font-normal text-xs text-red-400">
+                          {errors.title.message}
+                        </span>
+                      )}
+                    </div> 
                   </div>
                   <div className="w-full flex flex-col gap-2">
                     <div className="w-full flex flex-col gap-3">
                       <label
-                        htmlFor="author"
-                        className="w-full text-sm font-normal text-shark-950"
+                        htmlFor="text"
+                        className="w-full font-medium text-sm text-slate-900 "
                       >
-                        Nome do responsável
+                        Relatório
                       </label>
-                      <input
-                        type="text"
-                        className={
-                          errors.author
-                            ? "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
-                            : "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                        }
-                        {...register("author")}
-                      />
+                      <textarea 
+                        id={styles.textareaScroll}
+                        rows={12} 
+                        placeholder="Digite o seu relatório"
+                        className={`resize-none block w-full rounded-lg border-0 p-[12px] text-sm text-slate-900 ring-1 ring-inset ${
+                          errors.text
+                            ? "ring-red-300 placeholder:text-red-400 focus:outline-red-500 focus:ring-1 focus:ring-inset focus:ring-red-500"
+                            : "ring-slate-300 placeholder:text-slate-400 focus:outline-slate-500 focus:ring-1 focus:ring-inset focus:ring-slate-500"
+                        }`}
+                        {...register("text")}
+                      ></textarea>
                     </div>
-                    {errors.author && (
-                      <span className="text-xs font-normal text-red-500">
-                        {errors.author.message}
+                    {errors.text && (
+                      <span className="font-normal text-xs text-red-400">
+                        {errors.text.message}
                       </span>
-                    )}
+                    )}    
                   </div>
                 </div>
-                <div className="w-full flex flex-col gap-2">
-                  <div className="w-full flex flex-col gap-3">
-                    <label
-                      htmlFor="author"
-                      className="w-full text-sm font-normal text-shark-950"
-                    >
-                      Título
-                    </label>
-                    <input
-                      type="text"
-                      className={
-                        errors.title
-                          ? "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-red-200 rounded bg-white hover:boder hover:border-red-500"
-                          : "w-full h-10 px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                      }
-                      {...register("title")}
-                    />
-                  </div>
-                  {errors.title && (
-                    <span className="text-xs font-normal text-red-500">
-                      {errors.title.message}
-                    </span>
-                  )}
-                </div>
-                <div className="w-full flex flex-col gap-3">
-                  <label
-                    htmlFor="report_text"
-                    className="w-full text-sm font-normal text-shark-950"
+                <div className="w-full h-10 flex justify-end">
+                  <button
+                    type="submit"
+                    className="w-[152px] h-10 border border-slate-300 rounded-lg font-medium text-base text-slate-700 bg-white hover:border-none hover:text-white hover:bg-blue-500"
                   >
-                    Descrição / Relatório
-                  </label>
-                  <div>
-                    <textarea
-                      cols={30}
-                      rows={10}
-                      className="w-full px-3 py-3 text-sm text-shark-950 font-normal border border-gray-200 rounded bg-white hover:boder hover:border-[#b3b3b3]"
-                      {...register("report_text")}
-                    ></textarea>
-                  </div>
+                    Salvar alterações
+                  </button>
                 </div>
-                {fecthedAttachment && (
-                  <div className="w-[552.8px] border rounded border-gray-200 overflow-hidden flex flex-col items-center">
-                    <div className="w-[552.8px] h-44 overflow-hidden">
-                      <Document
-                        file={fecthedAttachment}
-                        onLoadSuccess={onDocumentLoadSuccess}
-                      >
-                        <Page pageNumber={1} width={552.8} />
-                      </Document>
-                    </div>
-                    <div className="w-[552.8px] h-14 border-t-[1px] border-gray-200 flex items-center p-2 gap-2">
-                      <Image
-                        src="/pdf-svgrepo-com.svg"
-                        alt="pdf-icon"
-                        width={24}
-                        height={24}
-                      />
-                      <div className="w-80 flex flex-col items-center justify-center">
-                        <div className="w-80 whitespace-nowrap overflow-hidden text-ellipsis">
-                          <p className="max-w-80 whitespace-nowrap overflow-hidden text-ellipsis font-semibold text-[14.8px]">
-                            {fecthedFilename.split(".").slice(0, -1).join(".")}
-                          </p>
-                        </div>
-                        <div className="w-80 flex flex-row items-center text-center gap-1">
-                          <span className="text-[10px] font-light">
-                            {numPages} páginas
-                          </span>
-                          <span className="text-[10px] font-light">•</span>
-                          <span className="text-[10px] font-light">
-                            {fecthedFilename.split(".").pop()?.toUpperCase()}
-                          </span>
-                          <span className="text-[10px] font-light">•</span>
-                          <span className="text-[10px] font-light">
-                            {formatFileSize(data.fileSize)}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="w-[176.8px] flex justify-end">
-                        <div className="flex gap-2">
-                          <button
-                            onClick={downloadFile}
-                            className="w-7 h-7 flex justify-center items-center bg-white border rounded border-gray-200 overflow-hidden cursor-pointer"
-                          >
-                            <DownloadIcon
-                              color="#212529"
-                              width={16}
-                              height={16}
-                            />
-                          </button>
-                          <button
-                            onClick={removeFecthedAttachment}
-                            className="w-7 h-7 flex justify-center items-center bg-white border rounded border-gray-200 overflow-hidden cursor-pointer"
-                          >
-                            <TrashIcon color="#ef4444" width={16} height={16} />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-                {attachedFile && (
-                  <div className="w-[552.8px] border rounded border-gray-200 overflow-hidden flex flex-col items-center">
-                    <div className="w-[552.8px] h-44 overflow-hidden">
-                      <Document
-                        file={attachedFile}
-                        onLoadSuccess={onDocumentLoadSuccess}
-                      >
-                        <Page pageNumber={1} width={552.8} />
-                      </Document>
-                    </div>
-                    <div className="w-[552.8px] h-14 border-t-[1px] border-gray-200 flex items-center p-2 gap-2">
-                      <Image
-                        src="/pdf-svgrepo-com.svg"
-                        alt="pdf-icon"
-                        width={24}
-                        height={24}
-                      />
-                      <div className="w-80 flex flex-col items-center justify-center">
-                        <div className="w-80 whitespace-nowrap overflow-hidden text-ellipsis">
-                          <p className="max-w-80 whitespace-nowrap overflow-hidden text-ellipsis font-semibold text-[14.8px]">
-                            {filename.split(".").slice(0, -1).join(".")}
-                          </p>
-                        </div>
-                        <div className="w-80 flex flex-row items-center text-center gap-1">
-                          <span className="text-[10px] font-light">
-                            {numPages} páginas
-                          </span>
-                          <span className="text-[10px] font-light">•</span>
-                          <span className="text-[10px] font-light">
-                            {filename.split(".").pop()?.toUpperCase()}
-                          </span>
-                          <span className="text-[10px] font-light">•</span>
-                          <span className="text-[10px] font-light">
-                            {formatFileSize(attachedFile.size)}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="w-[176.8px] flex justify-end">
-                        <button
-                          onClick={removeAttachment}
-                          className="w-7 h-7 flex justify-center items-center bg-white border rounded border-gray-200 overflow-hidden cursor-pointer"
-                        >
-                          <TrashIcon color="#ef4444" width={16} height={16} />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-              <div className="w-full flex flex-col gap-3">
-                <div className="w-full flex justify-between">
-                  {hasAttachment === true ? undefined : (
-                    <div className="w-full flex">
-                      <label
-                        htmlFor="attachfile"
-                        className="border border-gray-200 flex items-center px-3 py-[6px] gap-1 rounded text-base text-shark-950 font-medium bg-white hover:border-[#b3b3b3] cursor-pointer"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="#212529"
-                          className="w-5 h-5"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"
-                          />
-                        </svg>
-                        Adicionar um anexo
-                      </label>
-                      <input
-                        type="file"
-                        accept=".pdf"
-                        id="attachfile"
-                        className="hidden"
-                        onChange={handleFile}
-                      />
-                    </div>
-                  )}
-                  <div className="w-full h-10 flex justify-end gap-2">
-                    <WarningToDeleteReportModal
-                      id={id}
-                      modalIsOpen={setOpen}
-                      setLoading={setIsRemovingRecord}
-                    />
-                    <button className="w-[152px] h-10 border border-gray-200 rounded font-medium text-base text-shark-950 bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500">
-                      Salvar alterações
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </form>
-          </VerticalScrollbar>
+              </form>
+            </div>
+          </div>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
@@ -549,72 +216,3 @@ const EditPatientReportModal: React.FC<EditPatientReportModalProps> = ({ id, pat
 };
 
 export default EditPatientReportModal;
-
-type WarningToDeleteReportModalProps = {
-  id: string;
-  setLoading: Dispatch<SetStateAction<boolean>>;
-  modalIsOpen: Dispatch<SetStateAction<boolean>>;
-};
-
-const WarningToDeleteReportModal: React.FC<WarningToDeleteReportModalProps> = ({ id, modalIsOpen, setLoading }) => {
-  const [open, setOpen] = useState<boolean>(false);
-
-  const { isLoading, mutate } = useMutation({
-    mutationKey: ["delete-report-by-id"],
-    mutationFn: async () => {
-      await api.delete(`/reports/${id}`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["list-all-reports"] });
-      if (isLoading != true) {
-        setOpen(false);
-        modalIsOpen(false);
-      }
-    },
-  });
-
-  useEffect(() => {
-    if (isLoading) {
-      setLoading(isLoading);
-    }
-  }, [setLoading, isLoading]);
-
-  const acceptRemoveFile = (event: any) => {
-    event.preventDefault();
-    mutate();
-    setOpen(false);
-  };
-
-  return (
-    <Dialog.Root onOpenChange={setOpen} open={open}>
-      <Dialog.Trigger className="w-10 flex items-center justify-center border border-gray-200 rounded text-base text-shark-950 font-medium bg-white hover:border-red-500">
-        <TrashIcon color="#ef4444" width={20} height={20} />
-      </Dialog.Trigger>
-      <Dialog.Portal>
-        <Dialog.Overlay className="bg-black/60 inset-0 fixed z-20" />
-        <Dialog.Content className="w-[358px] rounded-lg border border-gray-200 fixed z-20 pt-4 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white overflow-hidden">
-          <div className="w-full px-6 pb-4 border-b-[1px] border-gray-200 flex items-center gap-4 flex-row justify-start">
-            <ExclamationTriangleIcon color="#0f172a" width={24} height={24} />
-            <Dialog.Title className="font-semibold text-2xl text-slate-900">
-              Aviso
-            </Dialog.Title>
-          </div>
-          <div className="w-full flex flex-col justify-center text-center gap-4 px-6 pt-6 pb-6">
-            <span>Tem certeza que você quer remover este registro?</span>
-            <div className="flex justify-center gap-6">
-              <Dialog.Close className="w-[124px] px-3 py-[6px] border rounded font-medium text-base text-slate-900 shadow-md hover:shadow-blue-500/50 hover:border-none hover:text-neutral-50 hover: hover:bg-blue-500">
-                Não
-              </Dialog.Close>
-              <button
-                onClick={(e) => acceptRemoveFile(e)}
-                className="w-[124px] px-3 py-[6px] border rounded font-medium text-base text-slate-900 shadow-md hover:shadow-blue-500/50 hover:border-none hover:text-neutral-50 hover: hover:bg-blue-500"
-              >
-                Sim
-              </button>
-            </div>
-          </div>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
-  );
-};
