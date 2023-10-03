@@ -14,6 +14,7 @@ type PatientCardProps = {
   current_weight: string;
   status: string;
   _count: {
+    vaccines: number,
     exams: number,
     surgery: number,
     hospitalizations: number,
@@ -32,6 +33,7 @@ const PatientCard = ({
   current_weight,
   status,
   _count: {
+    vaccines,
     exams,
     surgery,
     hospitalizations,
@@ -125,7 +127,7 @@ const PatientCard = ({
                 Vacinas
               </span>
               <div className="flex flex-row gap-2">
-                <Badges data={"0"} />
+                {renderBadges(vaccines, "0")}
               </div>
             </div>
             <div className="flex flex-col gap-2">

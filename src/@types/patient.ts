@@ -3,6 +3,7 @@ import { Files } from "./file";
 import { Hospitalizations } from "./hospitalizations";
 import { Reports } from "./reports";
 import { Surgery } from "./surgery";
+import { Vaccine } from "./vaccine";
 
 export type Patient = {
   id: string;
@@ -31,5 +32,6 @@ export type Patient = {
   surgery: Surgery[];
   hospitalizations: Hospitalizations[]
   reports: Reports[];
+  vaccines: Vaccine[];
 }
          

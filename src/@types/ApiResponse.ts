@@ -5,6 +5,7 @@ import { Files } from "./file";
 import { Reports } from "./reports";
 import { Hospitalizations } from "./hospitalizations";
 import { Surgery } from "./surgery";
+import { Vaccine } from "./vaccine";
 
 type DashboardPatientData = {
   id: string;
@@ -17,6 +18,7 @@ type DashboardPatientData = {
   current_weight: string;
   status: string;
   _count: {
+    vaccines: number,
     exams: number,
     surgery: number,
     hospitalizations: number,
@@ -60,6 +62,7 @@ export type GetPatientResponse = {
   exams: Exams[];
   surgery: Surgery[];
   reports: Reports[];
+  vaccines: Vaccine[];
   hospitalizations: Hospitalizations[];
 };
 
@@ -252,4 +255,46 @@ export type PostSurgeryResponse = {
   notes: string;           
   createdAt: Date;       
   updatedAt: Date;  
+}
+
+export type GetVaccineResponse = {
+  id: string;                   
+  patientId: string;            
+  username: string;             
+  vaccine: string;              
+  date_of_vaccination: string;  
+  revaccination_date: string;   
+  name_of_veterinarian: string; 
+  vaccine_code: string;
+  age: string;         
+  createdAt: Date;            
+  updatedAt: Date;      
+}
+
+export type PostVaccineResponse = {
+  id: string;                   
+  patientId: string;            
+  username: string;             
+  vaccine: string;              
+  date_of_vaccination: string;  
+  revaccination_date: string;   
+  name_of_veterinarian: string; 
+  vaccine_code: string;
+  age: string;         
+  createdAt: Date;            
+  updatedAt: Date;      
+}
+
+export type PatchVaccineResponse = {
+  id: string;                   
+  patientId: string;            
+  username: string;             
+  vaccine: string;              
+  date_of_vaccination: string;  
+  revaccination_date: string;   
+  name_of_veterinarian: string; 
+  vaccine_code: string;     
+  age: string;    
+  createdAt: Date;            
+  updatedAt: Date;      
 }

@@ -1,0 +1,11 @@
+#modalScroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+#modalScroll::-webkit-scrollbar-thumb {
+  background: #64748b;
+}
+
+#modalScroll::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}

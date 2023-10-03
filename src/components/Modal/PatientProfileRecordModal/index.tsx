@@ -31,6 +31,9 @@ import { Hospitalizations } from "../../../@types/hospitalizations";
 import RegisterPatientSurgeryModal from "../RegisterPatientSurgeryModal";
 import SurgeryItem from "../../Items/SurgeryItem";
 import { Surgery } from "../../../@types/surgery";
+import RegisterPatientVaccinesModal from "../RegisterPatientVaccinesModal";
+import VaccineItem from "../../Items/VaccineItem";
+import { Vaccine } from "../../../@types/vaccine";
 
 const PatientProfileRecordModal = ({ patientId, children }: { patientId: string; children: React.ReactNode; }) => {
   const [open, setOpen] = useState<boolean>(false);
@@ -40,6 +43,7 @@ const PatientProfileRecordModal = ({ patientId, children }: { patientId: string;
   const [files, setFiles] = useState<Files[] | undefined>(undefined);
   const [exams, setExams] = useState<Exams[] | undefined>(undefined);
   const [surgery, setSurgery] = useState<Surgery[] | undefined>(undefined);
+  const [vaccines, setVaccines] = useState<Vaccine[] | undefined>(undefined);
   const [reports, setReports] = useState<Reports[] | undefined>(undefined);
   const [hospitalizations, setHospitalizations] = useState<Hospitalizations[] | undefined>(undefined)
 
@@ -62,6 +66,7 @@ const PatientProfileRecordModal = ({ patientId, children }: { patientId: string;
         setReports(res.data.reports);
         setHospitalizations(res.data.hospitalizations);
         setSurgery(res.data.surgery);
+        setVaccines(res.data.vaccines)
       });
       setIsLoading(false);
     },
@@ -98,6 +103,12 @@ const PatientProfileRecordModal = ({ patientId, children }: { patientId: string;
                   Arquivos
                 </Tabs.Trigger>
                 <Tabs.Trigger
+                  value="vaccines"
+                  className="inline-block px-[12px] pt-[6px] pb-3 rounded-t-lg border-b-2 border-transparent text-slate-400 hover:text-gray-500 hover:border-slate-400 data-[state=active]:text-slate-700 data-[state=active]:border-b-slate-700 focus:outline-none"
+                >
+                  Vacinas
+                </Tabs.Trigger>
+                <Tabs.Trigger
                   value="exams"
                   className="inline-block px-[12px] pt-[6px] pb-3 rounded-t-lg border-b-2 border-transparent text-slate-400 hover:text-gray-500 hover:border-slate-400 data-[state=active]:text-slate-700 data-[state=active]:border-b-slate-700 focus:outline-none"
                 >
@@ -132,6 +143,11 @@ const PatientProfileRecordModal = ({ patientId, children }: { patientId: string;
                 patientId={patientId}
                 isLoading={isLoading}
                 data={files}
+              />
+              <TabContentVaccines 
+                patientId={patientId}
+                isLoading={isLoading}
+                data={vaccines}
               />
               <TabContentExam 
                 patientId={patientId}
@@ -975,6 +991,61 @@ const TabContentAttachment = ({
   );
 };
 
+const TabContentVaccines = ({
+  patientId,
+  isLoading,
+  data
+}: {
+  patientId: string;
+  isLoading: boolean;
+  data: Vaccine[] | undefined
+}) => {
+  return (
+    <Tabs.Content value="vaccines">
+      {isLoading && (
+        <div className="w-full h-full absolute z-20">
+          <div className="w-full h-full bg-[#f9fafb8b]">
+            <SpinnerLoad
+              divProps={{
+                className:
+                  "w-full h-[400px] relative flex items-center justify-center bg-slate-500-50",
+              }}
+            />
+          </div>
+        </div>
+      )}
+      <div className="w-full flex flex-col pb-6 gap-6">
+        <div
+          id={styles.containerScroll}
+          className="w-full h-[400px] px-6 py-6 border-b border-slate-300 overflow-y-scroll"
+        >
+          <ul role="list" className="divide-y divide-slate-300">
+            {data && data.map((data, index) => (
+              <li key={index} className="py-6 first:pt-0 last:pb-0">
+                <VaccineItem
+                  id={data.id}
+                  username={data.username}
+                  vaccine={data.vaccine}
+                  date_of_vaccination={data.date_of_vaccination}
+                  revaccination_date={data.revaccination_date}
+                  name_of_veterinarian={data.name_of_veterinarian}
+                  vaccine_code={data.vaccine_code}
+                  age={data.age}
+                  createdAt={data.createdAt}
+                  updatedAt={data.updatedAt}
+                />
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="w-full h-10 px-6 flex justify-end">
+          <RegisterPatientVaccinesModal id={patientId} />
+        </div>
+      </div>
+    </Tabs.Content>
+  );
+};
+
 const TabContentExam = ({
   patientId,
   isLoading,
@@ -1005,8 +1076,8 @@ const TabContentExam = ({
         >
           <ul role="list" className="divide-y divide-slate-300">
             {data &&
-              data.map((data) => (
-                <li key={data.id} className="py-6 first:pt-0 last:pb-0">
+              data.map((data, index) => (
+                <li key={index} className="py-6 first:pt-0 last:pb-0">
                   <ExamItem
                     id={data.id}
                     username={data.username}
@@ -1034,7 +1105,15 @@ const TabContentExam = ({
   );
 };
 
-const TabContentSurgery = ({ patientId, isLoading, data }: { patientId: string; isLoading: boolean; data?: Surgery[] }) => {
+const TabContentSurgery = ({
+  patientId,
+  isLoading,
+  data,
+}: {
+  patientId: string;
+  isLoading: boolean;
+  data?: Surgery[];
+}) => {
   return (
     <Tabs.Content value="surgery">
       {isLoading && (
@@ -1055,22 +1134,23 @@ const TabContentSurgery = ({ patientId, isLoading, data }: { patientId: string; 
           className="w-full h-[400px] px-6 py-6 border-b border-slate-300 overflow-y-scroll"
         >
           <ul role="list" className="divide-y divide-slate-300">
-            {data && data.map((data) => (
-              <li key={data.id} className="py-6 first:pt-0 last:pb-0">
-                <SurgeryItem
-                  id={data.id}
-                  username={data.username}
-                  name_of_surgery={data.name_of_surgery}
-                  risk_level={data.risk_level}
-                  execution_date={data.execution_date}
-                  duration={data.duration}
-                  period={data.period}
-                  notes={data.notes}
-                  createdAt={data.createdAt}
-                  updatedAt={data.updatedAt}
-                />
-              </li>
-            ))}
+            {data &&
+              data.map((data, index) => (
+                <li key={index} className="py-6 first:pt-0 last:pb-0">
+                  <SurgeryItem
+                    id={data.id}
+                    username={data.username}
+                    name_of_surgery={data.name_of_surgery}
+                    risk_level={data.risk_level}
+                    execution_date={data.execution_date}
+                    duration={data.duration}
+                    period={data.period}
+                    notes={data.notes}
+                    createdAt={data.createdAt}
+                    updatedAt={data.updatedAt}
+                  />
+                </li>
+              ))}
           </ul>
         </div>
         <div className="w-full h-10 px-6 flex justify-end">
@@ -1079,9 +1159,17 @@ const TabContentSurgery = ({ patientId, isLoading, data }: { patientId: string; 
       </div>
     </Tabs.Content>
   );
-}
+};
 
-const TabContentHospitalizations = ({ patientId, isLoading, data }: { patientId: string; isLoading: boolean; data: Hospitalizations[] | undefined }) => {
+const TabContentHospitalizations = ({
+  patientId,
+  isLoading,
+  data,
+}: {
+  patientId: string;
+  isLoading: boolean;
+  data: Hospitalizations[] | undefined;
+}) => {
   return (
     <Tabs.Content value="hospitalizations">
       {isLoading && (
@@ -1103,8 +1191,8 @@ const TabContentHospitalizations = ({ patientId, isLoading, data }: { patientId:
         >
           <ul role="list" className="divide-y divide-slate-300">
             {data &&
-              data.map((data) => (
-                <li key={data.id} className="py-6 first:pt-0 last:pb-0">
+              data.map((data, index) => (
+                <li key={index} className="py-6 first:pt-0 last:pb-0">
                   <HospitalizationItem
                     id={data.id}
                     username={data.username}
@@ -1126,7 +1214,7 @@ const TabContentHospitalizations = ({ patientId, isLoading, data }: { patientId:
       </div>
     </Tabs.Content>
   );
-}
+};
 
 const TabContentReports = ({
   patientId,
@@ -1137,30 +1225,29 @@ const TabContentReports = ({
   isLoading: boolean;
   data: Reports[] | undefined;
 }) => {
-  const loadingSpinner = isLoading && (
-    <div className="w-full h-full absolute z-20">
-      <div className="w-full h-full bg-[#f9fafb8b]">
-        <SpinnerLoad
-          divProps={{
-            className:
-              "w-full h-[400px] relative flex items-center justify-center bg-slate-500-50",
-          }}
-        />
-      </div>
-    </div>
-  );
 
   return (
     <Tabs.Content value="reports">
-      {loadingSpinner}
+      {isLoading && (
+        <div className="w-full h-full absolute z-20">
+          <div className="w-full h-full bg-[#f9fafb8b]">
+            <SpinnerLoad
+              divProps={{
+                className:
+                  "w-full h-[400px] relative flex items-center justify-center bg-slate-500-50",
+              }}
+            />
+          </div>
+        </div>
+      )}
       <div className="w-full flex flex-col pb-6 gap-6">
         <div
-          id={styles.containerScroll} 
+          id={styles.containerScroll}
           className="w-full h-[400px] px-6 py-6 border-b border-slate-300 overflow-y-scroll"
         >
           <ul role="list" className="divide-y divide-slate-300">
-            {data?.map((data) => (
-              <li key={data.id} className="py-6 first:pt-0 last:pb-0">
+            {data?.map((data, index) => (
+              <li key={index} className="py-6 first:pt-0 last:pb-0">
                 <ReportItem
                   id={data.id}
                   username={data.username}
