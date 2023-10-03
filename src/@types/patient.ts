@@ -1,5 +1,4 @@
 import { Exams } from "./exams";
-import { Files } from "./file";
 import { Hospitalizations } from "./hospitalizations";
 import { Reports } from "./reports";
 import { Surgery } from "./surgery";
@@ -27,7 +26,6 @@ export type Patient = {
   notes: string;
   createdAt: Date;
   updatedAt: Date;
-  files: Files[];
   exams: Exams[];
   surgery: Surgery[];
   hospitalizations: Hospitalizations[]

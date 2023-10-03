@@ -7,7 +7,6 @@ import RegisterPatientReportModal from "../RegisterPatientReportModal";
 import ReportItem from "../../Items/ReportItem";
 import RegisterPatientExamModal from "../RegisterPatientExamModal";
 import ExamItem from "../../Items/ExamItem";
-import AddAttachmentModal from "../AddAttachmentModal";
 import RegisterPatientHospitalizationModal from "../RegisterPatientHospitalization";
 import { api } from "../../../providers/Api";
 import { queryClient } from "../../../providers/QueryClient";
@@ -17,11 +16,9 @@ import { Option } from "../../../interfaces/Option";
 import { ChangeEvent, useEffect, useState } from "react";
 import { useController, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FileCard } from "../../Cards/FileCard";
 import { Reports } from "../../../@types/reports";
 import { Patient } from "../../../@types/patient";
 import { Exams } from "../../../@types/exams";
-import { Files } from "../../../@types/file";
 import { GetPatientResponse, PatchPatientResponse, UploadImageResponse } from "../../../@types/ApiResponse";
 import { editPatientProfileFormData, editPatientProfileFormSchema } from "../../../schemas/editPatientProfileFormSchema";
 
@@ -40,7 +37,6 @@ const PatientProfileRecordModal = ({ patientId, children }: { patientId: string;
   const [callRequest, setCallRequest] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [patientFormData, setPatientFormData] = useState<Patient | undefined>(undefined);
-  const [files, setFiles] = useState<Files[] | undefined>(undefined);
   const [exams, setExams] = useState<Exams[] | undefined>(undefined);
   const [surgery, setSurgery] = useState<Surgery[] | undefined>(undefined);
   const [vaccines, setVaccines] = useState<Vaccine[] | undefined>(undefined);
@@ -61,7 +57,6 @@ const PatientProfileRecordModal = ({ patientId, children }: { patientId: string;
       setIsLoading(true);
       await api.get<GetPatientResponse>(`/patient/${patientId}`).then((res) => {
         setPatientFormData(res.data as Patient);
-        setFiles(res.data.files);
         setExams(res.data.exams);
         setReports(res.data.reports);
         setHospitalizations(res.data.hospitalizations);
@@ -95,12 +90,6 @@ const PatientProfileRecordModal = ({ patientId, children }: { patientId: string;
                   className="inline-block px-[12px] pt-[6px] pb-3 rounded-t-lg border-b-2 border-transparent text-slate-400 hover:text-gray-500 hover:border-slate-400 data-[state=active]:text-slate-700 data-[state=active]:border-b-slate-700 focus:outline-none"
                 >
                   Perfil
-                </Tabs.Trigger>
-                <Tabs.Trigger
-                  value="attachments"
-                  className="inline-block px-[12px] pt-[6px] pb-3 rounded-t-lg border-b-2 border-transparent text-slate-400 hover:text-gray-500 hover:border-slate-400 data-[state=active]:text-slate-700 data-[state=active]:border-b-slate-700 focus:outline-none"
-                >
-                  Arquivos
                 </Tabs.Trigger>
                 <Tabs.Trigger
                   value="vaccines"
@@ -138,11 +127,6 @@ const PatientProfileRecordModal = ({ patientId, children }: { patientId: string;
                 patientId={patientId}
                 isLoading={isLoading}
                 data={patientFormData} 
-              />
-              <TabContentAttachment
-                patientId={patientId}
-                isLoading={isLoading}
-                data={files}
               />
               <TabContentVaccines 
                 patientId={patientId}
@@ -938,54 +922,6 @@ const TabContentProfile = ({
             </button>
           </div>
         </form>
-      </div>
-    </Tabs.Content>
-  );
-};
-
-const TabContentAttachment = ({
-  patientId,
-  isLoading,
-  data,
-}: {
-  patientId: string;
-  isLoading: boolean;
-  data: Files[] | undefined;
-}) => {
-  return (
-    <Tabs.Content value="attachments">
-      {isLoading && (
-        <div className="w-full h-full absolute z-20">
-          <div className="w-full h-full bg-[#f9fafb8b]">
-            <SpinnerLoad
-              divProps={{
-                className:
-                  "w-full h-[488px] relative flex items-center justify-center bg-slate-500-50",
-              }}
-            />
-          </div>
-        </div>
-      )}
-      <div 
-        id={styles.containerScroll}
-        className="w-full h-[488px] px-6 py-6 border-b border-slate-300 overflow-y-scroll">
-        <div className="w-full flex flex-col items-center gap-6">
-          <div className="w-full flex justify-start">
-            <AddAttachmentModal patientId={patientId} />
-          </div>
-          <div className="w-full grid grid-cols-3 gap-[28px]">
-            {data &&
-              data.map((data) => (
-                <FileCard
-                  key={data.id}
-                  id={data.id}
-                  filename={data.filename}
-                  fileUrl={data.fileUrl}
-                  fileSize={data.fileSize}
-                />
-              ))}
-          </div>
-        </div>
       </div>
     </Tabs.Content>
   );
