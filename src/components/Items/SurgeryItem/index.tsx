@@ -2,8 +2,8 @@ import { format } from 'date-fns';
 import * as locale from 'date-fns/locale';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { DotsHorizontalIcon } from '@radix-ui/react-icons';
-import DeleteSurgeryModal from '../../Modal/DeleteSurgeryModal';
 import EditPatientSurgeryModal from '../../Modal/EditPatientSurgeryModal';
+import DeleteSurgeryModal from '../../Modal/DeleteSurgeryModal';
 
 type SurgeryItemProps = {
   id: string;            
@@ -133,8 +133,6 @@ const SurgeryItem: React.FC<SurgeryItemProps> = ({
   );
 };
 
-export default SurgeryItem;
-
 type OptionsProps = {
   id: string;
 }
@@ -163,3 +161,5 @@ const Options = ({ id: surgeryId }: OptionsProps) => {
     </DropdownMenu.Root>
   )
 }
+
+export default SurgeryItem;
