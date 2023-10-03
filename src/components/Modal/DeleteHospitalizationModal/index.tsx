@@ -23,7 +23,7 @@ const DeleteHospitalizationModal: React.FC<DeleteHospitalizationModalProps> = ({
         await api.delete(`/hospitalizations/${id}`);
       } catch (error) {
         setIsLoading(false)
-        console.error("Erro ao excluir internação:", error);
+        console.error("Erro ao excluir registro:", error);
         throw error;
       }
     },
@@ -55,17 +55,20 @@ const DeleteHospitalizationModal: React.FC<DeleteHospitalizationModalProps> = ({
           </div>
           <div className="w-full flex flex-col justify-center text-center gap-4 px-6 py-6">
             <AlertDialog.Description className="font-normal text-sm text-slate-700">
-              Tem certeza que você quer remover este relatório?
+              Tem certeza que você quer remover este registro?
             </AlertDialog.Description>
             <div className="flex justify-center gap-6">
               <AlertDialog.Cancel asChild>
-                <button className="w-[124px] h-10 border rounded-lg font-medium text-base text-slate-900 shadow-md hover:shadow-blue-500/50 hover:border-none hover:text-neutral-50 hover: hover:bg-blue-500">
+                <button className="w-[124px] h-10 border rounded-lg font-medium text-base text-neutral-50 bg-red-600 shadow-md hover:shadow-red-500/50 hover:border-none hover:text-neutral-50 hover: hover:bg-red-600">
                   Não
                 </button>
               </AlertDialog.Cancel>
               <AlertDialog.Action>
-                <button onClick={acceptedDeleteHospitalization} className="w-[124px] h-10 flex justify-center items-center border rounded-lg font-medium text-base text-slate-900 shadow-md hover:shadow-blue-500/50 hover:border-none hover:text-neutral-50 hover: hover:bg-blue-500">
-                  {isLoading ? <div className={styles.spinner}></div> : "Sim" } 
+                <button
+                  onClick={acceptedDeleteHospitalization}
+                  className="w-[124px] h-10 flex justify-center items-center border rounded-lg font-medium text-base text-neutral-50 shadow-md bg-blue-500 hover:shadow-blue-500/50 hover:border-none hover:text-neutral-50 hover: hover:bg-blue-600"
+                >
+                  {isLoading ? <div className={styles.spinner}></div> : "Sim"}
                 </button>
               </AlertDialog.Action>
             </div>
@@ -73,7 +76,7 @@ const DeleteHospitalizationModal: React.FC<DeleteHospitalizationModalProps> = ({
         </AlertDialog.Content>
       </AlertDialog.Portal>
     </AlertDialog.Root>
-  )
+  );
 }
 
 export default DeleteHospitalizationModal;
