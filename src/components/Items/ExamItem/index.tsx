@@ -4,7 +4,7 @@ import { Option } from "../../../interfaces/Option";
 import { format } from 'date-fns';
 import * as locale from 'date-fns/locale';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
-import DeleteExamModal from "../../Modal/DeleteExamModal/DeleteExamModal";
+import DeleteExamModal from "../../Modal/DeleteExamModal";
 
 type ExamItemProps = {
   id: string;
