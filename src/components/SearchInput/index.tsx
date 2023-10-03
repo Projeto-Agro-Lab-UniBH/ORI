@@ -1,11 +1,12 @@
+import * as Avatar from "@radix-ui/react-avatar";
 import * as Dialog from "@radix-ui/react-dialog";
 import DotsLoad from "../Load/DotsLoad";
-import SearchPatientResultItem from "../Items/SearchPatientResultItem";
 import { api } from "../../providers/Api";
 import { useQuery } from "react-query";
-import { Cross2Icon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
+import { CameraIcon, Cross2Icon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { Dispatch, SetStateAction, useState } from "react";
 import { SearchResponse } from "../../@types/ApiResponse";
+import PatientProfileRecordModal from "../Modal/PatientProfileRecordModal";
 
 import styles from "./styles.module.css"
 
@@ -92,7 +93,7 @@ const SearchInput = ({
                             key={data.id}
                             className="w-full flex items-center px-4 py-4"
                           >
-                            <SearchPatientResultItem
+                            <ResultItem
                               id={data.id}
                               name={data.name}
                               src={data.profile_photo}
@@ -117,4 +118,52 @@ const SearchInput = ({
   );
 };
 
+const ResultItem = ({
+  id,
+  src,
+  name,
+  race,
+  specie,
+}: {
+  id: string;
+  src?: string;
+  name: string;
+  specie?: string;
+  race?: string;
+}) => {
+  return (
+    <PatientProfileRecordModal patientId={id}>
+      <div className="w-full flex flex-row items-center gap-4">
+        <div className="w-12 h-12">
+          <Avatar.Root className="w-12 h-12 flex items-center justify-center rounded-full overflow-hidden">
+            <Avatar.Image src={src} className="w-full h-full object-cover" />
+            <Avatar.Fallback
+              className="w-12 h-12 border border-gray-200 flex items-center justify-center rounded-full overflow-hidden"
+              delayMs={600}
+            >
+              <CameraIcon color="#e5e7eb" width={14} height={14} />
+            </Avatar.Fallback>
+          </Avatar.Root>
+        </div>
+        <div className="w-full flex flex-col">
+          <span className="max-w-[502.4px] flex whitespace-nowrap overflow-hidden text-ellipsis text-base font-semibold text-shark-950">
+            {name}
+          </span>
+          {!specie && race != null ? undefined : (
+            <span className="max-w-[502.4px] flex whitespace-nowrap overflow-hidden text-ellipsis text-base font-light text-shark-950">
+              {specie}
+            </span>
+          )}
+          {!race && specie != null ? undefined : (
+            <span className="max-w-[502.4px] whitespace-nowrap overflow-hidden text-ellipsis text-base font-light text-shark-950">
+              {race}
+            </span>
+          )}
+        </div>
+      </div>
+    </PatientProfileRecordModal>
+  );
+};
+
+// exportação do componente
 export default SearchInput; 
