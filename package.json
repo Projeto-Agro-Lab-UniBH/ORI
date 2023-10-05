@@ -25,6 +25,7 @@
     "jwt-decode": "^3.1.2",
     "next": "^13.4.2",
     "nextjs-progressbar": "^0.0.16",
+    "nookies": "^2.5.2",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-draft-wysiwyg": "^1.15.0",
