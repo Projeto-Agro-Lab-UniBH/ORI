@@ -1,6 +1,14 @@
 import * as Avatar from "@radix-ui/react-avatar";
 import * as Dialog from "@radix-ui/react-dialog";
 import * as Tabs from "@radix-ui/react-tabs";
+import { useMutation, useQuery } from "react-query";
+import { CameraIcon, Cross1Icon } from "@radix-ui/react-icons";
+import { ChangeEvent, useEffect, useState } from "react";
+import { useController, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+import { queryClient } from "../../../providers/QueryClient";
+import { Option } from "../../../interfaces/Option";
 import Select from "react-select";
 import SpinnerLoad from "../../Load/SpinnerLoad";
 import RegisterPatientReportModal from "../RegisterPatientReportModal";
@@ -9,20 +17,11 @@ import RegisterPatientExamModal from "../RegisterPatientExamModal";
 import ExamItem from "../../Items/ExamItem";
 import RegisterPatientHospitalizationModal from "../RegisterPatientHospitalization";
 import { api } from "../../../providers/Api";
-import { queryClient } from "../../../providers/QueryClient";
-import { useMutation, useQuery } from "react-query";
-import { CameraIcon, Cross1Icon } from "@radix-ui/react-icons";
-import { Option } from "../../../interfaces/Option";
-import { ChangeEvent, useEffect, useState } from "react";
-import { useController, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Reports } from "../../../@types/reports";
 import { Patient } from "../../../@types/patient";
 import { Exams } from "../../../@types/exams";
 import { GetPatientResponse, PatchPatientResponse, UploadImageResponse } from "../../../@types/ApiResponse";
 import { editPatientProfileFormData, editPatientProfileFormSchema } from "../../../schemas/editPatientProfileFormSchema";
-
-import styles from './styles.module.css';
 import HospitalizationItem from "../../Items/HospitalizationItem";
 import { Hospitalizations } from "../../../@types/hospitalizations";
 import RegisterPatientSurgeryModal from "../RegisterPatientSurgeryModal";
@@ -31,6 +30,7 @@ import { Surgery } from "../../../@types/surgery";
 import RegisterPatientVaccinesModal from "../RegisterPatientVaccinesModal";
 import VaccineItem from "../../Items/VaccineItem";
 import { Vaccine } from "../../../@types/vaccine";
+import styles from './styles.module.css';
 
 const PatientProfileRecordModal = ({ patientId, children }: { patientId: string; children: React.ReactNode; }) => {
   const [open, setOpen] = useState<boolean>(false);
@@ -188,8 +188,8 @@ const TabContentProfile = ({
   const { field: selectGender } = useController({ name: "gender", control });
   const { value: selectGenderValue, onChange: selectGenderOnChange, ...restSelectGender } = selectGender;
 
-  const { field: selectHealthCondition } = useController({ name: "status", control });
-  const { value: selectHealthConditionValue, onChange: selectHealthConditionOnChange, ...restSelectHealthCondition } = selectHealthCondition;
+  const { field: selectStatus } = useController({ name: "status", control });
+  const { value: selectStatusValue, onChange: selectStatusOnChange, ...restSelectStatus } = selectStatus;
 
   const genderOptions: Option[] = [
     { label: "Macho", value: "Macho" },
@@ -202,7 +202,7 @@ const TabContentProfile = ({
     { label: "Pequeno porte", value: "Pequeno porte" },
   ];
 
-  const healthConditionOptions: Option[] = [
+  const patientStatusOptions: Option[] = [
     { label: "Vivo", value: "Vivo" },
     { label: "Favorável", value: "Favorável" },
     { label: "Risco", value: "Risco" },
@@ -244,7 +244,7 @@ const TabContentProfile = ({
   const { isLoading: isUpdating, mutate } = useMutation({
     mutationKey: ["update-patient"],
     mutationFn: async (data: editPatientProfileFormData) => {
-      if (selectedImage != undefined) {
+      if (selectedImage !== undefined) {
         const formData = new FormData();
         formData.append("image", selectedImage);
 
@@ -794,7 +794,7 @@ const TabContentProfile = ({
                         }),
                         indicatorSeparator: (styles) => ({
                           ...styles,
-                          backgroundColor: "#94a3b8"
+                          backgroundColor: "#94a3b8",
                         }),
                         placeholder: (styles) => ({
                           ...styles,
@@ -815,20 +815,20 @@ const TabContentProfile = ({
                       })}
                       placeholder="Selecione o status do paciente"
                       isSearchable={false}
-                      options={healthConditionOptions}
+                      options={patientStatusOptions}
                       value={
-                        selectHealthConditionValue
-                          ? healthConditionOptions.find(
-                              (x) => x.value === selectHealthConditionValue
+                        selectStatusValue
+                          ? patientStatusOptions.find(
+                              (x) => x.value === selectStatusValue
                             )
-                          : selectHealthConditionValue
+                          : selectStatusValue
                       }
                       onChange={(option) =>
-                        selectPhysicalShapeOnChange(
+                        selectStatusOnChange(
                           option ? option.value : option
                         )
                       }
-                      {...restSelectHealthCondition}
+                      {...restSelectStatus}
                     />
                   </div>      
                 </div>        
@@ -904,7 +904,7 @@ const TabContentProfile = ({
                       : "ring-slate-300 placeholder:text-slate-400 focus:outline-slate-500 focus:ring-1 focus:ring-inset focus:ring-slate-500"
                   }`}
                   {...register("notes")}
-                ></textarea>
+                />
               </div>
               {errors.notes && (
                 <span className="font-normal text-xs text-red-400">

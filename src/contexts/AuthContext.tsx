@@ -81,12 +81,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       api.defaults.headers["Authorization"] = `Bearer ${data.token}`;
 
       // Redirecione para a página do usuário
-      await Router.push("/dashboard?page=1");
+      Router.push("/dashboard");
 
       setIsLoading(false);
 
     } catch (error) {
-      // Trate os erros de login adequadamente
+      // Chama um toast
       toast.error("Falha ao fazer login. Verifique suas credenciais.", {
         position: "bottom-right",
         autoClose: 2500,

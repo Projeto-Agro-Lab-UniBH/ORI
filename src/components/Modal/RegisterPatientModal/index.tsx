@@ -29,7 +29,7 @@ const physicalShapeOptions: Option[] = [
   { value: "Pequeno porte", label: "Pequeno porte" },
 ];
 
-const healthConditionOptions: Option[] = [
+const patientStatusOptions: Option[] = [
   { label: "Vivo", value: "Vivo" },
   { label: "Favorável", value: "Favorável" },
   { label: "Risco", value: "Risco" },
@@ -115,8 +115,8 @@ const RegisterPatientModal = () => {
   const { field: selectGender } = useController({ name: "gender", control });
   const { value: selectGenderValue, onChange: selectGenderOnChange, ...restSelectGender } = selectGender;
 
-  const { field: selectHealthCondition } = useController({ name: "status", control });
-  const { value: selectHealthConditionValue, onChange: selectHealthConditionOnChange, ...restSelectHealthCondition } = selectHealthCondition;
+  const { field: selectStatus } = useController({ name: "status", control });
+  const { value: selectStatusValue, onChange: selectStatusOnChange, ...restSelectStatus } = selectStatus;
 
   useEffect(() => {
     if (isOpen != true) {
@@ -137,7 +137,7 @@ const RegisterPatientModal = () => {
   const { isLoading, mutate } = useMutation({
     mutationKey: ["create-patient"],
     mutationFn: async (data: registerPatientFormData) => {
-      if (selectedImage != undefined) {
+      if (selectedImage !== undefined) {
         const formData = new FormData();
         formData.append("image", selectedImage);
 
@@ -166,10 +166,7 @@ const RegisterPatientModal = () => {
   });
 
   const onSubmit = (data: registerPatientFormData) => {
-    const request = {
-      ...data,
-    };
-    mutate(request);
+    mutate(data);
   };
 
   return (
@@ -730,20 +727,20 @@ const RegisterPatientModal = () => {
                           })}
                           placeholder="Selecione o status do paciente"
                           isSearchable={false}
-                          options={healthConditionOptions}
+                          options={patientStatusOptions}
                           value={
-                            selectHealthConditionValue
-                              ? healthConditionOptions.find(
-                                  (x) => x.value === selectHealthConditionValue
+                            selectStatusValue
+                              ? patientStatusOptions.find(
+                                  (x) => x.value === selectStatusValue
                                 )
-                              : selectHealthConditionValue
+                              : selectStatusValue
                           }
                           onChange={(option) =>
-                            selectPhysicalShapeOnChange(
+                            selectStatusOnChange(
                               option ? option.value : option
                             )
                           }
-                          {...restSelectHealthCondition}
+                          {...restSelectStatus}
                         />
                       </div>
                     </div>

@@ -155,7 +155,7 @@ const ResultItem = ({
             </span>
           )}
           {!race && specie != null ? undefined : (
-            <span className="max-w-[502.4px] whitespace-nowrap overflow-hidden text-ellipsis text-base font-light text-shark-950">
+            <span className="max-w-[502.4px] flex whitespace-nowrap overflow-hidden text-ellipsis text-base font-light text-shark-950">
               {race}
             </span>
           )}

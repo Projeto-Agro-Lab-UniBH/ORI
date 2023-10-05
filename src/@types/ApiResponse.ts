@@ -1,7 +1,6 @@
 import { Page } from "./page";
 import { Option } from "../interfaces/Option";
 import { Exams } from "./exams";
-import { Files } from "./file";
 import { Reports } from "./reports";
 import { Hospitalizations } from "./hospitalizations";
 import { Surgery } from "./surgery";
@@ -58,7 +57,6 @@ export type GetPatientResponse = {
   notes: string;
   createdAt: Date;
   updatedAt: Date;
-  files: Files[];
   exams: Exams[];
   surgery: Surgery[];
   reports: Reports[];
@@ -88,7 +86,6 @@ export type PatchPatientResponse = {
   notes: string;
   createdAt: Date;
   updatedAt: Date;
-  files: Files[];
   exams: Exams[];
   reports: Reports[];
   hospitalizations: Hospitalizations[];

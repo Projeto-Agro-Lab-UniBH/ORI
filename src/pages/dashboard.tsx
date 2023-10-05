@@ -23,7 +23,7 @@ export default function Dashboard({ data }: DashboardProps) {
   const searchParams = useSearchParams();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchInputValue, setSearchInputValue] = useState<string>("");
-  const [selectPrognosis, setSelectPrognosis] = useState<Option | null>(null);
+  const [selectStatus, setSelectStatus] = useState<Option | null>(null);
   const [selectPhysicalShape, setSelectPhysicalShape] = useState<Option | null>(null);
   const [selectGender, setSelectGender] = useState<Option | null>(null);
 
@@ -47,8 +47,8 @@ export default function Dashboard({ data }: DashboardProps) {
       if (value) {
         const option = { value, label: value };
         switch (field) {
-          case "prognosis":
-            setSelectPrognosis(option);
+          case "status":
+            setSelectStatus(option);
             break;
           case "physical_shape":
             setSelectPhysicalShape(option);
@@ -61,8 +61,8 @@ export default function Dashboard({ data }: DashboardProps) {
         }
       } else {
         switch (field) {
-          case "prognosis":
-            setSelectPrognosis(null);
+          case "status":
+            setSelectStatus(null);
             break;
           case "physical_shape":
             setSelectPhysicalShape(null);
@@ -76,12 +76,12 @@ export default function Dashboard({ data }: DashboardProps) {
       }
     };
 
-    setSearchValue("prognosis");
+    setSearchValue("status");
     setSearchValue("physical_shape");
     setSearchValue("gender");
   }, [
     searchParams,
-    setSelectPrognosis,
+    setSelectStatus,
     setSelectPhysicalShape,
     setSelectGender,
   ]);
@@ -94,16 +94,16 @@ export default function Dashboard({ data }: DashboardProps) {
           <div className="w-[1280px] flex items-center gap-3 z-10">
             <SelectFilter
               width={"w-[216px]"}
-              field="prognosis"
-              value={selectPrognosis}
-              placeholder="Filtrar status"
+              field="status"
+              value={selectStatus}
+              placeholder="Filtrar por status"
               options={[
                 { label: "Vivo", value: "Vivo" },
                 { label: "Favorável", value: "Favorável" },
                 { label: "Risco", value: "Risco" },
                 { label: "Alto risco", value: "Alto risco" },
               ]}
-              onChange={(option) => handleSelect("prognosis", option?.value)}
+              onChange={(option) => handleSelect("status", option?.value)}
             />
             <SelectFilter
               width={"w-[200px]"}
@@ -140,11 +140,11 @@ export default function Dashboard({ data }: DashboardProps) {
             </div>
           </div>
         </div>
-        <div className={`w-[1280px] flex flex-col ${data.info.length >= 6 ? "" : "mb-14"} gap-6`}>
+        <div className={`w-[1280px] flex flex-col ${data.info.length <= 16 ? "mb-14" : ""} gap-6`}>
           <div className="w-[1280px] flex flex-col gap-6">
             {data.results.map((data, i) =>  <PatientCard key={i} {...data} /> )}
           </div>
-          {data.info.length > 6 && (
+          {data.info.length > 16 && (
             <div className="w-[1280px] h-14 flex items-center justify-center">
               {data.info && (
                 <Pagination
@@ -175,10 +175,10 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   }
 
   const { query } = ctx;
-  const { page, physical_shape, gender } = query;
+  const { page, status, physical_shape, gender } = query;
   
   const response = await api.get<DashboardPatientDataResponse>(
-    `/patient/search/by/filters?page=${page || 1}&size=6&physical_shape=${physical_shape || ""}&gender=${gender || ""}`
+    `/patient/search/by/filters?page=${page || 1}&size=16&status=${status || ""}&physical_shape=${physical_shape || ""}&gender=${gender || ""}`
   );
 
   const data = response.data
