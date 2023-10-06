@@ -7,14 +7,14 @@ import { useAuthContext } from "../../contexts/AuthContext";
 import { useForm } from "react-hook-form";
 
 const signFormSchema = z.object({
-  email: z.string().nonempty("O e-mail da sua conta é obrigatório").email("Formato de e-mail inválido"),
+  email: z.string().email("Formato de e-mail inválido").nonempty("O e-mail da sua conta é obrigatório"),
   password: z.string().nonempty("A senha da sua conta é obrigatória"),
 });
 
 type signInFormData = z.infer<typeof signFormSchema>;
 
 export default function SignIn() {
-  const { signIn, isLoading } = useAuthContext();
+  const { signIn } = useAuthContext();
   const {
     register,
     handleSubmit,
@@ -97,17 +97,17 @@ export default function SignIn() {
             <button
               type="submit"
               className="w-full h-10 flex justify-center items-center text-base font-medium text-white bg-blue-500 hover:bg-blue-600 border-none rounded-lg cursor-pointer"
-              disabled={isLoading}
+
             >
               Entrar
             </button>
           </div>
           {/* <span className="w-full h-8 mt-6 flex gap-[6px] justify-center text-sm font-normal text-gray-500">
-              Esqueceu seu acesso?
-              <Link href="/reset-password" className="no-underline text-blue-500">
-                Recupere-o
-              </Link>
-            </span> */}
+            Esqueceu sua senha de acesso?
+            <Link href="/reset-password" className="no-underline text-blue-500">
+              Recupere-o
+            </Link>
+          </span> */}
         </form>
       </div>
     </div>

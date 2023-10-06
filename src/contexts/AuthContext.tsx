@@ -1,7 +1,7 @@
 import Router from "next/router";
-import Cookies from "js-cookie"; // Use js-cookie para manipular cookies
-import jwt_decode from "jwt-decode"; // Verifique o token JWT
-import { createContext, useContext, useEffect, useState } from "react";
+import Cookies from "js-cookie";
+import jwt_decode from "jwt-decode";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { api } from "../providers/Api"; 
 import { toast } from "react-toastify";
 import { AuthService } from "../services/AuthService";
@@ -27,7 +27,6 @@ type DecodedToken = {
 
 type AuthContext = {
   user: User | null;
-  isLoading: boolean;
   isAuthenticated: boolean;
   signIn: (data: SignInData) => Promise<void>;
   logOut: () => void;
@@ -41,52 +40,22 @@ export function useAuthContext() {
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false)
   const isAuthenticated = !!user;
 
-  useEffect(() => {
-    // Verifique se o usuário já está autenticado ao carregar a página
-    const token = Cookies.get("nextauth.token");
-    if (token) {
-      try {
-        const decodedToken = jwt_decode<DecodedToken>(token);
-        if (decodedToken && !isTokenExpired(decodedToken)) {
-          // Token válido e não expirado
-          api.get(`/user/${decodedToken.sub}`).then((res) => setUser(res.data));
-        } else {
-          // Token expirado, faça o logout
-          logOut();
-        }
-      } catch (error) {
-        // Manipule erros ao decodificar o token
-        logOut();
-      }
-    }
-  }, []);
-
-  async function signIn({ email, password }: SignInData) {
+  const signIn = useCallback(async ({ email, password }: SignInData) => {
     try {
       const { data } = await AuthService.signIn({
         email,
         password,
       });
 
-      // Salve o token JWT nos cookies
-      Cookies.set("nextauth.token", data.token, { expires: 1 / 3 }); // Token válido por 8 horas
-      
+      Cookies.set("nextauth.token", data.token, { expires: 1 / 3 });
       setUser(data.user);
-      setIsLoading(true);
 
-      // Atualize os cabeçalhos da API com o token
       api.defaults.headers["Authorization"] = `Bearer ${data.token}`;
 
-      // Redirecione para a página do usuário
       Router.push("/dashboard");
-
-      setIsLoading(false);
-
     } catch (error) {
-      // Chama um toast
       toast.error("Falha ao fazer login. Verifique suas credenciais.", {
         position: "bottom-right",
         autoClose: 2500,
@@ -102,27 +71,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         },
       });
     }
-  }
+  }, []);
 
-  function logOut() {
-    // Remova o token dos cookies
+  const logOut = useCallback(() => {
     Cookies.remove("nextauth.token");
-
-    // Limpe os cabeçalhos da API
     delete api.defaults.headers["Authorization"];
-
-    // Redirecione para a página de login
     Router.push("/sign-in");
-  }
+  }, []);
 
-  // Função para verificar se o token JWT está expirado
+  useEffect(() => {
+    const token = Cookies.get("nextauth.token");
+    if (token) {
+      try {
+        const decodedToken = jwt_decode<DecodedToken>(token);
+        if (decodedToken && !isTokenExpired(decodedToken)) {
+          api.get(`/user/${decodedToken.sub}`).then((res) => setUser(res.data));
+        } else {
+          logOut();
+        }
+      } catch (error) {
+        logOut();
+      }
+    }
+  }, [logOut]);
+
   function isTokenExpired(decodedToken: DecodedToken): boolean {
     const now = Date.now() / 1000;
     return decodedToken.exp ? now > decodedToken.exp : false;
   }
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, isAuthenticated, signIn, logOut }}>
+    <AuthContext.Provider value={{ user, isAuthenticated, signIn, logOut }}>
       {children}
     </AuthContext.Provider>
   );
