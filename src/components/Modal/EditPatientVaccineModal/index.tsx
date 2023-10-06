@@ -9,7 +9,7 @@ import { z } from "zod";
 import { GetVaccineResponse, PatchVaccineResponse } from "../../../@types/ApiResponse";
 import { api } from "../../../providers/Api";
 import { queryClient } from "../../../providers/QueryClient";
-import SpinnerLoad from "../../Load/SpinnerLoad";
+import SpinnerLoad from "../../Shared/Loads/SpinnerLoad";
 
 const editVaccineFormSchema = z.object({
   vaccine: z.string().nonempty("Vacina não pode ser branco."),

@@ -1,5 +1,5 @@
 import Image from "next/image";
-import SpinnerLoad from "../../Load/SpinnerLoad";
+import SpinnerLoad from "../../Shared/Loads/SpinnerLoad";
 import CreatableSelect from "react-select/creatable";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Document, Page } from "react-pdf";
@@ -11,7 +11,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { queryClient } from "../../../providers/QueryClient";
 import { api } from "../../../providers/Api";
 import { useMutation, useQuery } from "react-query";
-import { formatFileSize } from "../../../functions/formatBytes";
 import { z } from "zod";
 import { format } from "date-fns";
 import * as locale from 'date-fns/locale';

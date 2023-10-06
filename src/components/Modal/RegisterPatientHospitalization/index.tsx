@@ -9,7 +9,7 @@ import { useMutation } from "react-query";
 import { useAuthContext } from "../../../contexts/AuthContext";
 import { api } from "../../../providers/Api";
 import { queryClient } from "../../../providers/QueryClient";
-import SpinnerLoad from "../../Load/SpinnerLoad";
+import SpinnerLoad from "../../Shared/Loads/SpinnerLoad";
 import styles from "./styles.module.css";
 
 const registerHospitalizationFormSchema = z.object({

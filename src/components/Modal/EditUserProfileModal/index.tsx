@@ -1,6 +1,6 @@
 import * as Avatar from "@radix-ui/react-avatar";
 import * as Dialog from "@radix-ui/react-dialog";
-import SpinnerLoad from "../../Load/SpinnerLoad";
+import SpinnerLoad from "../../Shared/Loads/SpinnerLoad";
 import { api } from "../../../providers/Api";
 import { useForm } from "react-hook-form";
 import { Cross1Icon } from "@radix-ui/react-icons";

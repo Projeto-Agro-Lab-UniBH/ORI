@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { useMutation } from "react-query";
 
 import styles from "./styles.module.css";
-import SpinnerLoad from "../../Load/SpinnerLoad";
+import SpinnerLoad from "../../Shared/Loads/SpinnerLoad";
 import { queryClient } from "../../../providers/QueryClient";
 import { api } from "../../../providers/Api";
 import { useAuthContext } from "../../../contexts/AuthContext";

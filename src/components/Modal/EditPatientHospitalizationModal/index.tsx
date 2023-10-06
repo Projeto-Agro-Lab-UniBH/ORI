@@ -8,7 +8,7 @@ import { useMutation, useQuery } from "react-query";
 
 import { api } from "../../../providers/Api";
 import { queryClient } from "../../../providers/QueryClient";
-import SpinnerLoad from "../../Load/SpinnerLoad";
+import SpinnerLoad from "../../Shared/Loads/SpinnerLoad";
 import styles from "./styles.module.css";
 import { GetHospitalizationResponse, PatchHospitalizationResponse } from "../../../@types/ApiResponse";
 

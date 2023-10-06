@@ -1,4 +1,4 @@
-import SpinnerLoad from "../../Load/SpinnerLoad";
+import SpinnerLoad from "../../Shared/Loads/SpinnerLoad";
 import { api } from "../../../providers/Api";
 import { z } from "zod";
 import { queryClient } from "../../../providers/QueryClient";
@@ -9,8 +9,6 @@ import { Cross1Icon } from "@radix-ui/react-icons";
 import { useMutation, useQuery } from "react-query";
 import * as Dialog from "@radix-ui/react-dialog";
 import { GetReportResponse, PatchReportResponse } from "../../../@types/ApiResponse";
-import { format } from "date-fns";
-import * as locale from 'date-fns/locale';
 
 import styles from "./styles.module.css";
 

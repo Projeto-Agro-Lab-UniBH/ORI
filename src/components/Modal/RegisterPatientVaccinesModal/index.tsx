@@ -11,7 +11,7 @@ import { useAuthContext } from "../../../contexts/AuthContext";
 import { PostVaccineResponse } from "../../../@types/ApiResponse";
 import { api } from "../../../providers/Api";
 import { queryClient } from "../../../providers/QueryClient";
-import SpinnerLoad from "../../Load/SpinnerLoad";
+import SpinnerLoad from "../../Shared/Loads/SpinnerLoad";
 
 const registerVaccineFormSchema = z.object({
   vaccine: z.string().nonempty("Vacina não pode ser branco."),

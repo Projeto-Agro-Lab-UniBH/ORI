@@ -10,7 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { queryClient } from "../../../providers/QueryClient";
 import { Option } from "../../../interfaces/Option";
 import Select from "react-select";
-import SpinnerLoad from "../../Load/SpinnerLoad";
+import SpinnerLoad from "../../Shared/Loads/SpinnerLoad";
 import RegisterPatientReportModal from "../RegisterPatientReportModal";
 import ReportItem from "../../Items/ReportItem";
 import RegisterPatientExamModal from "../RegisterPatientExamModal";
@@ -31,6 +31,7 @@ import RegisterPatientVaccinesModal from "../RegisterPatientVaccinesModal";
 import VaccineItem from "../../Items/VaccineItem";
 import { Vaccine } from "../../../@types/vaccine";
 import styles from './styles.module.css';
+import SelectInput from "../../Shared/SelectInput";
 
 const PatientProfileRecordModal = ({ patientId, children }: { patientId: string; children: React.ReactNode; }) => {
   const [open, setOpen] = useState<boolean>(false);
@@ -599,60 +600,11 @@ const TabContentProfile = ({
                       >
                         Porte físico
                       </label>
-                      <Select
-                        styles={{
-                          control: (baseStyles, state) => ({
-                            ...baseStyles,
-                            width: "100%",
-                            height: 41.6,
-                            borderRadius: 8,
-                            borderColor: state.isFocused
-                              ? "#64748b"
-                              : "#cbd5e1",
-                            whiteSpace: "nowrap",
-                            textOverflow: "ellipsis",
-                            fontWeight: 400,
-                            fontFamily: "Inter",
-                            fontSize: "0.875rem",
-                            lineHeight: "1.25rem",
-                          }),
-                          input: (styles) => ({
-                            ...styles,
-                            borderRadius: 8,
-                            fontWeight: 400,
-                            fontFamily: "Inter",
-                            borderColor: "#cbd5e1",
-                            ":hover": { borderColor: "#94a3b8" },
-                          }),
-                          dropdownIndicator: (styles) => ({
-                            ...styles,
-                            color: "#94a3b8",
-                            ":hover": { color: "#64748b" },
-                          }),
-                          indicatorSeparator: (styles) => ({
-                            ...styles,
-                            backgroundColor: "#94a3b8"
-                          }),
-                          placeholder: (styles) => ({
-                            ...styles,
-                            fontWeight: 400,
-                            fontFamily: "Inter",
-                            color: "#94a3b8",
-                          }),
-                        }}
-                        theme={(theme) => ({
-                          ...theme,
-                          borderRadius: 8,
-                          colors: {
-                            ...theme.colors,
-                            primary50: "#f8fafc",
-                            primary25: "#f8fafc",
-                            primary: "#0f172a",
-                          },
-                        })}
-                        placeholder="Selecione o porte"
+                      <SelectInput 
+                        placeholder={"Selecione o porte"} 
+                        isClearable={false}
                         isSearchable={false}
-                        options={physicalShapeOptions}
+                        options={physicalShapeOptions} 
                         value={
                           selectPhysicalShapeValue
                             ? physicalShapeOptions.find(
@@ -663,8 +615,7 @@ const TabContentProfile = ({
                         onChange={(option) =>
                           selectPhysicalShapeOnChange(
                             option ? option.value : option
-                          )
-                        }
+                        )}
                         {...restSelectPhysicalShape}
                       />
                     </div>
@@ -680,60 +631,11 @@ const TabContentProfile = ({
                     >
                       Sexo
                     </label>
-                    <Select
-                      styles={{
-                        control: (baseStyles, state) => ({
-                          ...baseStyles,
-                          width: "100%",
-                          height: 41.6,
-                          borderRadius: 8,
-                          borderColor: state.isFocused
-                            ? "#64748b"
-                            : "#cbd5e1",
-                          whiteSpace: "nowrap",
-                          textOverflow: "ellipsis",
-                          fontWeight: 400,
-                          fontFamily: "Inter",
-                          fontSize: "0.875rem",
-                          lineHeight: "1.25rem",
-                        }),
-                        input: (styles) => ({
-                          ...styles,
-                          borderRadius: 8,
-                          fontWeight: 400,
-                          fontFamily: "Inter",
-                          borderColor: "#cbd5e1",
-                          ":hover": { borderColor: "#94a3b8" },
-                        }),
-                        dropdownIndicator: (styles) => ({
-                          ...styles,
-                          color: "#94a3b8",
-                          ":hover": { color: "#64748b" },
-                        }),
-                        indicatorSeparator: (styles) => ({
-                          ...styles,
-                          backgroundColor: "#94a3b8"
-                        }),
-                        placeholder: (styles) => ({
-                          ...styles,
-                          fontWeight: 400,
-                          fontFamily: "Inter",
-                          color: "#94a3b8",
-                        }),
-                      }}
-                      theme={(theme) => ({
-                        ...theme,
-                        borderRadius: 8,
-                        colors: {
-                          ...theme.colors,
-                          primary50: "#f8fafc",
-                          primary25: "#f8fafc",
-                          primary: "#0f172a",
-                        },
-                      })}
-                      placeholder="Selecione o sexo"
+                    <SelectInput 
+                      placeholder={"Selecione o sexo"} 
+                      isClearable={false}
                       isSearchable={false}
-                      options={genderOptions}
+                      options={genderOptions} 
                       value={
                         selectGenderValue
                           ? genderOptions.find(
@@ -762,60 +664,11 @@ const TabContentProfile = ({
                     >
                       Status
                     </label>
-                    <Select
-                      styles={{
-                        control: (baseStyles, state) => ({
-                          ...baseStyles,
-                          width: "100%",
-                          height: 41.6,
-                          borderRadius: 8,
-                          borderColor: state.isFocused
-                            ? "#64748b"
-                            : "#cbd5e1",
-                          whiteSpace: "nowrap",
-                          textOverflow: "ellipsis",
-                          fontWeight: 400,
-                          fontFamily: "Inter",
-                          fontSize: "0.875rem",
-                          lineHeight: "1.25rem",
-                        }),
-                        input: (styles) => ({
-                          ...styles,
-                          borderRadius: 8,
-                          fontWeight: 400,
-                          fontFamily: "Inter",
-                          borderColor: "#cbd5e1",
-                          ":hover": { borderColor: "#94a3b8" },
-                        }),
-                        dropdownIndicator: (styles) => ({
-                          ...styles,
-                          color: "#94a3b8",
-                          ":hover": { color: "#64748b" },
-                        }),
-                        indicatorSeparator: (styles) => ({
-                          ...styles,
-                          backgroundColor: "#94a3b8",
-                        }),
-                        placeholder: (styles) => ({
-                          ...styles,
-                          fontWeight: 400,
-                          fontFamily: "Inter",
-                          color: "#94a3b8",
-                        }),
-                      }}
-                      theme={(theme) => ({
-                        ...theme,
-                        borderRadius: 8,
-                        colors: {
-                          ...theme.colors,
-                          primary50: "#f8fafc",
-                          primary25: "#f8fafc",
-                          primary: "#0f172a",
-                        },
-                      })}
-                      placeholder="Selecione o status do paciente"
+                    <SelectInput 
+                      placeholder={"Selecione o status do paciente"} 
+                      isClearable={false}
                       isSearchable={false}
-                      options={patientStatusOptions}
+                      options={patientStatusOptions} 
                       value={
                         selectStatusValue
                           ? patientStatusOptions.find(
@@ -1182,17 +1035,18 @@ const TabContentReports = ({
           className="w-full h-[400px] px-6 py-6 border-b border-slate-300 overflow-y-scroll"
         >
           <ul role="list" className="divide-y divide-slate-300">
-            {data?.map((data, index) => (
-              <li key={index} className="py-6 first:pt-0 last:pb-0">
-                <ReportItem
-                  id={data.id}
-                  username={data.username}
-                  title={data.title}
-                  text={data.text}
-                  createdAt={data.createdAt}
-                  updatedAt={data.updatedAt}
-                />
-              </li>
+            {data &&
+              data.map((data, index) => (
+                <li key={index} className="py-6 first:pt-0 last:pb-0">
+                  <ReportItem
+                    id={data.id}
+                    username={data.username}
+                    title={data.title}
+                    text={data.text}
+                    createdAt={data.createdAt}
+                    updatedAt={data.updatedAt}
+                  />
+                </li>
             ))}
           </ul>
         </div>

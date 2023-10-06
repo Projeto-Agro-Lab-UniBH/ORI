@@ -1,17 +1,21 @@
 import Select from "react-select";
 import { useId, useState } from "react";
-import { Option } from "../../interfaces/Option";
+import { Option } from "../../../interfaces/Option";
 
-const SelectFilter = ({
+const SelectInput = ({
   width,
   field,
+  isClearable,
+  isSearchable,
   value,
   placeholder,
   options,
   onChange,
 }: {
-  width: string;
-  field: string;
+  width?: string;
+  field?: string;
+  isClearable?: boolean;
+  isSearchable?: boolean;
   value: Option | null;
   placeholder: string;
   options: Option[];
@@ -76,8 +80,8 @@ const SelectFilter = ({
             primary: "#0f172a",
           },
         })}
-        isClearable
-        isSearchable={false}
+        isClearable={isClearable}
+        isSearchable={isSearchable}
         value={value}
         placeholder={placeholder}
         options={options}
@@ -87,4 +91,4 @@ const SelectFilter = ({
   );
 }
 
-export default SelectFilter;
+export default SelectInput;

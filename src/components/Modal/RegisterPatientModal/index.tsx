@@ -1,7 +1,6 @@
 import * as Avatar from "@radix-ui/react-avatar";
 import * as Dialog from "@radix-ui/react-dialog";
-import SpinnerLoad from "../../Load/SpinnerLoad";
-import Select from "react-select";
+import SpinnerLoad from "../../Shared/Loads/SpinnerLoad";
 import { z } from "zod";
 import { api } from "../../../providers/Api";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,6 +10,7 @@ import { Option } from "../../../interfaces/Option";
 import { useController, useForm } from "react-hook-form";
 import { useState, useEffect, ChangeEvent } from "react";
 import { useMutation } from "react-query";
+import SelectInput from "../../Shared/SelectInput"; 
 
 import styles from './styles.module.css';
 
@@ -513,60 +513,11 @@ const RegisterPatientModal = () => {
                           >
                             Porte físico
                           </label>
-                          <Select
-                            styles={{
-                              control: (baseStyles, state) => ({
-                                ...baseStyles,
-                                width: "100%",
-                                height: 41.6,
-                                borderRadius: 8,
-                                borderColor: state.isFocused
-                                  ? "#64748b"
-                                  : "#cbd5e1",
-                                whiteSpace: "nowrap",
-                                textOverflow: "ellipsis",
-                                fontWeight: 400,
-                                fontFamily: "Inter",
-                                fontSize: "0.875rem",
-                                lineHeight: "1.25rem",
-                              }),
-                              input: (styles) => ({
-                                ...styles,
-                                borderRadius: 8,
-                                fontWeight: 400,
-                                fontFamily: "Inter",
-                                borderColor: "#cbd5e1",
-                                ":hover": { borderColor: "#94a3b8" },
-                              }),
-                              dropdownIndicator: (styles) => ({
-                                ...styles,
-                                color: "#94a3b8",
-                                ":hover": { color: "#64748b" },
-                              }),
-                              indicatorSeparator: (styles) => ({
-                                ...styles,
-                                backgroundColor: "#94a3b8",
-                              }),
-                              placeholder: (styles) => ({
-                                ...styles,
-                                fontWeight: 400,
-                                fontFamily: "Inter",
-                                color: "#94a3b8",
-                              }),
-                            }}
-                            theme={(theme) => ({
-                              ...theme,
-                              borderRadius: 8,
-                              colors: {
-                                ...theme.colors,
-                                primary50: "#f8fafc",
-                                primary25: "#f8fafc",
-                                primary: "#0f172a",
-                              },
-                            })}
-                            placeholder="Selecione o porte"
+                          <SelectInput 
+                            placeholder={"Selecione o porte"} 
+                            isClearable={false}
                             isSearchable={false}
-                            options={physicalShapeOptions}
+                            options={physicalShapeOptions} 
                             value={
                               selectPhysicalShapeValue
                                 ? physicalShapeOptions.find(
@@ -577,8 +528,7 @@ const RegisterPatientModal = () => {
                             onChange={(option) =>
                               selectPhysicalShapeOnChange(
                                 option ? option.value : option
-                              )
-                            }
+                            )}
                             {...restSelectPhysicalShape}
                           />
                         </div>
@@ -594,60 +544,11 @@ const RegisterPatientModal = () => {
                         >
                           Sexo
                         </label>
-                        <Select
-                          styles={{
-                            control: (baseStyles, state) => ({
-                              ...baseStyles,
-                              width: "100%",
-                              height: 41.6,
-                              borderRadius: 8,
-                              borderColor: state.isFocused
-                                ? "#64748b"
-                                : "#cbd5e1",
-                              whiteSpace: "nowrap",
-                              textOverflow: "ellipsis",
-                              fontWeight: 400,
-                              fontFamily: "Inter",
-                              fontSize: "0.875rem",
-                              lineHeight: "1.25rem",
-                            }),
-                            input: (styles) => ({
-                              ...styles,
-                              borderRadius: 8,
-                              fontWeight: 400,
-                              fontFamily: "Inter",
-                              borderColor: "#cbd5e1",
-                              ":hover": { borderColor: "#94a3b8" },
-                            }),
-                            dropdownIndicator: (styles) => ({
-                              ...styles,
-                              color: "#94a3b8",
-                              ":hover": { color: "#64748b" },
-                            }),
-                            indicatorSeparator: (styles) => ({
-                              ...styles,
-                              backgroundColor: "#94a3b8",
-                            }),
-                            placeholder: (styles) => ({
-                              ...styles,
-                              fontWeight: 400,
-                              fontFamily: "Inter",
-                              color: "#94a3b8",
-                            }),
-                          }}
-                          theme={(theme) => ({
-                            ...theme,
-                            borderRadius: 8,
-                            colors: {
-                              ...theme.colors,
-                              primary50: "#f8fafc",
-                              primary25: "#f8fafc",
-                              primary: "#0f172a",
-                            },
-                          })}
-                          placeholder="Selecione o sexo"
+                        <SelectInput 
+                          placeholder={"Selecione o sexo"} 
+                          isClearable={false}
                           isSearchable={false}
-                          options={genderOptions}
+                          options={genderOptions} 
                           value={
                             selectGenderValue
                               ? genderOptions.find(
@@ -656,7 +557,9 @@ const RegisterPatientModal = () => {
                               : selectGenderValue
                           }
                           onChange={(option) =>
-                            selectGenderOnChange(option ? option.value : option)
+                            selectGenderOnChange(
+                              option ? option.value : option
+                            )
                           }
                           {...restSelectGender}
                         />
@@ -674,60 +577,11 @@ const RegisterPatientModal = () => {
                         >
                           Status
                         </label>
-                        <Select
-                          styles={{
-                            control: (baseStyles, state) => ({
-                              ...baseStyles,
-                              width: "100%",
-                              height: 41.6,
-                              borderRadius: 8,
-                              borderColor: state.isFocused
-                                ? "#64748b"
-                                : "#cbd5e1",
-                              whiteSpace: "nowrap",
-                              textOverflow: "ellipsis",
-                              fontWeight: 400,
-                              fontFamily: "Inter",
-                              fontSize: "0.875rem",
-                              lineHeight: "1.25rem",
-                            }),
-                            input: (styles) => ({
-                              ...styles,
-                              borderRadius: 8,
-                              fontWeight: 400,
-                              fontFamily: "Inter",
-                              borderColor: "#cbd5e1",
-                              ":hover": { borderColor: "#94a3b8" },
-                            }),
-                            dropdownIndicator: (styles) => ({
-                              ...styles,
-                              color: "#94a3b8",
-                              ":hover": { color: "#64748b" },
-                            }),
-                            indicatorSeparator: (styles) => ({
-                              ...styles,
-                              backgroundColor: "#94a3b8",
-                            }),
-                            placeholder: (styles) => ({
-                              ...styles,
-                              fontWeight: 400,
-                              fontFamily: "Inter",
-                              color: "#94a3b8",
-                            }),
-                          }}
-                          theme={(theme) => ({
-                            ...theme,
-                            borderRadius: 8,
-                            colors: {
-                              ...theme.colors,
-                              primary50: "#f8fafc",
-                              primary25: "#f8fafc",
-                              primary: "#0f172a",
-                            },
-                          })}
-                          placeholder="Selecione o status do paciente"
+                        <SelectInput 
+                          placeholder={"Selecione o status do paciente"} 
+                          isClearable={false}
                           isSearchable={false}
-                          options={patientStatusOptions}
+                          options={patientStatusOptions} 
                           value={
                             selectStatusValue
                               ? patientStatusOptions.find(

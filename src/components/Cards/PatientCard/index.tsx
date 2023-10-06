@@ -1,5 +1,5 @@
 import * as Avatar from "@radix-ui/react-avatar";
-import Badges from "../../Badges";
+import Badges from "../../Shared/Badges";
 import PatientProfileRecordModal from "../../Modal/PatientProfileRecordModal";
 import { CameraIcon } from "@radix-ui/react-icons";
 

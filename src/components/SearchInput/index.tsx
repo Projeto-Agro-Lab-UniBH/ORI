@@ -1,6 +1,6 @@
 import * as Avatar from "@radix-ui/react-avatar";
 import * as Dialog from "@radix-ui/react-dialog";
-import DotsLoad from "../Load/DotsLoad";
+import DotsLoad from "../Shared/Loads/DotsLoad";
 import { api } from "../../providers/Api";
 import { useQuery } from "react-query";
 import { CameraIcon, Cross2Icon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
@@ -93,7 +93,7 @@ const SearchInput = ({
                             key={data.id}
                             className="w-full flex items-center px-4 py-4"
                           >
-                            <ResultItem
+                            <ResultContent
                               id={data.id}
                               name={data.name}
                               src={data.profile_photo}
@@ -118,7 +118,7 @@ const SearchInput = ({
   );
 };
 
-const ResultItem = ({
+const ResultContent = ({
   id,
   src,
   name,
@@ -165,5 +165,4 @@ const ResultItem = ({
   );
 };
 
-// exportação do componente
 export default SearchInput; 
