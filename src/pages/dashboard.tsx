@@ -8,7 +8,7 @@ import { DashboardPatientDataResponse } from "../@types/ApiResponse";
 import { api } from "../providers/Api";     
 import { Option } from "../interfaces/Option";
 import Header from "../components/Header";
-import SelectFilter from "../components/SelectFilter";
+import SelectInput from "../components/Shared/SelectInput";
 import RegisterPatientModal from "../components/Modal/RegisterPatientModal";
 import PatientCard from "../components/Cards/PatientCard";
 import Pagination from "../components/Pagination";
@@ -92,9 +92,11 @@ export default function Dashboard({ data }: DashboardProps) {
         <Header />
         <div className="w-[1280px] h-24 flex flex-col items-center">
           <div className="w-[1280px] flex items-center gap-3 z-10">
-            <SelectFilter
+            <SelectInput
               width={"w-[216px]"}
               field="status"
+              isClearable={true}
+              isSearchable={false}
               value={selectStatus}
               placeholder="Filtrar por status"
               options={[
@@ -105,9 +107,11 @@ export default function Dashboard({ data }: DashboardProps) {
               ]}
               onChange={(option) => handleSelect("status", option?.value)}
             />
-            <SelectFilter
+            <SelectInput
               width={"w-[200px]"}
               field="physical_shape"
+              isClearable={true}
+              isSearchable={false}
               value={selectPhysicalShape}
               placeholder="Filtrar porte físico"
               options={[
@@ -119,9 +123,11 @@ export default function Dashboard({ data }: DashboardProps) {
                 handleSelect("physical_shape", option?.value)
               }
             />
-            <SelectFilter
+            <SelectInput
               width={"w-[200px]"}
               field="gender"
+              isClearable={true}
+              isSearchable={false}
               value={selectGender}
               placeholder="Filtrar por gênero"
               options={[
@@ -174,18 +180,32 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     };
   }
 
-  const { query } = ctx;
-  const { page, status, physical_shape, gender } = query;
-  
-  const response = await api.get<DashboardPatientDataResponse>(
-    `/patient/search/by/filters?page=${page || 1}&size=16&status=${status || ""}&physical_shape=${physical_shape || ""}&gender=${gender || ""}`
-  );
+  const { page = 1, status = "", physical_shape = "", gender = "" } = ctx.query;
 
-  const data = response.data
+  const queryString = new URLSearchParams({
+    page: page.toString(),
+    size: "16",
+    status: status.toString(),
+    physical_shape: physical_shape.toString(),
+    gender: gender.toString(),
+  }).toString();
 
-  return {
-    props: {
-      data
-    },
-  };
+  try {
+    const response = await api.get<DashboardPatientDataResponse>(
+      `/patient/search/by/filters?${queryString}`
+    );
+
+    return {
+      props: {
+        data: response.data,
+      },
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      props: {
+        data: [],
+      },
+    };
+  }
 };
