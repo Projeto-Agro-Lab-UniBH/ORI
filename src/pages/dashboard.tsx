@@ -4,15 +4,16 @@ import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 
-import { DashboardPatientDataResponse } from "../@types/ApiResponse";
 import { api } from "../providers/Api";     
 import { Option } from "../interfaces/Option";
+import { DashboardPatientDataResponse } from "../@types/ApiResponse";
+
 import Header from "../components/Header";
-import SelectInput from "../components/Shared/SelectInput";
 import RegisterPatientModal from "../components/Modal/RegisterPatientModal";
 import PatientCard from "../components/Cards/PatientCard";
 import Pagination from "../components/Pagination";
 import SearchInput from "../components/SearchInput";
+import SelectInput from "../components/Shared/SelectInput";
 
 type DashboardProps = {
   data: DashboardPatientDataResponse;
@@ -28,7 +29,16 @@ export default function Dashboard({ data }: DashboardProps) {
   const [selectGender, setSelectGender] = useState<Option | null>(null);
 
   const handleSelect = async (field: string, value: any) => {
-    const query = { ...router.query, [field]: value, page: "1" };
+    const query = { ...router.query };
+
+    if (value !== null && value !== undefined) {
+      query[field] = value;
+    } else {
+      delete query[field];
+    }
+
+    query.page = "1";
+
     setCurrentPage(1);
 
     await router.push({
