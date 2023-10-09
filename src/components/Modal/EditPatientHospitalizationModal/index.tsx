@@ -1,16 +1,18 @@
 import * as Dialog from "@radix-ui/react-dialog";
-import { Cross1Icon } from "@radix-ui/react-icons";
-import { useEffect, useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
+import * as ScrollArea from "@radix-ui/react-scroll-area";
+
 import { z } from "zod"; 
 import { useForm } from "react-hook-form";
 import { useMutation, useQuery } from "react-query";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Cross1Icon } from "@radix-ui/react-icons";
+import { useEffect, useState } from "react";
 
 import { api } from "../../../providers/Api";
 import { queryClient } from "../../../providers/QueryClient";
-import SpinnerLoad from "../../Shared/Loads/SpinnerLoad";
-import styles from "./styles.module.css";
 import { GetHospitalizationResponse, PatchHospitalizationResponse } from "../../../@types/ApiResponse";
+
+import SpinnerLoad from "../../Shared/Loads/SpinnerLoad";
 
 const editHospitalizationFormSchema = z.object({
   entry_date: z.string().nonempty("Selecione a data do início da internação do paciente."),
@@ -104,145 +106,150 @@ const EditPatientHospitalizationModal: React.FC<EditPatientHospitalizationModalP
             </Dialog.Close>
           </div>
           {loadingSpinner}
-          <div 
-            id={styles.modalScroll}
-            className="w-full h-[402px] px-6 py-6 overflow-y-scroll"
-          >
-            <form
-              onSubmit={handleSubmit(onSubmit)}
-              className="w-full flex flex-col gap-10"
-            >
-              <div className="w-full flex flex-col gap-6">
-                <div className="w-full flex flex-row gap-3">
-                  <div className="w-[176px] flex flex-col gap-2">
+          <ScrollArea.Root className="w-full h-[402px] overflow-hidden">
+            <ScrollArea.Viewport className="w-full h-full px-6 py-6">
+              <form
+                onSubmit={handleSubmit(onSubmit)}
+                className="w-full flex flex-col gap-10"
+              >
+                <div className="w-full flex flex-col gap-6">
+                  <div className="w-full flex flex-row gap-3">
+                    <div className="w-[176px] flex flex-col gap-2">
+                      <div className="w-[176px] flex flex-col gap-3">
+                        <label
+                          htmlFor="entry_date"
+                          className="w-full font-medium text-sm text-slate-700"
+                        >
+                          Data de entrada
+                        </label>
+                        <input
+                          type="date"
+                          className={`w-full block p-2.5 font-normal text-sm text-shark-950 bg-white rounded-lg border ${
+                            errors.entry_date
+                              ? "border-red-300 hover:border-red-400 focus:outline-none placeholder:text-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                              : "border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
+                          }`}
+                          {...register("entry_date")}
+                        />
+                      </div>
+                      {errors.entry_date && (
+                        <span className="font-normal text-xs text-red-400">
+                          {errors.entry_date.message}
+                        </span>
+                      )}     
+                    </div>
                     <div className="w-[176px] flex flex-col gap-3">
                       <label
-                        htmlFor="entry_date"
+                        htmlFor="departure_date"
                         className="w-full font-medium text-sm text-slate-700"
                       >
-                        Data de entrada
+                        Data de saída
                       </label>
                       <input
                         type="date"
                         className={`w-full block p-2.5 font-normal text-sm text-shark-950 bg-white rounded-lg border ${
-                          errors.entry_date
+                          errors.departure_date
                             ? "border-red-300 hover:border-red-400 focus:outline-none placeholder:text-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
                             : "border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
                         }`}
-                        {...register("entry_date")}
+                        {...register("departure_date")}
                       />
-                    </div>
-                    {errors.entry_date && (
-                      <span className="font-normal text-xs text-red-400">
-                        {errors.entry_date.message}
-                      </span>
-                    )}     
+                    </div>  
                   </div>
-                  <div className="w-[176px] flex flex-col gap-3">
-                    <label
-                      htmlFor="departure_date"
-                      className="w-full font-medium text-sm text-slate-700"
-                    >
-                      Data de saída
-                    </label>
-                    <input
-                      type="date"
-                      className={`w-full block p-2.5 font-normal text-sm text-shark-950 bg-white rounded-lg border ${
-                        errors.departure_date
-                          ? "border-red-300 hover:border-red-400 focus:outline-none placeholder:text-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                          : "border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
-                      }`}
-                      {...register("departure_date")}
-                    />
-                  </div>  
-                </div>
-                <div className="w-full flex flex-row gap-3">
-                  <div className="w-[288px] flex flex-col gap-2">
-                    <div className="w-[288px] flex flex-col gap-3">
-                      <label
-                        htmlFor="reason"
-                        className="w-full font-medium text-sm text-slate-700"
-                      >
-                        Motivo da internação
-                      </label>
-                      <input
-                        type="text"
-                        className={`w-full block p-2.5 font-normal text-sm text-shark-950 bg-white rounded-lg border ${
-                          errors.reason
-                            ? "border-red-300 hover:border-red-400 focus:outline-none placeholder:text-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                            : "border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
-                        }`}
-                        {...register("reason")}
-                      />
+                  <div className="w-full flex flex-row gap-3">
+                    <div className="w-[288px] flex flex-col gap-2">
+                      <div className="w-[288px] flex flex-col gap-3">
+                        <label
+                          htmlFor="reason"
+                          className="w-full font-medium text-sm text-slate-700"
+                        >
+                          Motivo da internação
+                        </label>
+                        <input
+                          type="text"
+                          className={`w-full block p-2.5 font-normal text-sm text-shark-950 bg-white rounded-lg border ${
+                            errors.reason
+                              ? "border-red-300 hover:border-red-400 focus:outline-none placeholder:text-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                              : "border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
+                          }`}
+                          {...register("reason")}
+                        />
+                      </div>
+                      {errors.reason && (
+                        <span className="font-normal text-xs text-red-400">
+                          {errors.reason.message}
+                        </span>
+                      )} 
                     </div>
-                    {errors.reason && (
-                      <span className="font-normal text-xs text-red-400">
-                        {errors.reason.message}
-                      </span>
-                    )} 
+                    <div className="w-full flex flex-col gap-2">
+                      <div className="w-full flex flex-col gap-3">
+                        <label
+                          htmlFor="prognosis"
+                          className="w-full font-medium text-sm text-slate-700"
+                        >
+                          Prognóstico
+                        </label>
+                        <input
+                          type="text"
+                          className={`w-full block p-2.5 font-normal text-sm text-shark-950 bg-white rounded-lg border ${
+                            errors.prognosis
+                              ? "border-red-300 hover:border-red-400 focus:outline-none placeholder:text-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                              : "border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
+                          }`}
+                          {...register("prognosis")}
+                        />
+                      </div>
+                      {errors.prognosis && (
+                        <span className="font-normal text-xs text-red-400">
+                          {errors.prognosis.message}
+                        </span>
+                      )}
+                    </div>
                   </div>
+                  
                   <div className="w-full flex flex-col gap-2">
                     <div className="w-full flex flex-col gap-3">
                       <label
-                        htmlFor="prognosis"
+                        htmlFor="notes"
                         className="w-full font-medium text-sm text-slate-700"
                       >
-                        Prognóstico
+                        Descrição
                       </label>
-                      <input
-                        type="text"
-                        className={`w-full block p-2.5 font-normal text-sm text-shark-950 bg-white rounded-lg border ${
-                          errors.prognosis
-                            ? "border-red-300 hover:border-red-400 focus:outline-none placeholder:text-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                            : "border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
+                      <textarea
+                        rows={14}
+                        placeholder="Detalhe com mais informações sobre a internação ou o estado de saúde do paciente"
+                        className={`resize-none block w-full rounded-lg border-0 p-[12px] text-sm text-slate-900 ring-1 ring-inset ${
+                          errors.notes
+                            ? "ring-red-300 placeholder:text-red-400 focus:outline-red-500 focus:ring-1 focus:ring-inset focus:ring-red-500"
+                            : "ring-slate-300 placeholder:text-slate-400 focus:outline-slate-500 focus:ring-1 focus:ring-inset focus:ring-slate-500"
                         }`}
-                        {...register("prognosis")}
-                      />
+                        {...register("notes")}
+                      ></textarea>
                     </div>
-                    {errors.prognosis && (
+                    {errors.notes && (
                       <span className="font-normal text-xs text-red-400">
-                        {errors.prognosis.message}
+                        {errors.notes.message}
                       </span>
-                    )}
+                    )}    
                   </div>
                 </div>
-                
-                <div className="w-full flex flex-col gap-2">
-                  <div className="w-full flex flex-col gap-3">
-                    <label
-                      htmlFor="notes"
-                      className="w-full font-medium text-sm text-slate-700"
-                    >
-                      Descrição
-                    </label>
-                    <textarea
-                      rows={14}
-                      placeholder="Detalhe com mais informações sobre a internação ou o estado de saúde do paciente"
-                      className={`resize-none block w-full rounded-lg border-0 p-[12px] text-sm text-slate-900 ring-1 ring-inset ${
-                        errors.notes
-                          ? "ring-red-300 placeholder:text-red-400 focus:outline-red-500 focus:ring-1 focus:ring-inset focus:ring-red-500"
-                          : "ring-slate-300 placeholder:text-slate-400 focus:outline-slate-500 focus:ring-1 focus:ring-inset focus:ring-slate-500"
-                      }`}
-                      {...register("notes")}
-                    ></textarea>
-                  </div>
-                  {errors.notes && (
-                    <span className="font-normal text-xs text-red-400">
-                      {errors.notes.message}
-                    </span>
-                  )}    
+                <div className="w-full h-10 flex justify-end">
+                  <button
+                    type="submit"
+                    className="w-[152px] h-10 border border-slate-300 rounded-lg font-medium text-base text-slate-700 bg-white hover:border-none hover:text-white hover:bg-blue-500"
+                  >
+                    Salvar alterações
+                  </button>
                 </div>
-              </div>
-              <div className="w-full h-10 flex justify-end">
-                <button
-                  type="submit"
-                  className="w-[152px] h-10 border border-slate-300 rounded-lg font-medium text-base text-slate-700 bg-white hover:border-none hover:text-white hover:bg-blue-500"
-                >
-                  Salvar alterações
-                </button>
-              </div>
-            </form>
-          </div>
+              </form>
+            </ScrollArea.Viewport>
+            <ScrollArea.Scrollbar
+              className="flex select-none touch-none bg-slate-100 transition-colors duration-[160ms] ease-out data-[orientation=vertical]:w-1 hover:bg-slate-200 data-[orientation=horizontal]:flex-col data-[orientation=horizontal]:h-1"
+              orientation="vertical"
+            >
+              <ScrollArea.Thumb className="flex-1 bg-[#64748b] hover:bg-[#334155] relative before:content-[''] before:absolute before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:w-full before:h-full before:min-w-[44px] before:min-h-[44px]" />
+            </ScrollArea.Scrollbar>
+          </ScrollArea.Root>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

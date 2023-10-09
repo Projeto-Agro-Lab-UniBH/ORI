@@ -1,16 +1,18 @@
-import SpinnerLoad from "../../Shared/Loads/SpinnerLoad";
-import { api } from "../../../providers/Api";
+import * as Dialog from "@radix-ui/react-dialog";
+import * as ScrollArea from "@radix-ui/react-scroll-area";
+
 import { z } from "zod";
-import { queryClient } from "../../../providers/QueryClient";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Cross1Icon } from "@radix-ui/react-icons";
 import { useMutation, useQuery } from "react-query";
-import * as Dialog from "@radix-ui/react-dialog";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+import { api } from "../../../providers/Api";
+import { queryClient } from "../../../providers/QueryClient";
 import { GetReportResponse, PatchReportResponse } from "../../../@types/ApiResponse";
 
-import styles from "./styles.module.css";
+import SpinnerLoad from "../../Shared/Loads/SpinnerLoad";
 
 type EditPatientReportModalProps = {
   id: string;
@@ -105,108 +107,112 @@ const EditPatientReportModal = ({ id: reportId }: EditPatientReportModalProps) =
             </Dialog.Close>
           </div>
           {loadingSpinner}
-          <div 
-            id={styles.modalScroll}
-            className="w-full h-[402px] px-6 py-6 overflow-y-scroll"
-          >
-            <div className="w-full flex flex-col gap-6">
-              {/* <div className="flex flex-col gap-4">
-                <div className="flex flex-col">
-                  <span className="font-normal text-xs text-slate-500">Usuário que realizou a postagem</span>      
-                  <span className="font-medium text-base text-slate-700">{data.username}</span>  
-                </div>
-                <div className="flex flex-row gap-6">
+          <ScrollArea.Root className="w-full h-[402px] overflow-hidden">
+            <ScrollArea.Viewport className="w-full h-full px-6 py-6">
+              <div className="w-full flex flex-col gap-6">
+                {/* <div className="flex flex-col gap-4">
                   <div className="flex flex-col">
-                    <span className="font-normal text-xs text-slate-500">Data de criação</span>      
-                    <span className="font-medium text-base text-slate-700">{formattedCreatedAt}</span>  
+                    <span className="font-normal text-xs text-slate-500">Usuário que realizou a postagem</span>      
+                    <span className="font-medium text-base text-slate-700">{data.username}</span>  
                   </div>
-                  <div className="flex flex-col">
-                    <span className="font-normal text-xs text-slate-500">Hora da postagem</span>      
-                    <span className="font-medium text-base text-slate-700">{formattedTimeItCreated}</span>  
-                  </div>
-                </div>
-                {data.updatedAt && (
                   <div className="flex flex-row gap-6">
-                  <div className="flex flex-col">
-                    <span className="font-normal text-xs text-slate-500">Data da ultima edição</span>      
-                    <span className="font-medium text-base text-slate-700">{formattedUpdatedAt}</span>  
+                    <div className="flex flex-col">
+                      <span className="font-normal text-xs text-slate-500">Data de criação</span>      
+                      <span className="font-medium text-base text-slate-700">{formattedCreatedAt}</span>  
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="font-normal text-xs text-slate-500">Hora da postagem</span>      
+                      <span className="font-medium text-base text-slate-700">{formattedTimeItCreated}</span>  
+                    </div>
                   </div>
-                  <div className="flex flex-col">
-                    <span className="font-normal text-xs text-slate-500">Hora da postagem editada</span>      
-                    <span className="font-medium text-base text-slate-700">{formattedTimeItUpdated}</span>  
+                  {data.updatedAt && (
+                    <div className="flex flex-row gap-6">
+                    <div className="flex flex-col">
+                      <span className="font-normal text-xs text-slate-500">Data da ultima edição</span>      
+                      <span className="font-medium text-base text-slate-700">{formattedUpdatedAt}</span>  
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="font-normal text-xs text-slate-500">Hora da postagem editada</span>      
+                      <span className="font-medium text-base text-slate-700">{formattedTimeItUpdated}</span>  
+                    </div>
                   </div>
-                </div>
-                )}
-              </div>   */}
-              <form
-                onSubmit={handleSubmit(onSubmit)}
-                className="w-full flex flex-col h-360 gap-6"
-              >
-                <div className="w-full flex flex-col gap-6">
-                  <div className="w-full flex flex-row gap-3">
+                  )}
+                </div>   */}
+                <form
+                  onSubmit={handleSubmit(onSubmit)}
+                  className="w-full flex flex-col h-360 gap-6"
+                >
+                  <div className="w-full flex flex-col gap-6">
+                    <div className="w-full flex flex-row gap-3">
+                      <div className="w-full flex flex-col gap-2">
+                        <div className="w-full flex flex-col gap-3">
+                          <label
+                            htmlFor="title"
+                            className="w-full font-medium text-sm text-slate-900"
+                          >
+                            Título
+                          </label>
+                          <input
+                            type="text"
+                            className={`w-full block p-2.5 font-normal text-sm text-slate-900 bg-white rounded-lg border ${
+                              errors.title
+                                ? "border-red-300 hover:border-red-400 focus:outline-none placeholder:text-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                                : "border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
+                            }`}
+                            {...register("title")}
+                          />
+                        </div>
+                        {errors.title && (
+                          <span className="font-normal text-xs text-red-400">
+                            {errors.title.message}
+                          </span>
+                        )}
+                      </div> 
+                    </div>
                     <div className="w-full flex flex-col gap-2">
                       <div className="w-full flex flex-col gap-3">
                         <label
-                          htmlFor="title"
-                          className="w-full font-medium text-sm text-slate-900"
+                          htmlFor="text"
+                          className="w-full font-medium text-sm text-slate-900 "
                         >
-                          Título
+                          Relatório
                         </label>
-                        <input
-                          type="text"
-                          className={`w-full block p-2.5 font-normal text-sm text-slate-900 bg-white rounded-lg border ${
-                            errors.title
-                              ? "border-red-300 hover:border-red-400 focus:outline-none placeholder:text-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                              : "border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
+                        <textarea
+                          rows={12} 
+                          placeholder="Digite o seu relatório"
+                          className={`resize-none block w-full rounded-lg border-0 p-[12px] text-sm text-slate-900 ring-1 ring-inset ${
+                            errors.text
+                              ? "ring-red-300 placeholder:text-red-400 focus:outline-red-500 focus:ring-1 focus:ring-inset focus:ring-red-500"
+                              : "ring-slate-300 placeholder:text-slate-400 focus:outline-slate-500 focus:ring-1 focus:ring-inset focus:ring-slate-500"
                           }`}
-                          {...register("title")}
-                        />
+                          {...register("text")}
+                        ></textarea>
                       </div>
-                      {errors.title && (
+                      {errors.text && (
                         <span className="font-normal text-xs text-red-400">
-                          {errors.title.message}
+                          {errors.text.message}
                         </span>
-                      )}
-                    </div> 
-                  </div>
-                  <div className="w-full flex flex-col gap-2">
-                    <div className="w-full flex flex-col gap-3">
-                      <label
-                        htmlFor="text"
-                        className="w-full font-medium text-sm text-slate-900 "
-                      >
-                        Relatório
-                      </label>
-                      <textarea 
-                        id={styles.textareaScroll}
-                        rows={12} 
-                        placeholder="Digite o seu relatório"
-                        className={`resize-none block w-full rounded-lg border-0 p-[12px] text-sm text-slate-900 ring-1 ring-inset ${
-                          errors.text
-                            ? "ring-red-300 placeholder:text-red-400 focus:outline-red-500 focus:ring-1 focus:ring-inset focus:ring-red-500"
-                            : "ring-slate-300 placeholder:text-slate-400 focus:outline-slate-500 focus:ring-1 focus:ring-inset focus:ring-slate-500"
-                        }`}
-                        {...register("text")}
-                      ></textarea>
+                      )}    
                     </div>
-                    {errors.text && (
-                      <span className="font-normal text-xs text-red-400">
-                        {errors.text.message}
-                      </span>
-                    )}    
                   </div>
-                </div>
-                <div className="w-full h-10 flex justify-end">
-                  <button
-                    type="submit"
-                    className="w-[152px] h-10 border border-slate-300 rounded-lg font-medium text-base text-slate-700 bg-white hover:border-none hover:text-white hover:bg-blue-500"
-                  >
-                    Salvar alterações
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
+                  <div className="w-full h-10 flex justify-end">
+                    <button
+                      type="submit"
+                      className="w-[152px] h-10 border border-slate-300 rounded-lg font-medium text-base text-slate-700 bg-white hover:border-none hover:text-white hover:bg-blue-500"
+                    >
+                      Salvar alterações
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </ScrollArea.Viewport>
+            <ScrollArea.Scrollbar
+              className="flex select-none touch-none bg-slate-100 transition-colors duration-[160ms] ease-out data-[orientation=vertical]:w-1 hover:bg-slate-200 data-[orientation=horizontal]:flex-col data-[orientation=horizontal]:h-1"
+              orientation="vertical"
+            >
+              <ScrollArea.Thumb className="flex-1 bg-[#64748b] hover:bg-[#334155] relative before:content-[''] before:absolute before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:w-full before:h-full before:min-w-[44px] before:min-h-[44px]" />
+            </ScrollArea.Scrollbar>
+          </ScrollArea.Root>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

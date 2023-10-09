@@ -1,4 +1,6 @@
 import * as Dialog from "@radix-ui/react-dialog";
+import * as ScrollArea from "@radix-ui/react-scroll-area";
+
 import { Cross1Icon } from "@radix-ui/react-icons";
 import { useEffect, useState } from "react";
 import { z } from "zod";
@@ -6,12 +8,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useMutation } from "react-query";
 
-import styles from "./styles.module.css";
-import SpinnerLoad from "../../Shared/Loads/SpinnerLoad";
-import { queryClient } from "../../../providers/QueryClient";
 import { api } from "../../../providers/Api";
+import { queryClient } from "../../../providers/QueryClient";
 import { useAuthContext } from "../../../contexts/AuthContext";
 import { PostSurgeryResponse } from "../../../@types/ApiResponse";
+
+import SpinnerLoad from "../../Shared/Loads/SpinnerLoad";
 
 const registerSurgeryFormSchema = z.object({
   execution_date: z.string().nonempty("Selecione a data de realização da cirurgia."),
@@ -93,177 +95,182 @@ const RegisterPatientSurgeryModal: React.FC<RegisterPatientSurgeryModalProps> = 
             </Dialog.Close>
           </div>
           {loadingSpinner}
-          <div
-            id={styles.modalScroll}
-            className="w-full h-[402px] px-6 py-6 overflow-y-scroll"
-          >
-            <form
-              onSubmit={handleSubmit(onSubmit)}
-              className="w-full flex flex-col gap-10"
+          <ScrollArea.Root className="w-full h-[402px] overflow-hidden">
+            <ScrollArea.Viewport className="w-full h-full px-6 py-6">
+              <form
+                onSubmit={handleSubmit(onSubmit)}
+                className="w-full flex flex-col gap-10"
+              >
+                <div className="w-full flex flex-col gap-6">
+                  <div className="w-full flex flex-row gap-3">
+                    <div className="w-[176px] flex flex-col gap-2">
+                      <div className="w-[176px] flex flex-col gap-3">
+                        <label
+                          htmlFor="execution_date"
+                          className="w-full font-medium text-sm text-slate-700"
+                        >
+                          Data da operação
+                        </label>
+                        <input
+                          type="date"
+                          className={`w-full block p-2.5 font-normal text-sm text-shark-950 bg-white rounded-lg border ${
+                            errors.execution_date
+                              ? "border-red-300 hover:border-red-400 focus:outline-none placeholder:text-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                              : "border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
+                          }`}
+                          {...register("execution_date")}
+                        />
+                      </div>
+                      {errors.execution_date && (
+                        <span className="font-normal text-xs text-red-400">
+                          {errors.execution_date.message}
+                        </span>
+                      )}     
+                    </div>
+                    <div className="w-[176px] flex flex-col gap-2">
+                      <div className="w-[176px] flex flex-col gap-3">
+                        <label
+                          htmlFor="duration"
+                          className="w-full font-medium text-sm text-slate-700"
+                        >
+                          Duração da cirurgia
+                        </label>
+                        <input
+                          type="text"
+                          className={`w-full block p-2.5 font-normal text-sm text-shark-950 bg-white rounded-lg border ${
+                            errors.duration
+                              ? "border-red-300 hover:border-red-400 focus:outline-none placeholder:text-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                              : "border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
+                          }`}
+                          {...register("duration")}
+                        />
+                      </div>
+                      {errors.duration && (
+                        <span className="font-normal text-xs text-red-400">
+                          {errors.duration.message}
+                        </span>
+                      )}     
+                    </div>
+                    <div className="w-full flex flex-col gap-2">
+                      <div className="w-full flex flex-col gap-3">
+                        <label
+                          htmlFor="period"
+                          className="w-full font-medium text-sm text-slate-700"
+                        >
+                          Período
+                        </label>
+                        <input
+                          type="text"
+                          className={`w-full block p-2.5 font-normal text-sm text-shark-950 bg-white rounded-lg border ${
+                            errors.period
+                              ? "border-red-300 hover:border-red-400 focus:outline-none placeholder:text-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                              : "border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
+                          }`}
+                          {...register("period")}
+                        />
+                      </div>
+                      {errors.period && (
+                        <span className="font-normal text-xs text-red-400">
+                          {errors.period.message}
+                        </span>
+                      )}     
+                    </div>
+                  </div>
+                  <div className="w-full flex flex-row gap-3">
+                    <div className="w-full flex flex-col gap-2">
+                      <div className="w-full flex flex-col gap-3">
+                        <label
+                          htmlFor="name_of_surgery"
+                          className="w-full font-medium text-sm text-slate-700"
+                        >
+                          Nome da cirurgia / Procedimento
+                        </label>
+                        <input
+                          type="text"
+                          className={`w-full block p-2.5 font-normal text-sm text-shark-950 bg-white rounded-lg border ${
+                            errors.name_of_surgery
+                              ? "border-red-300 hover:border-red-400 focus:outline-none placeholder:text-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                              : "border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
+                          }`}
+                          {...register("name_of_surgery")}
+                        />
+                      </div>
+                      {errors.name_of_surgery && (
+                        <span className="font-normal text-xs text-red-400">
+                          {errors.name_of_surgery.message}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="w-full flex flex-row gap-3">
+                    <div className="w-[244px] flex flex-col gap-2">
+                      <div className="w-[244px] flex flex-col gap-3">
+                        <label
+                          htmlFor="risk_level"
+                          className="w-full font-medium text-sm text-slate-700"
+                        >
+                          Nível de risco da operação
+                        </label>
+                        <input
+                          type="text"
+                          className={`w-full block p-2.5 font-normal text-sm text-shark-950 bg-white rounded-lg border ${
+                            errors.risk_level
+                              ? "border-red-300 hover:border-red-400 focus:outline-none placeholder:text-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                              : "border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
+                          }`}
+                          {...register("risk_level")}
+                        />
+                      </div>
+                      {errors.risk_level && (
+                        <span className="font-normal text-xs text-red-400">
+                          {errors.risk_level.message}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="w-full flex flex-col gap-2">
+                    <div className="w-full flex flex-col gap-3">
+                      <label
+                        htmlFor="notes"
+                        className="w-full font-medium text-sm text-slate-700"
+                      >
+                        Descrição
+                      </label>
+                      <textarea
+                        rows={14}
+                        placeholder="Descreva a cirurgia"
+                        className={`resize-none block w-full rounded-lg border-0 p-[12px] text-sm text-slate-900 ring-1 ring-inset ${
+                          errors.notes
+                            ? "ring-red-300 placeholder:text-red-400 focus:outline-red-500 focus:ring-1 focus:ring-inset focus:ring-red-500"
+                            : "ring-slate-300 placeholder:text-slate-400 focus:outline-slate-500 focus:ring-1 focus:ring-inset focus:ring-slate-500"
+                        }`}
+                        {...register("notes")}
+                      ></textarea>
+                    </div>
+                    {errors.notes && (
+                      <span className="font-normal text-xs text-red-400">
+                        {errors.notes.message}
+                      </span>
+                    )}    
+                  </div>
+                </div>
+                <div className="w-full h-10 flex justify-end">
+                  <button
+                    type="submit"
+                    className="w-[148px] h-10 border border-slate-300 rounded-lg font-medium text-base text-slate-700 bg-white hover:border-none hover:text-white hover:bg-blue-500"
+                  >
+                    Registrar cirurgia
+                  </button>
+                </div>
+              </form>
+            </ScrollArea.Viewport>
+            <ScrollArea.Scrollbar
+              className="flex select-none touch-none bg-slate-100 transition-colors duration-[160ms] ease-out data-[orientation=vertical]:w-1 hover:bg-slate-200 data-[orientation=horizontal]:flex-col data-[orientation=horizontal]:h-1"
+              orientation="vertical"
             >
-              <div className="w-full flex flex-col gap-6">
-                <div className="w-full flex flex-row gap-3">
-                  <div className="w-[176px] flex flex-col gap-2">
-                    <div className="w-[176px] flex flex-col gap-3">
-                      <label
-                        htmlFor="execution_date"
-                        className="w-full font-medium text-sm text-slate-700"
-                      >
-                        Data da operação
-                      </label>
-                      <input
-                        type="date"
-                        className={`w-full block p-2.5 font-normal text-sm text-shark-950 bg-white rounded-lg border ${
-                          errors.execution_date
-                            ? "border-red-300 hover:border-red-400 focus:outline-none placeholder:text-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                            : "border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
-                        }`}
-                        {...register("execution_date")}
-                      />
-                    </div>
-                    {errors.execution_date && (
-                      <span className="font-normal text-xs text-red-400">
-                        {errors.execution_date.message}
-                      </span>
-                    )}     
-                  </div>
-                  <div className="w-[176px] flex flex-col gap-2">
-                    <div className="w-[176px] flex flex-col gap-3">
-                      <label
-                        htmlFor="duration"
-                        className="w-full font-medium text-sm text-slate-700"
-                      >
-                        Duração da cirurgia
-                      </label>
-                      <input
-                        type="text"
-                        className={`w-full block p-2.5 font-normal text-sm text-shark-950 bg-white rounded-lg border ${
-                          errors.duration
-                            ? "border-red-300 hover:border-red-400 focus:outline-none placeholder:text-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                            : "border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
-                        }`}
-                        {...register("duration")}
-                      />
-                    </div>
-                    {errors.duration && (
-                      <span className="font-normal text-xs text-red-400">
-                        {errors.duration.message}
-                      </span>
-                    )}     
-                  </div>
-                  <div className="w-full flex flex-col gap-2">
-                    <div className="w-full flex flex-col gap-3">
-                      <label
-                        htmlFor="period"
-                        className="w-full font-medium text-sm text-slate-700"
-                      >
-                        Período
-                      </label>
-                      <input
-                        type="text"
-                        className={`w-full block p-2.5 font-normal text-sm text-shark-950 bg-white rounded-lg border ${
-                          errors.period
-                            ? "border-red-300 hover:border-red-400 focus:outline-none placeholder:text-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                            : "border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
-                        }`}
-                        {...register("period")}
-                      />
-                    </div>
-                    {errors.period && (
-                      <span className="font-normal text-xs text-red-400">
-                        {errors.period.message}
-                      </span>
-                    )}     
-                  </div>
-                </div>
-                <div className="w-full flex flex-row gap-3">
-                  <div className="w-full flex flex-col gap-2">
-                    <div className="w-full flex flex-col gap-3">
-                      <label
-                        htmlFor="name_of_surgery"
-                        className="w-full font-medium text-sm text-slate-700"
-                      >
-                        Nome da cirurgia / Procedimento
-                      </label>
-                      <input
-                        type="text"
-                        className={`w-full block p-2.5 font-normal text-sm text-shark-950 bg-white rounded-lg border ${
-                          errors.name_of_surgery
-                            ? "border-red-300 hover:border-red-400 focus:outline-none placeholder:text-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                            : "border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
-                        }`}
-                        {...register("name_of_surgery")}
-                      />
-                    </div>
-                    {errors.name_of_surgery && (
-                      <span className="font-normal text-xs text-red-400">
-                        {errors.name_of_surgery.message}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div className="w-full flex flex-row gap-3">
-                  <div className="w-[244px] flex flex-col gap-2">
-                    <div className="w-[244px] flex flex-col gap-3">
-                      <label
-                        htmlFor="risk_level"
-                        className="w-full font-medium text-sm text-slate-700"
-                      >
-                        Nível de risco da operação
-                      </label>
-                      <input
-                        type="text"
-                        className={`w-full block p-2.5 font-normal text-sm text-shark-950 bg-white rounded-lg border ${
-                          errors.risk_level
-                            ? "border-red-300 hover:border-red-400 focus:outline-none placeholder:text-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                            : "border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
-                        }`}
-                        {...register("risk_level")}
-                      />
-                    </div>
-                    {errors.risk_level && (
-                      <span className="font-normal text-xs text-red-400">
-                        {errors.risk_level.message}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div className="w-full flex flex-col gap-2">
-                  <div className="w-full flex flex-col gap-3">
-                    <label
-                      htmlFor="notes"
-                      className="w-full font-medium text-sm text-slate-700"
-                    >
-                      Descrição
-                    </label>
-                    <textarea
-                      rows={14}
-                      placeholder="Descreva a cirurgia"
-                      className={`resize-none block w-full rounded-lg border-0 p-[12px] text-sm text-slate-900 ring-1 ring-inset ${
-                        errors.notes
-                          ? "ring-red-300 placeholder:text-red-400 focus:outline-red-500 focus:ring-1 focus:ring-inset focus:ring-red-500"
-                          : "ring-slate-300 placeholder:text-slate-400 focus:outline-slate-500 focus:ring-1 focus:ring-inset focus:ring-slate-500"
-                      }`}
-                      {...register("notes")}
-                    ></textarea>
-                  </div>
-                  {errors.notes && (
-                    <span className="font-normal text-xs text-red-400">
-                      {errors.notes.message}
-                    </span>
-                  )}    
-                </div>
-              </div>
-              <div className="w-full h-10 flex justify-end">
-                <button
-                  type="submit"
-                  className="w-[148px] h-10 border border-slate-300 rounded-lg font-medium text-base text-slate-700 bg-white hover:border-none hover:text-white hover:bg-blue-500"
-                >
-                  Registrar cirurgia
-                </button>
-              </div>
-            </form>
-          </div>
+              <ScrollArea.Thumb className="flex-1 bg-[#64748b] hover:bg-[#334155] relative before:content-[''] before:absolute before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:w-full before:h-full before:min-w-[44px] before:min-h-[44px]" />
+            </ScrollArea.Scrollbar>
+          </ScrollArea.Root>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

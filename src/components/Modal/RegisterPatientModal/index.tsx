@@ -1,18 +1,20 @@
 import * as Avatar from "@radix-ui/react-avatar";
 import * as Dialog from "@radix-ui/react-dialog";
-import SpinnerLoad from "../../Shared/Loads/SpinnerLoad";
+import * as ScrollArea from "@radix-ui/react-scroll-area";
+
 import { z } from "zod";
-import { api } from "../../../providers/Api";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { queryClient } from "../../../providers/QueryClient";
+import { useMutation } from "react-query";
 import { CameraIcon, Cross1Icon, PlusIcon } from "@radix-ui/react-icons";
-import { Option } from "../../../interfaces/Option";
 import { useController, useForm } from "react-hook-form";
 import { useState, useEffect, ChangeEvent } from "react";
-import { useMutation } from "react-query";
-import SelectInput from "../../Shared/SelectInput"; 
 
-import styles from './styles.module.css';
+import { api } from "../../../providers/Api";
+import { queryClient } from "../../../providers/QueryClient";
+import { Option } from "../../../interfaces/Option";
+
+import SelectInput from "../../Shared/SelectInput"; 
+import SpinnerLoad from "../../Shared/Loads/SpinnerLoad";
 
 type UploadImageResponse = {
   imageUrl: string;
@@ -201,494 +203,506 @@ const RegisterPatientModal = () => {
               </div>
             </div>
           )}
-          <div 
-            id={styles.containerScroll}
-            className="w-full h-[488px] overflow-y-scroll px-6 py-6">
-            <form
-              onSubmit={handleSubmit(onSubmit)}
-              className="w-full flex flex-col gap-10"
-            >
-              <div className="w-full flex flex-col gap-6">
-                <div className="w-full flex items-center gap-4">
-                  <div className="w-[72px] h-full flex items-center flex-col gap-2">
-                    <div className="w-full flex items-center justify-center">
-                      <span className="font-medium text-sm text-slate-700">
-                        Foto
-                      </span>
+          <ScrollArea.Root className="w-full h-[488px] overflow-hidden">
+            <ScrollArea.Viewport className="w-full h-full px-6 py-6">
+              <form
+                onSubmit={handleSubmit(onSubmit)}
+                className="w-full flex flex-col gap-10"
+              >
+                <div className="w-full flex flex-col gap-6">
+                  <div className="w-full flex items-center gap-4">
+                    <div className="w-[72px] h-full flex items-center flex-col gap-2">
+                      <div className="w-full flex items-center justify-center">
+                        <span className="font-medium text-sm text-slate-700">
+                          Foto
+                        </span>
+                      </div>
+                      <div className="w-full flex items-center justify-center">
+                        <Avatar.Root
+                          className={`w-16 h-16 flex items-center justify-center ${
+                            previewImage ? "" : "border border-slate-300"
+                          } rounded-full overflow-hidden`}
+                        >
+                          {previewImage ? (
+                            <Avatar.Image
+                              src={previewImage as string | undefined}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <CameraIcon
+                              width={16}
+                              height={16}
+                              color="#cbd5e1"
+                            />
+                          )}
+                        </Avatar.Root>
+                      </div>
                     </div>
-                    <div className="w-full flex items-center justify-center">
-                      <Avatar.Root
-                        className={`w-16 h-16 flex items-center justify-center ${
-                          previewImage ? "" : "border border-slate-300"
-                        } rounded-full overflow-hidden`}
-                      >
-                        {previewImage ? (
-                          <Avatar.Image
-                            src={previewImage as string | undefined}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <CameraIcon width={16} height={16} color="#cbd5e1" />
-                        )}
-                      </Avatar.Root>
-                    </div>
-                  </div>
-                  <div className="w-full h-full flex">
-                    <div className="w-full flex justify-center flex-col gap-1">
-                      <label
-                        htmlFor="patient-photo-file"
-                        className="w-[156px] text-base font-normal text-[#4573D2] cursor-pointer"
-                      >
-                        Selecionar uma foto
-                      </label>
-                      <input
-                        type="file"
-                        accept=".jpg, .jpeg, .png"
-                        id="patient-photo-file"
-                        className="hidden"
-                        onChange={handleImage}
-                      />
-                      <div className="w-full">
-                        <div className="w-[516px] flex flex-col">
-                          <p className="w-16 font-medium text-sm text-slate-700">
-                            Dica:
-                          </p>
-                          <p className="w-[500px] font-normal text-sm text-slate-400 whitespace-nowrap">
-                            Uma foto de perfil do paciente o ajuda a ser
-                            reconhecido na plataforma.
-                          </p>
+                    <div className="w-full h-full flex">
+                      <div className="w-full flex justify-center flex-col gap-1">
+                        <label
+                          htmlFor="patient-photo-file"
+                          className="w-[156px] text-base font-normal text-[#4573D2] cursor-pointer"
+                        >
+                          Selecionar uma foto
+                        </label>
+                        <input
+                          type="file"
+                          accept=".jpg, .jpeg, .png"
+                          id="patient-photo-file"
+                          className="hidden"
+                          onChange={handleImage}
+                        />
+                        <div className="w-full">
+                          <div className="w-[516px] flex flex-col">
+                            <p className="w-16 font-medium text-sm text-slate-700">
+                              Dica:
+                            </p>
+                            <p className="w-[500px] font-normal text-sm text-slate-400 whitespace-nowrap">
+                              Uma foto de perfil do paciente o ajuda a ser
+                              reconhecido na plataforma.
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-                <div className="w-full flex flex-row gap-4">
-                  <div className="w-44">
-                    <div className="w-44 flex flex-col gap-6">
-                      <div className="w-full flex flex-col gap-3">
-                        <label
-                          htmlFor="date_of_birth"
-                          className="w-full font-medium text-sm text-slate-700"
-                        >
-                          Data de nascimento
-                        </label>
-                        <input
-                          type="date"
-                          className="w-full block p-2.5 text-sm text-shark-950 font-normal bg-white rounded-lg border border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
-                          {...register("date_of_birth")}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="w-44">
-                    <div className="w-44 flex flex-col gap-6">
-                      <div className="w-full flex flex-col gap-3">
-                        <label
-                          htmlFor="age"
-                          className="w-full font-medium text-sm text-slate-700"
-                        >
-                          Idade
-                        </label>
-                        <input
-                          type="text"
-                          className="w-full block p-2.5 text-sm text-shark-950 font-normal bg-white rounded-lg border border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
-                          {...register("age")}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="w-full">
-                    <div className="w-full flex flex-col gap-2">
-                      <div className="w-full flex flex-col gap-3">
-                        <label
-                          htmlFor="pedigree_RGA"
-                          className="w-full font-medium text-sm text-slate-700"
-                        >
-                          Nº do Pedigree/RGA
-                        </label>
-                        <input
-                          type="text"
-                          className="w-full block p-2.5 text-sm text-shark-950 font-normal bg-white rounded-lg border border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
-                          {...register("pedigree_RGA")}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="w-full flex flex-row gap-4">
-                  <div className="w-[368px]">
-                    <div className="w-[368px] flex flex-col gap-2">
-                      <div className="w-[368px] flex flex-col gap-3">
-                        <label
-                          htmlFor="name"
-                          className="w-full font-medium text-sm text-slate-700"
-                        >
-                          Nome
-                        </label>
-                        <input
-                          type="text"
-                          className={`w-full block p-2.5 font-normal text-sm text-shark-950 bg-white rounded-lg border ${
-                            errors.name
-                              ? "border-red-300 hover:border-red-400 focus:outline-none placeholder:text-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                              : "border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
-                          }`}
-                          {...register("name")}
-                        />
-                      </div>
-                      {errors.name && (
-                        <span className={"font-normal text-xs text-red-400"}>
-                          {errors.name.message}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="w-full">
-                    <div className="w-full flex flex-col gap-2">
-                      <div className="w-full flex flex-col gap-3">
-                        <label
-                          htmlFor="chip_number"
-                          className="w-full font-medium text-sm text-slate-700"
-                        >
-                          Nº do chip
-                        </label>
-                        <input
-                          type="text"
-                          className="w-full block p-2.5 text-sm text-shark-950 font-normal bg-white rounded-lg border border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
-                          {...register("chip_number")}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="w-full flex flex-row gap-4">
-                  <div className="w-full">
-                    <div className="w-full flex flex-col gap-2">
-                      <div className="w-full flex flex-col gap-3">
-                        <label
-                          htmlFor="specie"
-                          className="w-full font-medium text-sm text-slate-700"
-                        >
-                          Espécie
-                        </label>
-                        {watch("undefined_specie") == true ? (
-                          <input
-                            type="text"
-                            className="w-full h-[41.6px] text-slate-200 bg-slate-200 border border-slate-300 rounded-lg cursor-not-allowed"
-                            disabled
-                          />
-                        ) : (
-                          <input
-                            type="text"
-                            className={`w-full block p-2.5 text-sm text-shark-950 font-normal bg-white rounded-lg border ${
-                              errors.specie
-                                ? "border-red-300 hover:border-red-400 focus:outline-none placeholder:text-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                                : "border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
-                            }`}
-                            {...register("specie")}
-                          />
-                        )}
-                      </div>
-                      {errors.specie && (
-                        <span
-                          className={
-                            watch("undefined_specie") == false
-                              ? "font-normal text-xs text-red-400"
-                              : "hidden font-normal text-xs text-red-400"
-                          }
-                        >
-                          {errors.specie.message}
-                        </span>
-                      )}
-                      <div className="w-full flex items-center gap-1">
-                        <input
-                          type="checkbox"
-                          id="checkbox2"
-                          {...register("undefined_specie")}
-                        ></input>
-                        <label
-                          htmlFor="checkbox2"
-                          className="font-normal text-xs text-slate-400"
-                        >
-                          Sem espécie definida.
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="w-full">
-                    <div className="w-full flex flex-col gap-2">
-                      <div className="w-full flex flex-col gap-3">
-                        <label
-                          htmlFor="race"
-                          className="w-full font-medium text-sm text-slate-700"
-                        >
-                          Raça
-                        </label>
-                        {watch("undefined_race") == true ? (
-                          <input
-                            type="text"
-                            className="w-full h-[41.6px] text-slate-200 bg-slate-200 border border-slate-300 rounded-lg cursor-not-allowed"
-                            disabled
-                          />
-                        ) : (
-                          <input
-                            type="text"
-                            className={`w-full block p-2.5 text-sm text-shark-950 font-normal bg-white rounded-lg border ${
-                              errors.race
-                                ? "border-red-300 hover:border-red-400 focus:outline-none placeholder:text-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                                : "border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
-                            }`}
-                            {...register("race")}
-                          />
-                        )}
-                      </div>
-                      {errors.race && (
-                        <span
-                          className={
-                            watch("undefined_race") == false
-                              ? "font-normal text-xs text-red-400"
-                              : "hidden font-normal text-xs text-red-400"
-                          }
-                        >
-                          {errors.race.message}
-                        </span>
-                      )}
-                      <div className="w-full flex items-center gap-1">
-                        <input
-                          type="checkbox"
-                          id="checkbox4"
-                          {...register("undefined_race")}
-                        ></input>
-                        <label
-                          htmlFor="checkbox4"
-                          className="font-normal text-xs text-slate-400"
-                        >
-                          Sem raça definida.
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="w-full flex flex-row gap-4">
-                  <div className="w-[128px]">
-                    <div className="w-[128px] flex flex-col gap-6">
-                      <div className="w-[128px] flex flex-col gap-3">
-                        <label
-                          htmlFor="starting_weight"
-                          className="w-full font-medium text-sm text-slate-700"
-                        >
-                          Peso inícial
-                        </label>
-                        <input
-                          type="text"
-                          className="w-full block p-2.5 text-sm text-shark-950 font-normal bg-white rounded-lg border border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
-                          {...register("starting_weight")}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="w-[128px]">
-                    <div className="w-[128px] flex flex-col gap-6">
-                      <div className="w-[128px] flex flex-col gap-3">
-                        <label
-                          htmlFor="current_weight"
-                          className="w-full font-medium text-sm text-slate-700"
-                        >
-                          Peso atual
-                        </label>
-                        <input
-                          type="text"
-                          className="w-full block p-2.5 text-sm text-shark-950 font-normal bg-white rounded-lg border border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
-                          {...register("current_weight")}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="w-44">
+                  <div className="w-full flex flex-row gap-4">
                     <div className="w-44">
                       <div className="w-44 flex flex-col gap-6">
                         <div className="w-full flex flex-col gap-3">
                           <label
-                            htmlFor="physical_shape"
+                            htmlFor="date_of_birth"
                             className="w-full font-medium text-sm text-slate-700"
                           >
-                            Porte físico
+                            Data de nascimento
                           </label>
-                          <SelectInput 
-                            placeholder={"Selecione o porte"} 
-                            isClearable={false}
-                            isSearchable={false}
-                            options={physicalShapeOptions} 
-                            value={
-                              selectPhysicalShapeValue
-                                ? physicalShapeOptions.find(
-                                    (x) => x.value === selectPhysicalShapeValue
-                                  )
-                                : selectPhysicalShapeValue
-                            }
-                            onChange={(option) =>
-                              selectPhysicalShapeOnChange(
-                                option ? option.value : option
-                            )}
-                            {...restSelectPhysicalShape}
+                          <input
+                            type="date"
+                            className="w-full block p-2.5 text-sm text-shark-950 font-normal bg-white rounded-lg border border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
+                            {...register("date_of_birth")}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="w-44">
+                      <div className="w-44 flex flex-col gap-6">
+                        <div className="w-full flex flex-col gap-3">
+                          <label
+                            htmlFor="age"
+                            className="w-full font-medium text-sm text-slate-700"
+                          >
+                            Idade
+                          </label>
+                          <input
+                            type="text"
+                            className="w-full block p-2.5 text-sm text-shark-950 font-normal bg-white rounded-lg border border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
+                            {...register("age")}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="w-full">
+                      <div className="w-full flex flex-col gap-2">
+                        <div className="w-full flex flex-col gap-3">
+                          <label
+                            htmlFor="pedigree_RGA"
+                            className="w-full font-medium text-sm text-slate-700"
+                          >
+                            Nº do Pedigree/RGA
+                          </label>
+                          <input
+                            type="text"
+                            className="w-full block p-2.5 text-sm text-shark-950 font-normal bg-white rounded-lg border border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
+                            {...register("pedigree_RGA")}
                           />
                         </div>
                       </div>
                     </div>
                   </div>
-                  <div className="w-full">
-                    <div className="w-full flex flex-col gap-6">
-                      <div className="w-full flex flex-col gap-3">
-                        <label
-                          htmlFor="gender"
-                          className="w-full font-medium text-sm text-slate-700"
-                        >
-                          Sexo
-                        </label>
-                        <SelectInput 
-                          placeholder={"Selecione o sexo"} 
-                          isClearable={false}
-                          isSearchable={false}
-                          options={genderOptions} 
-                          value={
-                            selectGenderValue
-                              ? genderOptions.find(
-                                  (x) => x.value === selectGenderValue
-                                )
-                              : selectGenderValue
-                          }
-                          onChange={(option) =>
-                            selectGenderOnChange(
-                              option ? option.value : option
-                            )
-                          }
-                          {...restSelectGender}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="w-full flex flex-row gap-4">
-                  <div className="w-[272px]">
-                    <div className="w-[272px] flex flex-col gap-2">
-                      <div className="w-[272px] flex flex-col gap-3">
-                        <label
-                          htmlFor="status"
-                          className="w-full font-medium text-sm text-slate-700"
-                        >
-                          Status
-                        </label>
-                        <SelectInput 
-                          placeholder={"Selecione o status do paciente"} 
-                          isClearable={false}
-                          isSearchable={false}
-                          options={patientStatusOptions} 
-                          value={
-                            selectStatusValue
-                              ? patientStatusOptions.find(
-                                  (x) => x.value === selectStatusValue
-                                )
-                              : selectStatusValue
-                          }
-                          onChange={(option) =>
-                            selectStatusOnChange(
-                              option ? option.value : option
-                            )
-                          }
-                          {...restSelectStatus}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="w-full">
-                    <div className="w-full flex flex-col gap-2">
-                      <div className="w-full flex flex-col gap-3">
-                        <label
-                          htmlFor="owner"
-                          className="w-full font-medium text-sm text-slate-700"
-                        >
-                          Nome do proprietário(a)
-                        </label>
-                        {watch("ownerless_patient") == true ? (
+                  <div className="w-full flex flex-row gap-4">
+                    <div className="w-[368px]">
+                      <div className="w-[368px] flex flex-col gap-2">
+                        <div className="w-[368px] flex flex-col gap-3">
+                          <label
+                            htmlFor="name"
+                            className="w-full font-medium text-sm text-slate-700"
+                          >
+                            Nome
+                          </label>
                           <input
                             type="text"
-                            className="w-full h-[41.6px] text-slate-200 bg-slate-200 border border-slate-300 rounded-lg cursor-not-allowed"
-                            disabled
-                          />
-                        ) : (
-                          <input
-                            type="text"
-                            className={`w-full block p-2.5 text-sm text-shark-950 font-normal bg-white rounded-lg border ${
-                              errors.owner
+                            className={`w-full block p-2.5 font-normal text-sm text-shark-950 bg-white rounded-lg border ${
+                              errors.name
                                 ? "border-red-300 hover:border-red-400 focus:outline-none placeholder:text-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
                                 : "border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
                             }`}
-                            {...register("owner")}
+                            {...register("name")}
                           />
+                        </div>
+                        {errors.name && (
+                          <span className={"font-normal text-xs text-red-400"}>
+                            {errors.name.message}
+                          </span>
                         )}
                       </div>
-                      {errors.owner && (
-                        <span
-                          className={
-                            watch("ownerless_patient") == false
-                              ? "font-normal text-xs text-red-400"
-                              : "hidden font-normal text-xs text-red-400"
-                          }
-                        >
-                          {errors.owner.message}
-                        </span>
-                      )}
-                      <div className="w-full flex items-center gap-1">
-                        <input
-                          type="checkbox"
-                          id="checkbox3"
-                          {...register("ownerless_patient")}
-                        ></input>
-                        <label
-                          htmlFor="checkbox3"
-                          className="font-normal text-xs text-slate-400"
-                        >
-                          Não foi identificado o tutor do paciente.
-                        </label>
+                    </div>
+                    <div className="w-full">
+                      <div className="w-full flex flex-col gap-2">
+                        <div className="w-full flex flex-col gap-3">
+                          <label
+                            htmlFor="chip_number"
+                            className="w-full font-medium text-sm text-slate-700"
+                          >
+                            Nº do chip
+                          </label>
+                          <input
+                            type="text"
+                            className="w-full block p-2.5 text-sm text-shark-950 font-normal bg-white rounded-lg border border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
+                            {...register("chip_number")}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-                <div className="w-full flex flex-col gap-2">
-                  <div className="w-full flex flex-col gap-3">
-                    <label
-                      htmlFor="notes"
-                      className="w-full font-medium text-sm text-slate-700"
-                    >
-                      Observações
-                    </label>
-                    <textarea
-                      rows={10}
-                      placeholder="Relate um ponto interessante sobre o animal"
-                      className={`resize-none block w-full rounded-lg border-0 p-[12px] text-sm text-slate-900 ring-1 ring-inset ${
-                        errors.notes
-                          ? "ring-red-300 placeholder:text-red-400 focus:outline-red-500 focus:ring-1 focus:ring-inset focus:ring-red-500"
-                          : "ring-slate-300 placeholder:text-slate-400 focus:outline-slate-500 focus:ring-1 focus:ring-inset focus:ring-slate-500"
-                      }`}
-                      {...register("notes")}
-                    ></textarea>
+                  <div className="w-full flex flex-row gap-4">
+                    <div className="w-full">
+                      <div className="w-full flex flex-col gap-2">
+                        <div className="w-full flex flex-col gap-3">
+                          <label
+                            htmlFor="specie"
+                            className="w-full font-medium text-sm text-slate-700"
+                          >
+                            Espécie
+                          </label>
+                          {watch("undefined_specie") == true ? (
+                            <input
+                              type="text"
+                              className="w-full h-[41.6px] text-slate-200 bg-slate-200 border border-slate-300 rounded-lg cursor-not-allowed"
+                              disabled
+                            />
+                          ) : (
+                            <input
+                              type="text"
+                              className={`w-full block p-2.5 text-sm text-shark-950 font-normal bg-white rounded-lg border ${
+                                errors.specie
+                                  ? "border-red-300 hover:border-red-400 focus:outline-none placeholder:text-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                                  : "border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
+                              }`}
+                              {...register("specie")}
+                            />
+                          )}
+                        </div>
+                        {errors.specie && (
+                          <span
+                            className={
+                              watch("undefined_specie") == false
+                                ? "font-normal text-xs text-red-400"
+                                : "hidden font-normal text-xs text-red-400"
+                            }
+                          >
+                            {errors.specie.message}
+                          </span>
+                        )}
+                        <div className="w-full flex items-center gap-1">
+                          <input
+                            type="checkbox"
+                            id="checkbox2"
+                            {...register("undefined_specie")}
+                          ></input>
+                          <label
+                            htmlFor="checkbox2"
+                            className="font-normal text-xs text-slate-400"
+                          >
+                            Sem espécie definida.
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="w-full">
+                      <div className="w-full flex flex-col gap-2">
+                        <div className="w-full flex flex-col gap-3">
+                          <label
+                            htmlFor="race"
+                            className="w-full font-medium text-sm text-slate-700"
+                          >
+                            Raça
+                          </label>
+                          {watch("undefined_race") == true ? (
+                            <input
+                              type="text"
+                              className="w-full h-[41.6px] text-slate-200 bg-slate-200 border border-slate-300 rounded-lg cursor-not-allowed"
+                              disabled
+                            />
+                          ) : (
+                            <input
+                              type="text"
+                              className={`w-full block p-2.5 text-sm text-shark-950 font-normal bg-white rounded-lg border ${
+                                errors.race
+                                  ? "border-red-300 hover:border-red-400 focus:outline-none placeholder:text-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                                  : "border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
+                              }`}
+                              {...register("race")}
+                            />
+                          )}
+                        </div>
+                        {errors.race && (
+                          <span
+                            className={
+                              watch("undefined_race") == false
+                                ? "font-normal text-xs text-red-400"
+                                : "hidden font-normal text-xs text-red-400"
+                            }
+                          >
+                            {errors.race.message}
+                          </span>
+                        )}
+                        <div className="w-full flex items-center gap-1">
+                          <input
+                            type="checkbox"
+                            id="checkbox4"
+                            {...register("undefined_race")}
+                          ></input>
+                          <label
+                            htmlFor="checkbox4"
+                            className="font-normal text-xs text-slate-400"
+                          >
+                            Sem raça definida.
+                          </label>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  {errors.notes && (
-                    <span className="font-normal text-xs text-red-400">
-                      {errors.notes.message}
-                    </span>
-                  )}         
+                  <div className="w-full flex flex-row gap-4">
+                    <div className="w-[128px]">
+                      <div className="w-[128px] flex flex-col gap-6">
+                        <div className="w-[128px] flex flex-col gap-3">
+                          <label
+                            htmlFor="starting_weight"
+                            className="w-full font-medium text-sm text-slate-700"
+                          >
+                            Peso inícial
+                          </label>
+                          <input
+                            type="text"
+                            className="w-full block p-2.5 text-sm text-shark-950 font-normal bg-white rounded-lg border border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
+                            {...register("starting_weight")}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="w-[128px]">
+                      <div className="w-[128px] flex flex-col gap-6">
+                        <div className="w-[128px] flex flex-col gap-3">
+                          <label
+                            htmlFor="current_weight"
+                            className="w-full font-medium text-sm text-slate-700"
+                          >
+                            Peso atual
+                          </label>
+                          <input
+                            type="text"
+                            className="w-full block p-2.5 text-sm text-shark-950 font-normal bg-white rounded-lg border border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
+                            {...register("current_weight")}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="w-44">
+                      <div className="w-44">
+                        <div className="w-44 flex flex-col gap-6">
+                          <div className="w-full flex flex-col gap-3">
+                            <label
+                              htmlFor="physical_shape"
+                              className="w-full font-medium text-sm text-slate-700"
+                            >
+                              Porte físico
+                            </label>
+                            <SelectInput
+                              placeholder={"Selecione o porte"}
+                              isClearable={false}
+                              isSearchable={false}
+                              options={physicalShapeOptions}
+                              value={
+                                selectPhysicalShapeValue
+                                  ? physicalShapeOptions.find(
+                                      (x) =>
+                                        x.value === selectPhysicalShapeValue
+                                    )
+                                  : selectPhysicalShapeValue
+                              }
+                              onChange={(option) =>
+                                selectPhysicalShapeOnChange(
+                                  option ? option.value : option
+                                )
+                              }
+                              {...restSelectPhysicalShape}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="w-full">
+                      <div className="w-full flex flex-col gap-6">
+                        <div className="w-full flex flex-col gap-3">
+                          <label
+                            htmlFor="gender"
+                            className="w-full font-medium text-sm text-slate-700"
+                          >
+                            Sexo
+                          </label>
+                          <SelectInput
+                            placeholder={"Selecione o sexo"}
+                            isClearable={false}
+                            isSearchable={false}
+                            options={genderOptions}
+                            value={
+                              selectGenderValue
+                                ? genderOptions.find(
+                                    (x) => x.value === selectGenderValue
+                                  )
+                                : selectGenderValue
+                            }
+                            onChange={(option) =>
+                              selectGenderOnChange(
+                                option ? option.value : option
+                              )
+                            }
+                            {...restSelectGender}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="w-full flex flex-row gap-4">
+                    <div className="w-[272px]">
+                      <div className="w-[272px] flex flex-col gap-2">
+                        <div className="w-[272px] flex flex-col gap-3">
+                          <label
+                            htmlFor="status"
+                            className="w-full font-medium text-sm text-slate-700"
+                          >
+                            Status
+                          </label>
+                          <SelectInput
+                            placeholder={"Selecione o status do paciente"}
+                            isClearable={false}
+                            isSearchable={false}
+                            options={patientStatusOptions}
+                            value={
+                              selectStatusValue
+                                ? patientStatusOptions.find(
+                                    (x) => x.value === selectStatusValue
+                                  )
+                                : selectStatusValue
+                            }
+                            onChange={(option) =>
+                              selectStatusOnChange(
+                                option ? option.value : option
+                              )
+                            }
+                            {...restSelectStatus}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="w-full">
+                      <div className="w-full flex flex-col gap-2">
+                        <div className="w-full flex flex-col gap-3">
+                          <label
+                            htmlFor="owner"
+                            className="w-full font-medium text-sm text-slate-700"
+                          >
+                            Nome do proprietário(a)
+                          </label>
+                          {watch("ownerless_patient") == true ? (
+                            <input
+                              type="text"
+                              className="w-full h-[41.6px] text-slate-200 bg-slate-200 border border-slate-300 rounded-lg cursor-not-allowed"
+                              disabled
+                            />
+                          ) : (
+                            <input
+                              type="text"
+                              className={`w-full block p-2.5 text-sm text-shark-950 font-normal bg-white rounded-lg border ${
+                                errors.owner
+                                  ? "border-red-300 hover:border-red-400 focus:outline-none placeholder:text-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                                  : "border-slate-300 hover:border-slate-400 focus:outline-none placeholder:text-slate-400 focus:border-slate-500 focus:ring-1 focus:ring-slate-500"
+                              }`}
+                              {...register("owner")}
+                            />
+                          )}
+                        </div>
+                        {errors.owner && (
+                          <span
+                            className={
+                              watch("ownerless_patient") == false
+                                ? "font-normal text-xs text-red-400"
+                                : "hidden font-normal text-xs text-red-400"
+                            }
+                          >
+                            {errors.owner.message}
+                          </span>
+                        )}
+                        <div className="w-full flex items-center gap-1">
+                          <input
+                            type="checkbox"
+                            id="checkbox3"
+                            {...register("ownerless_patient")}
+                          ></input>
+                          <label
+                            htmlFor="checkbox3"
+                            className="font-normal text-xs text-slate-400"
+                          >
+                            Não foi identificado o tutor do paciente.
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="w-full flex flex-col gap-2">
+                    <div className="w-full flex flex-col gap-3">
+                      <label
+                        htmlFor="notes"
+                        className="w-full font-medium text-sm text-slate-700"
+                      >
+                        Observações
+                      </label>
+                      <textarea
+                        rows={10}
+                        placeholder="Relate um ponto interessante sobre o animal"
+                        className={`resize-none block w-full rounded-lg border-0 p-[12px] text-sm text-slate-900 ring-1 ring-inset ${
+                          errors.notes
+                            ? "ring-red-300 placeholder:text-red-400 focus:outline-red-500 focus:ring-1 focus:ring-inset focus:ring-red-500"
+                            : "ring-slate-300 placeholder:text-slate-400 focus:outline-slate-500 focus:ring-1 focus:ring-inset focus:ring-slate-500"
+                        }`}
+                        {...register("notes")}
+                      ></textarea>
+                    </div>
+                    {errors.notes && (
+                      <span className="font-normal text-xs text-red-400">
+                        {errors.notes.message}
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </div>
-              <div className="w-full h-10 flex items-center justify-end">
-                <button
-                  type="submit"
-                  className="w-24 h-10 border border-slate-300 rounded-lg font-medium text-base text-slate-700 bg-white hover:border-none hover:text-white hover:bg-blue-500"
-                >
-                  Cadastrar
-                </button>
-              </div>
-            </form>
-          </div>
+                <div className="w-full h-10 flex items-center justify-end">
+                  <button
+                    type="submit"
+                    className="w-24 h-10 border border-slate-300 rounded-lg font-medium text-base text-slate-700 bg-white hover:border-none hover:text-white hover:bg-blue-500"
+                  >
+                    Cadastrar
+                  </button>
+                </div>
+              </form>
+            </ScrollArea.Viewport>
+            <ScrollArea.Scrollbar
+              className="flex select-none touch-none bg-slate-100 transition-colors duration-[160ms] ease-out data-[orientation=vertical]:w-1 hover:bg-slate-200 data-[orientation=horizontal]:flex-col data-[orientation=horizontal]:h-1"
+              orientation="vertical"
+            >
+              <ScrollArea.Thumb className="flex-1 bg-[#64748b] hover:bg-[#334155] relative before:content-[''] before:absolute before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:w-full before:h-full before:min-w-[44px] before:min-h-[44px]" />
+            </ScrollArea.Scrollbar>
+          </ScrollArea.Root>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
