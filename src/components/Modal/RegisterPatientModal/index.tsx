@@ -15,6 +15,7 @@ import { Option } from "../../../interfaces/Option";
 
 import SelectInput from "../../Shared/SelectInput"; 
 import SpinnerLoad from "../../Shared/Loads/SpinnerLoad";
+import LittleSpinnerLoad from "../../Shared/Loads/LittleSpinnerLoad";
 
 type UploadImageResponse = {
   imageUrl: string;
@@ -191,18 +192,6 @@ const RegisterPatientModal = () => {
               />
             </Dialog.Close>
           </div>
-          {isLoading && (
-            <div className="w-full h-full absolute z-20">
-              <div className="w-full h-full bg-[#f9fafb8b]">
-                <SpinnerLoad
-                  divProps={{
-                    className:
-                      "w-full h-[488px] relative flex items-center justify-center bg-slate-500-50",
-                  }}
-                />
-              </div>
-            </div>
-          )}
           <ScrollArea.Root className="w-full h-[488px] overflow-hidden">
             <ScrollArea.Viewport className="w-full h-full px-6 py-6">
               <form
@@ -689,9 +678,10 @@ const RegisterPatientModal = () => {
                 <div className="w-full h-10 flex items-center justify-end">
                   <button
                     type="submit"
-                    className="w-24 h-10 border border-slate-300 rounded-lg font-medium text-base text-slate-700 bg-white hover:border-none hover:text-white hover:bg-blue-500"
+                    className="w-24 h-10 flex justify-center items-center rounded-lg font-medium text-base text-neutral-50 bg-blue-500 hover:bg-blue-600"
+                    disabled={isLoading}  
                   >
-                    Cadastrar
+                    {isLoading ? <LittleSpinnerLoad /> : "Cadastrar"}
                   </button>
                 </div>
               </form>

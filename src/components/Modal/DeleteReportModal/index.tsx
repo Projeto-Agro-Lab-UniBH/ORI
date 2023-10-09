@@ -1,11 +1,13 @@
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
-import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
-import { FormEvent, useState } from "react";
+
 import { useMutation } from "react-query";
+import { FormEvent, useState } from "react";
+import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
+
 import { api } from "../../../providers/Api";
 import { queryClient } from "../../../providers/QueryClient";
 
-import styles from "./styles.module.css";
+import LittleSpinnerLoad from '../../Shared/Loads/LittleSpinnerLoad';
 
 type DeleteReportModalProps = {
   id: string;
@@ -59,16 +61,16 @@ const DeleteReportModal: React.FC<DeleteReportModalProps> = ({ id: reportId }) =
             </AlertDialog.Description>
             <div className="flex justify-center gap-6">
               <AlertDialog.Cancel asChild>
-                <button className="w-[124px] h-10 border rounded-lg font-medium text-base text-neutral-50 bg-red-600 shadow-md hover:shadow-red-500/50 hover:border-none hover:text-neutral-50 hover: hover:bg-red-600">
+                <button className="w-[124px] h-10 rounded-lg font-medium text-base text-neutral-50 bg-red-500 hover:bg-red-600">
                   Não
                 </button>
               </AlertDialog.Cancel>
               <AlertDialog.Action>
                 <button
                   onClick={acceptedDeleteReport}
-                  className="w-[124px] h-10 flex justify-center items-center border rounded-lg font-medium text-base text-neutral-50 shadow-md bg-blue-500 hover:shadow-blue-500/50 hover:border-none hover:text-neutral-50 hover: hover:bg-blue-600"
+                  className="w-[124px] h-10 flex justify-center items-center rounded-lg font-medium text-base text-neutral-50 bg-blue-500 hover:bg-blue-600"
                 >
-                  {isLoading ? <div className={styles.spinner}></div> : "Sim"}
+                  {isLoading ? <LittleSpinnerLoad /> : "Sim"}
                 </button>
               </AlertDialog.Action>
             </div>

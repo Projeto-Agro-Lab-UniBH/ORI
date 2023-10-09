@@ -33,6 +33,7 @@ import RegisterPatientHospitalizationModal from "../RegisterPatientHospitalizati
 import RegisterPatientReportModal from "../RegisterPatientReportModal";
 import RegisterPatientSurgeryModal from "../RegisterPatientSurgeryModal";
 import RegisterPatientVaccinesModal from "../RegisterPatientVaccinesModal";
+import LittleSpinnerLoad from "../../Shared/Loads/LittleSpinnerLoad";
 
 const PatientProfileRecordModal = ({ patientId, children }: { patientId: string; children: React.ReactNode; }) => {
   const [open, setOpen] = useState<boolean>(false);
@@ -276,7 +277,7 @@ const TabContentProfile = ({
 
   return (
     <Tabs.Content value="profile">
-      {(isLoading || isUpdating) && (
+      {(isLoading) && (
         <div className="w-full h-full absolute z-20">
           <div className="w-full h-full bg-[#f9fafb8b]">
             <SpinnerLoad
@@ -769,9 +770,10 @@ const TabContentProfile = ({
             <div className="w-full h-10 flex items-center justify-end">
               <button
                 type="submit"
-                className="w-[152px] h-10 border border-slate-300 rounded-lg font-medium text-base text-slate-700 bg-white hover:border-none hover:text-white hover:bg-blue-500"
+                className="w-[152px] h-10 flex justify-center items-center rounded-lg font-medium text-base text-neutral-50 bg-blue-500 hover:bg-blue-600"
+                disabled={isUpdating}  
               >
-                Salvar alterações
+                {isUpdating ? <LittleSpinnerLoad /> : "Salvar alterações"}
               </button>
             </div>
           </form>

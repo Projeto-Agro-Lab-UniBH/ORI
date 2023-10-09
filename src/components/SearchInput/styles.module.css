@@ -1,7 +1,0 @@
-#containerScroll::-webkit-scrollbar {
-  width: 4px;
-}
-
-#containerScroll::-webkit-scrollbar-thumb {
-  background: #64748b;
-}

@@ -1,7 +1,6 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import * as ScrollArea from '@radix-ui/react-scroll-area';
 
-import SpinnerLoad from "../../Shared/Loads/SpinnerLoad";
 import CreatableSelect from "react-select/creatable";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Cross1Icon, TrashIcon, UploadIcon } from "@radix-ui/react-icons";
@@ -15,6 +14,7 @@ import { api } from "../../../providers/Api";
 import { z } from "zod";
 import { PostExamResponse } from "../../../@types/ApiResponse";
 import { useAuthContext } from "../../../contexts/AuthContext";
+import LittleSpinnerLoad from "../../Shared/Loads/LittleSpinnerLoad";
 
 type RegisterPatientReportProps = {
   patientId: string | null;
@@ -120,19 +120,6 @@ const RegisterPatientExamModal: React.FC<RegisterPatientReportProps> = ({ patien
     mutate(data);
   };
 
-  const loadingSpinner = isLoading && (
-    <div className="w-full h-full absolute z-20">
-      <div className="w-full h-full bg-[#f9fafb8b]">
-        <SpinnerLoad
-          divProps={{
-            className:
-              "w-full h-[402px] relative flex items-center justify-center bg-slate-500-50",
-          }}
-        />
-      </div>
-    </div>
-  ); 
-
   return (
     <Dialog.Root onOpenChange={setOpen} open={open}>
       <Dialog.Trigger className="w-[184px] h-10 border border-gray-300 rounded-lg font-medium text-base text-slate-900 bg-white hover:border-none hover:text-neutral-50 hover:bg-blue-500">
@@ -149,7 +136,6 @@ const RegisterPatientExamModal: React.FC<RegisterPatientReportProps> = ({ patien
               <Cross1Icon className="text-slate-400 hover:text-slate-500" width={24} height={24} />
             </Dialog.Close>
           </div>
-          {loadingSpinner}
           <ScrollArea.Root className="w-full h-[402px] overflow-hidden">
             <ScrollArea.Viewport className="w-full h-full px-6 py-6">
               <form
@@ -534,9 +520,10 @@ const RegisterPatientExamModal: React.FC<RegisterPatientReportProps> = ({ patien
                     <div className="w-full h-10 flex justify-end">
                       <button
                         type="submit"
-                        className="w-[120px] h-10 border border-slate-300 rounded-lg font-medium text-base text-slate-700 bg-white hover:border-none hover:text-white hover:bg-blue-500"
+                        className="w-[142px] h-10 flex justify-center items-center rounded-lg font-medium text-base text-neutral-50 bg-blue-500 hover:bg-blue-600"
+                        disabled={isLoading}
                       >
-                        Salvar exame
+                        {isLoading ? <LittleSpinnerLoad /> : "Registrar exame"}
                       </button>
                     </div>
                   </div>

@@ -12,7 +12,7 @@ import { api } from "../../../providers/Api";
 import { useAuthContext } from "../../../contexts/AuthContext";
 import { queryClient } from "../../../providers/QueryClient";
 
-import SpinnerLoad from "../../Shared/Loads/SpinnerLoad";
+import LittleSpinnerLoad from "../../Shared/Loads/LittleSpinnerLoad";
 
 const registerHospitalizationFormSchema = z.object({
   entry_date: z.string().nonempty("Selecione a data do início da internação do paciente."),
@@ -61,19 +61,6 @@ const RegisterPatientHospitalizationModal: React.FC<RegisterPatientHospitalizati
   const onSubmit = (data: registerHospitalizationFormData) => {
     mutate(data);
   };
-
-  const loadingSpinner = isLoading && (
-    <div className="w-full h-full absolute z-20">
-      <div className="w-full h-full bg-[#f9fafb8b]">
-        <SpinnerLoad
-          divProps={{
-            className:
-              "w-full h-[402px] relative flex items-center justify-center bg-slate-500-50",
-          }}
-        />
-      </div>
-    </div>
-  );
   
   return (
     <Dialog.Root onOpenChange={setOpen} open={open}>
@@ -91,7 +78,6 @@ const RegisterPatientHospitalizationModal: React.FC<RegisterPatientHospitalizati
               <Cross1Icon className="text-slate-400 hover:text-slate-500" width={24} height={24} />
             </Dialog.Close>
           </div>
-          {loadingSpinner}
           <ScrollArea.Root className="w-full h-[402px] overflow-hidden">
             <ScrollArea.Viewport className="w-full h-full px-6 py-6">
               <form
@@ -221,9 +207,10 @@ const RegisterPatientHospitalizationModal: React.FC<RegisterPatientHospitalizati
                 <div className="w-full h-10 flex justify-end">
                   <button
                     type="submit"
-                    className="w-[172px] h-10 border border-slate-300 rounded-lg font-medium text-base text-slate-700 bg-white hover:border-none hover:text-white hover:bg-blue-500"
+                    className="w-[172px] h-10 flex justify-center items-center rounded-lg font-medium text-base text-neutral-50 bg-blue-500 hover:bg-blue-600"
+                    disabled={isLoading}  
                   >
-                    Registrar internação
+                    {isLoading ? <LittleSpinnerLoad /> : "Registrar internação"}
                   </button>
                 </div>
               </form>    

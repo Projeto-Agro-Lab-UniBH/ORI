@@ -1,14 +1,16 @@
 import * as Avatar from "@radix-ui/react-avatar";
 import * as Dialog from "@radix-ui/react-dialog";
-import DotsLoad from "../Shared/Loads/DotsLoad";
-import { api } from "../../providers/Api";
-import { useQuery } from "react-query";
-import { CameraIcon, Cross2Icon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
-import { Dispatch, SetStateAction, useState } from "react";
-import { SearchResponse } from "../../@types/ApiResponse";
-import PatientProfileRecordModal from "../Modal/PatientProfileRecordModal";
+import * as ScrollArea from '@radix-ui/react-scroll-area';
 
-import styles from "./styles.module.css"
+import { useQuery } from "react-query";
+import { Dispatch, SetStateAction, useState } from "react";
+import { CameraIcon, Cross2Icon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
+
+import { api } from "../../providers/Api";
+import { SearchResponse } from "../../@types/ApiResponse";
+
+import DotsLoad from "../Shared/Loads/DotsLoad";
+import PatientProfileRecordModal from "../Modal/PatientProfileRecordModal";
 
 const SearchInput = ({ 
   value, 
@@ -74,42 +76,48 @@ const SearchInput = ({
                   </button>
                 )}
               </div>
-              <div
-                id={styles.containerScroll}
-                className="w-full bg-white max-h-[488px] overflow-y-scroll">
-                {(value !== "" || isLoading) &&
-                  (isLoading ? (
-                    <div className="w-full h-12 px-4 py-4 flex justify-center items-center">
-                      <DotsLoad />
-                    </div>
-                  ) : (
-                    <ul
-                      role="list"
-                      className="w-full divide-y divide-slate-200"
-                    >
-                      {data && data.length > 0 ? (
-                        data.map((data) => (
-                          <li
-                            key={data.id}
-                            className="w-full flex items-center px-4 py-4"
-                          >
-                            <ResultContent
-                              id={data.id}
-                              name={data.name}
-                              src={data.profile_photo}
-                              specie={data.specie}
-                              race={data.race}
-                            />
+              <ScrollArea.Root className="w-full max-h-[488px] bg-white overflow-hidden">
+                <ScrollArea.Viewport className="w-full h-full">
+                  {(value !== "" || isLoading) &&
+                    (isLoading ? (
+                      <div className="w-full h-12 px-4 py-4 flex justify-center items-center">
+                        <DotsLoad />
+                      </div>
+                    ) : (
+                      <ul
+                        role="list"
+                        className="w-full divide-y divide-slate-200"
+                      >
+                        {data && data.length > 0 ? (
+                          data.map((data) => (
+                            <li
+                              key={data.id}
+                              className="w-full flex items-center px-4 py-4"
+                            >
+                              <ResultContent
+                                id={data.id}
+                                name={data.name}
+                                src={data.profile_photo}
+                                specie={data.specie}
+                                race={data.race}
+                              />
+                            </li>
+                          ))
+                        ) : (
+                          <li className="w-full font-normal text-slate-700 text-base px-4 py-4">
+                            Nenhum resultado encontrado
                           </li>
-                        ))
-                      ) : (
-                        <li className="w-full font-normal text-slate-700 text-base px-4 py-4">
-                          Nenhum resultado encontrado
-                        </li>
-                      )}
-                    </ul>
-                  ))}
-              </div>
+                        )}
+                      </ul>
+                    ))}
+                </ScrollArea.Viewport>
+                <ScrollArea.Scrollbar
+                  className="flex select-none touch-none bg-slate-100 transition-colors duration-[160ms] ease-out data-[orientation=vertical]:w-1 hover:bg-slate-200 data-[orientation=horizontal]:flex-col data-[orientation=horizontal]:h-1"
+                  orientation="vertical"
+                >
+                  <ScrollArea.Thumb className="flex-1 bg-[#64748b] hover:bg-[#334155] relative before:content-[''] before:absolute before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:w-full before:h-full before:min-w-[44px] before:min-h-[44px]" />
+                </ScrollArea.Scrollbar>
+              </ScrollArea.Root>
             </div>
           </div>
         </Dialog.Content>
