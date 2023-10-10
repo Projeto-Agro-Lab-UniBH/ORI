@@ -30,22 +30,25 @@ export default function Dashboard({ data }: DashboardProps) {
 
   const handleSelect = async (field: string, value: any) => {
     const query = { ...router.query };
-
+  
     if (value !== null && value !== undefined) {
       query[field] = value;
     } else {
       delete query[field];
     }
-
+  
     query.page = "1";
-
+  
     setCurrentPage(1);
-
-    await router.push({
-      pathname: router.pathname,
-      query,
-    });
-  };
+  
+    // Verifique se a URL da consulta foi alterada antes de chamar router.push
+    if (JSON.stringify(query) !== JSON.stringify(router.query)) {
+      await router.push({
+        pathname: router.pathname,
+        query: { ...query }, // Clone o objeto aqui, se necessário
+      });
+    }
+  };  
 
   const handleSearchInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchInputValue(event.target.value);
