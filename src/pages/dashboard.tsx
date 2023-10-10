@@ -12,7 +12,7 @@ import Header from "../components/Header";
 import RegisterPatientModal from "../components/Modal/RegisterPatientModal";
 import PatientCard from "../components/Cards/PatientCard";
 import Pagination from "../components/Pagination";
-import SearchInput from "../components/SearchInput";
+import Search from "../components/Search";
 import SelectInput from "../components/Shared/SelectInput";
 
 type DashboardProps = {
@@ -149,7 +149,7 @@ export default function Dashboard({ data }: DashboardProps) {
               ]}
               onChange={(option) => handleSelect("gender", option?.value)}
             />
-            <SearchInput 
+            <Search 
               value={searchInputValue}
               setValue={setSearchInputValue}
               onChange={handleSearchInput}

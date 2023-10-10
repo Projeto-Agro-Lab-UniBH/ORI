@@ -12,7 +12,7 @@ import { SearchResponse } from "../../@types/ApiResponse";
 import DotsLoad from "../Shared/Loads/DotsLoad";
 import PatientProfileRecordModal from "../Modal/PatientProfileRecordModal";
 
-const SearchInput = ({ 
+const Search = ({ 
   value, 
   setValue,
   onChange 
@@ -173,4 +173,4 @@ const ResultContent = ({
   );
 };
 
-export default SearchInput; 
+export default Search; 
